@@ -7,7 +7,9 @@ on:
       - main
 
 jobs:
+
   build:
+
     runs-on: ubuntu-latest
 
     steps:
@@ -15,29 +17,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+
       - name: Setup Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
+
 
       - name: Create Android Project
         shell: bash
         run: |
 
+          set -e
+
           rm -rf app
-          rm -rf build.gradle
-          rm -rf settings.gradle
-          rm -rf gradle.properties
+          rm -f build.gradle
+          rm -f settings.gradle
+          rm -f gradle.properties
 
           mkdir -p app/src/main/java/com/dustinbot/v2
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/xml
 
-
-          # ============================================================
-          # settings.gradle
-          # ============================================================
 
           cat > settings.gradle <<'EOF'
           pluginManagement {
@@ -61,26 +63,32 @@ jobs:
 
           rootProject.name = "DustinBotAndroidV2"
 
-          include(":app")
+          include ":app"
           EOF
 
 
-          # ============================================================
-          # Root build.gradle
-          # ============================================================
-
           cat > build.gradle <<'EOF'
-          plugins {
-              id 'com.android.application'
-                  version '8.6.1'
-                  apply false
+          buildscript {
+
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:8.6.1'
+              }
+          }
+
+          allprojects {
+
+              repositories {
+                  google()
+                  mavenCentral()
+              }
           }
           EOF
 
-
-          # ============================================================
-          # gradle.properties
-          # ============================================================
 
           cat > gradle.properties <<'EOF'
           org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
@@ -88,21 +96,17 @@ jobs:
           EOF
 
 
-          # ============================================================
-          # app/build.gradle
-          # ============================================================
-
           cat > app/build.gradle <<'EOF'
-          plugins {
-              id 'com.android.application'
-          }
+          apply plugin: 'com.android.application'
 
           android {
+
               namespace 'com.dustinbot.v2'
 
               compileSdk 35
 
               defaultConfig {
+
                   applicationId 'com.dustinbot.v2'
 
                   minSdk 26
@@ -116,10 +120,6 @@ jobs:
           }
           EOF
 
-
-          # ============================================================
-          # strings.xml
-          # ============================================================
 
           cat > app/src/main/res/values/strings.xml <<'EOF'
           <resources>
@@ -135,10 +135,6 @@ jobs:
           </resources>
           EOF
 
-
-          # ============================================================
-          # themes.xml
-          # ============================================================
 
           cat > app/src/main/res/values/themes.xml <<'EOF'
           <resources>
@@ -169,10 +165,6 @@ jobs:
           EOF
 
 
-          # ============================================================
-          # accessibility.xml
-          # ============================================================
-
           cat > app/src/main/res/xml/accessibility.xml <<'EOF'
           <accessibility-service
               xmlns:android="http://schemas.android.com/apk/res/android"
@@ -193,10 +185,6 @@ jobs:
               android:canRetrieveWindowContent="true" />
           EOF
 
-
-          # ============================================================
-          # AndroidManifest.xml
-          # ============================================================
 
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest
@@ -226,7 +214,8 @@ jobs:
 
                   <service
                       android:name=".BotAccessibility"
-                      android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+                      android:permission=
+                          "android.permission.BIND_ACCESSIBILITY_SERVICE"
                       android:exported="false">
 
                       <intent-filter>
@@ -239,10 +228,10 @@ jobs:
 
                       <meta-data
                           android:name=
-                          "android.accessibilityservice"
+                              "android.accessibilityservice"
 
                           android:resource=
-                          "@xml/accessibility" />
+                              "@xml/accessibility" />
 
                   </service>
 
@@ -251,10 +240,6 @@ jobs:
           </manifest>
           EOF
 
-
-          # ============================================================
-          # BotAccessibility.java
-          # ============================================================
 
           cat > app/src/main/java/com/dustinbot/v2/BotAccessibility.java <<'EOF'
           package com.dustinbot.v2;
@@ -317,7 +302,6 @@ jobs:
                   GestureDescription gesture =
                       new GestureDescription
                           .Builder()
-
                           .addStroke(
                               new GestureDescription
                                   .StrokeDescription(
@@ -326,7 +310,6 @@ jobs:
                                       80
                                   )
                           )
-
                           .build();
 
                   return instance.dispatchGesture(
@@ -357,7 +340,6 @@ jobs:
                   GestureDescription gesture =
                       new GestureDescription
                           .Builder()
-
                           .addStroke(
                               new GestureDescription
                                   .StrokeDescription(
@@ -366,7 +348,6 @@ jobs:
                                       duration
                                   )
                           )
-
                           .build();
 
                   return instance.dispatchGesture(
@@ -378,10 +359,6 @@ jobs:
           }
           EOF
 
-
-          # ============================================================
-          # SettingsStore.java
-          # ============================================================
 
           cat > app/src/main/java/com/dustinbot/v2/SettingsStore.java <<'EOF'
           package com.dustinbot.v2;
@@ -415,17 +392,14 @@ jobs:
 
                   p(c)
                       .edit()
-
                       .putFloat(
                           name + "_x",
                           x
                       )
-
                       .putFloat(
                           name + "_y",
                           y
                       )
-
                       .apply();
               }
 
@@ -459,17 +433,12 @@ jobs:
                   String name
               ) {
 
-                  return x(c, name) >= 0
-                      &&
-                      y(c, name) >= 0;
+                  return x(c, name) >= 0 &&
+                         y(c, name) >= 0;
               }
           }
           EOF
 
-
-          # ============================================================
-          # Calibration.java
-          # ============================================================
 
           cat > app/src/main/java/com/dustinbot/v2/Calibration.java <<'EOF'
           package com.dustinbot.v2;
@@ -633,10 +602,6 @@ jobs:
           EOF
 
 
-          # ============================================================
-          # BotEngine.java
-          # ============================================================
-
           cat > app/src/main/java/com/dustinbot/v2/BotEngine.java <<'EOF'
           package com.dustinbot.v2;
 
@@ -716,11 +681,9 @@ jobs:
 
                   running = true;
 
-
                   MainActivity.status(
                       "RUNNING"
                   );
-
 
                   MainActivity.log(
                       "AI START"
@@ -812,13 +775,10 @@ jobs:
                               );
 
 
-                          /*
-                           * WALK
-                           */
-
                           MainActivity.status(
                               "WALK"
                           );
+
 
                           MainActivity.log(
                               "เดิน"
@@ -844,9 +804,7 @@ jobs:
                               endX =
                                   moveX + distance;
 
-                          }
-
-                          else {
+                          } else {
 
                               endX =
                                   moveX - distance;
@@ -865,15 +823,10 @@ jobs:
                           Thread.sleep(1000);
 
 
-                          /*
-                           * TARGET
-                           *
-                           * เกมเป็นคนล็อกเป้า
-                           */
-
                           MainActivity.status(
                               "TARGET"
                           );
+
 
                           MainActivity.log(
                               "รอเป้าหมายจากเกม"
@@ -883,13 +836,10 @@ jobs:
                           Thread.sleep(700);
 
 
-                          /*
-                           * ATTACK
-                           */
-
                           MainActivity.status(
                               "ATTACK"
                           );
+
 
                           MainActivity.log(
                               "โจมตี"
@@ -907,18 +857,14 @@ jobs:
                                   attackY
                               );
 
-
                               Thread.sleep(500);
                           }
 
 
-                          /*
-                           * LOOT
-                           */
-
                           MainActivity.status(
                               "LOOT"
                           );
+
 
                           MainActivity.log(
                               "เก็บของ"
@@ -934,14 +880,9 @@ jobs:
                           Thread.sleep(700);
 
 
-                          /*
-                           * CHANGE DIRECTION
-                           */
-
                           right = !right;
-
-
                       }
+
 
                       catch (
                           InterruptedException e
@@ -952,6 +893,7 @@ jobs:
 
                           break;
                       }
+
 
                       catch (
                           Exception e
@@ -977,10 +919,6 @@ jobs:
           EOF
 
 
-          # ============================================================
-          # MainActivity.java
-          # ============================================================
-
           cat > app/src/main/java/com/dustinbot/v2/MainActivity.java <<'EOF'
           package com.dustinbot.v2;
 
@@ -991,7 +929,6 @@ jobs:
           import android.os.Bundle;
           import android.provider.Settings;
           import android.view.Gravity;
-          import android.view.View;
           import android.widget.Button;
           import android.widget.LinearLayout;
           import android.widget.ScrollView;
@@ -1057,7 +994,6 @@ jobs:
                       Typeface.DEFAULT_BOLD
                   );
 
-
                   root.addView(
                       title,
                       params()
@@ -1066,20 +1002,15 @@ jobs:
 
                   statusView =
                       text(
-                          "STOP",
+                          "STATUS: STOP",
                           18
                       );
-
 
                   root.addView(
                       statusView,
                       params()
                   );
 
-
-                  /*
-                   * MAP
-                   */
 
                   TextView map =
                       text(
@@ -1106,10 +1037,6 @@ jobs:
                   );
 
 
-                  /*
-                   * CHARACTER
-                   */
-
                   TextView character =
                       text(
                           "CHARACTER\n" +
@@ -1127,10 +1054,6 @@ jobs:
                   );
 
 
-                  /*
-                   * TARGET
-                   */
-
                   TextView target =
                       text(
                           "TARGET\n" +
@@ -1146,10 +1069,6 @@ jobs:
                       params()
                   );
 
-
-                  /*
-                   * CALIBRATION
-                   */
 
                   Button move =
                       button(
@@ -1214,10 +1133,6 @@ jobs:
                   );
 
 
-                  /*
-                   * ACCESSIBILITY
-                   */
-
                   Button access =
                       button(
                           "OPEN ACCESSIBILITY"
@@ -1252,10 +1167,6 @@ jobs:
                   );
 
 
-                  /*
-                   * START
-                   */
-
                   Button start =
                       button(
                           "START BOT"
@@ -1276,10 +1187,6 @@ jobs:
                   );
 
 
-                  /*
-                   * STOP
-                   */
-
                   Button stop =
                       button(
                           "STOP BOT"
@@ -1297,10 +1204,6 @@ jobs:
                       params()
                   );
 
-
-                  /*
-                   * CONSOLE
-                   */
 
                   TextView consoleTitle =
                       text(
@@ -1335,11 +1238,9 @@ jobs:
 
                   LinearLayout.LayoutParams
                       consoleParams =
-                          params();
+                      params();
 
-
-                  consoleParams.weight =
-                      1;
+                  consoleParams.weight = 1;
 
 
                   root.addView(
@@ -1461,7 +1362,7 @@ jobs:
       # Setup Gradle
       # ================================================================
 
-      - name: Setup Gradle 8.7
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
@@ -1469,34 +1370,48 @@ jobs:
 
 
       # ================================================================
-      # Build APK
+      # Build
       # ================================================================
 
-      - name: Build Debug APK
+      - name: Build APK
         shell: bash
         run: |
-          gradle assembleDebug --no-daemon --stacktrace
+
+          set -e
+
+          echo "Starting Gradle build..."
+
+          gradle \
+            assembleDebug \
+            --no-daemon \
+            --stacktrace
+
+          echo "Gradle build completed."
 
 
       # ================================================================
       # Verify APK
       # ================================================================
 
-      - name: Check APK
+      - name: Verify APK
         shell: bash
         run: |
-          echo "===================================="
-          echo "APK OUTPUT"
-          echo "===================================="
 
-          find app/build/outputs/apk -type f -print
+          set -e
 
-          echo "===================================="
+          echo "APK files:"
+
+          find app/build/outputs/apk \
+            -type f \
+            -print
 
           test -f \
             app/build/outputs/apk/debug/app-debug.apk
 
-          echo "APK FOUND"
+          echo ""
+          echo "================================"
+          echo "APK FOUND SUCCESSFULLY"
+          echo "================================"
 
 
       # ================================================================
@@ -1506,7 +1421,12 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
+
           name: DustinBot-Android-V2-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+
+          path:
+            app/build/outputs/apk/debug/app-debug.apk
+
           if-no-files-found: error
+
           retention-days: 7
