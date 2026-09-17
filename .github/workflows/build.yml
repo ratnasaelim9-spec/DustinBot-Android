@@ -1,4 +1,4 @@
-name: Build DustinBot Android V1.2
+name: Build DustinBot Android V1.3
 
 on:
   workflow_dispatch:
@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Java 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -41,9 +41,7 @@ jobs:
           }
 
           dependencyResolutionManagement {
-              repositoriesMode.set(
-                  RepositoriesMode.FAIL_ON_PROJECT_REPOS
-              )
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
 
               repositories {
                   google()
@@ -53,15 +51,13 @@ jobs:
 
           rootProject.name = "DustinBotAndroid"
 
-          include ":app"
+          include(":app")
           EOF
 
 
           cat > build.gradle <<'EOF'
           plugins {
-              id 'com.android.application'
-                  version '8.6.1'
-                  apply false
+              id 'com.android.application' version '8.6.1' apply false
           }
           EOF
 
@@ -78,22 +74,15 @@ jobs:
           }
 
           android {
-
               namespace 'com.dustinbot'
-
               compileSdk 35
 
               defaultConfig {
-
                   applicationId 'com.dustinbot'
-
                   minSdk 26
-
                   targetSdk 35
-
-                  versionCode 12
-
-                  versionName '1.2'
+                  versionCode 13
+                  versionName '1.3'
               }
           }
           EOF
@@ -102,12 +91,10 @@ jobs:
           cat > app/src/main/res/values/strings.xml <<'EOF'
           <resources>
 
-              <string name="app_name">
-                  DustinBot Android
-              </string>
+              <string name="app_name">DustinBot Android</string>
 
               <string name="accessibility_description">
-                  DustinBot Android game controller
+                  DustinBot controls Dustin RO using Android Accessibility
               </string>
 
           </resources>
@@ -121,13 +108,8 @@ jobs:
                   name="AppTheme"
                   parent="android:style/Theme.Material.Light.NoActionBar">
 
-                  <item name="android:fontFamily">
-                      sans
-                  </item>
-
-                  <item name="android:colorAccent">
-                      #1976D2
-                  </item>
+                  <item name="android:fontFamily">sans</item>
+                  <item name="android:colorAccent">#1976D2</item>
 
               </style>
 
@@ -138,22 +120,12 @@ jobs:
           cat > app/src/main/res/xml/accessibility.xml <<'EOF'
           <accessibility-service
               xmlns:android="http://schemas.android.com/apk/res/android"
-
               android:description="@string/accessibility_description"
-
-              android:accessibilityEventTypes="
-                  typeWindowStateChanged|
-                  typeWindowContentChanged
-              "
-
+              android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
               android:accessibilityFeedbackType="feedbackGeneric"
-
               android:notificationTimeout="100"
-
               android:canPerformGestures="true"
-
               android:canRetrieveWindowContent="true" />
-
           EOF
 
 
@@ -162,18 +134,12 @@ jobs:
               xmlns:android="http://schemas.android.com/apk/res/android">
 
               <application
-
                   android:allowBackup="false"
-
                   android:label="@string/app_name"
-
                   android:theme="@style/AppTheme">
 
-
                   <activity
-
                       android:name=".MainActivity"
-
                       android:exported="true">
 
                       <intent-filter>
@@ -190,29 +156,20 @@ jobs:
 
 
                   <service
-
                       android:name=".BotAccessibility"
-
-                      android:permission=
-                          "android.permission.BIND_ACCESSIBILITY_SERVICE"
-
+                      android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
                       android:exported="false">
 
                       <intent-filter>
 
                           <action
-                              android:name=
-                              "android.accessibilityservice.AccessibilityService" />
+                              android:name="android.accessibilityservice.AccessibilityService" />
 
                       </intent-filter>
 
                       <meta-data
-
-                          android:name=
-                              "android.accessibilityservice"
-
-                          android:resource=
-                              "@xml/accessibility" />
+                          android:name="android.accessibilityservice"
+                          android:resource="@xml/accessibility" />
 
                   </service>
 
@@ -237,10 +194,9 @@ jobs:
           import android.view.accessibility.AccessibilityEvent;
           import android.widget.TextView;
 
-          public class BotAccessibility
-                  extends AccessibilityService {
+          public class BotAccessibility extends AccessibilityService {
 
-              public static BotAccessibility instance;
+              public static volatile BotAccessibility instance;
 
               private WindowManager windowManager;
 
@@ -254,19 +210,23 @@ jobs:
                   instance = this;
               }
 
+
               @Override
               public void onAccessibilityEvent(
                       AccessibilityEvent event) {
               }
 
+
               @Override
               public void onInterrupt() {
               }
+
 
               public static boolean ready() {
 
                   return instance != null;
               }
+
 
               public static void calibrate(
                       String key) {
@@ -277,6 +237,7 @@ jobs:
                   }
               }
 
+
               private void showCalibration(
                       String key) {
 
@@ -284,28 +245,49 @@ jobs:
 
                   windowManager =
                           (WindowManager)
-                          getSystemService(
-                                  WINDOW_SERVICE);
+                          getSystemService(WINDOW_SERVICE);
 
-                  TextView view =
+
+                  TextView overlay =
                           new TextView(this);
 
-                  view.setText(
-                          "ตั้งปุ่ม " + key +
-                          "\n\nแตะตำแหน่งปุ่มในเกม 1 ครั้ง");
 
-                  view.setTextSize(22);
+                  String text;
 
-                  view.setTextColor(Color.WHITE);
 
-                  view.setGravity(
-                          Gravity.CENTER);
+                  if (key.equals("move")) {
 
-                  view.setBackgroundColor(
+                      text =
+                          "ตั้งปุ่มเดิน\n\n" +
+                          "แตะตรงกลาง Joystick";
+
+                  } else if (key.equals("attack")) {
+
+                      text =
+                          "ตั้งปุ่มตี\n\n" +
+                          "แตะปุ่มโจมตี";
+
+                  } else {
+
+                      text =
+                          "ตั้งปุ่มเก็บของ\n\n" +
+                          "แตะปุ่มเก็บของ";
+                  }
+
+
+                  overlay.setText(text);
+
+                  overlay.setTextSize(22);
+
+                  overlay.setTextColor(Color.WHITE);
+
+                  overlay.setGravity(Gravity.CENTER);
+
+                  overlay.setBackgroundColor(
                           0xCC000000);
 
 
-                  view.setOnTouchListener(
+                  overlay.setOnTouchListener(
                           (v, event) -> {
 
                       if (
@@ -321,8 +303,8 @@ jobs:
 
 
                           getSharedPreferences(
-                              "DustinBot",
-                              MODE_PRIVATE)
+                                  "DustinBot",
+                                  MODE_PRIVATE)
 
                               .edit()
 
@@ -342,40 +324,43 @@ jobs:
                           return true;
                       }
 
+
                       return true;
                   });
 
 
-                  WindowManager.LayoutParams lp =
+                  WindowManager.LayoutParams params =
                           new WindowManager.LayoutParams(
 
-                                  -1,
+                              -1,
 
-                                  -1,
+                              -1,
 
-                                  WindowManager
-                                      .LayoutParams
-                                      .TYPE_ACCESSIBILITY_OVERLAY,
+                              WindowManager
+                                  .LayoutParams
+                                  .TYPE_ACCESSIBILITY_OVERLAY,
 
-                                  WindowManager
-                                      .LayoutParams
-                                      .FLAG_LAYOUT_IN_SCREEN,
+                              WindowManager
+                                  .LayoutParams
+                                  .FLAG_LAYOUT_IN_SCREEN,
 
-                                  PixelFormat.TRANSLUCENT
+                              PixelFormat.TRANSLUCENT
                           );
 
 
-                  lp.gravity =
+                  params.gravity =
                           Gravity.TOP |
                           Gravity.START;
 
 
                   windowManager.addView(
-                          view,
-                          lp);
+                          overlay,
+                          params);
 
-                  calibrationView = view;
+
+                  calibrationView = overlay;
               }
+
 
               private void removeCalibration() {
 
@@ -387,71 +372,94 @@ jobs:
                       try {
 
                           windowManager.removeView(
-                              calibrationView);
+                                  calibrationView);
 
                       } catch (Exception ignored) {
                       }
+
 
                       calibrationView = null;
                   }
               }
 
-              private float x(
+
+              private float getX(
                       String key) {
 
                   return getSharedPreferences(
-                      "DustinBot",
-                      MODE_PRIVATE)
+                          "DustinBot",
+                          MODE_PRIVATE)
 
                       .getFloat(
                           key + "_x",
                           -1);
               }
 
-              private float y(
+
+              private float getY(
                       String key) {
 
                   return getSharedPreferences(
-                      "DustinBot",
-                      MODE_PRIVATE)
+                          "DustinBot",
+                          MODE_PRIVATE)
 
                       .getFloat(
                           key + "_y",
                           -1);
               }
 
-              public static boolean has(
+
+              public static boolean configured(
                       String key) {
 
-                  if (instance == null)
-                      return false;
+                  if (instance == null) {
 
-                  return instance.x(key) >= 0 &&
-                         instance.y(key) >= 0;
+                      return false;
+                  }
+
+
+                  return
+                      instance.getX(key) >= 0 &&
+                      instance.getY(key) >= 0;
               }
+
 
               public static boolean tap(
                       String key) {
 
-                  if (!has(key))
+                  if (
+                      instance == null ||
+                      !configured(key)
+                  ) {
+
                       return false;
+                  }
+
 
                   return instance.tapXY(
-                      instance.x(key),
-                      instance.y(key));
+                          instance.getX(key),
+                          instance.getY(key));
               }
+
 
               public static boolean move(
                       boolean right) {
 
-                  if (!has("move"))
+                  if (
+                      instance == null ||
+                      !configured("move")
+                  ) {
+
                       return false;
+                  }
+
 
                   float x =
-                      instance.x("move");
+                      instance.getX("move");
 
                   float y =
-                      instance.y("move");
+                      instance.getY("move");
+
 
                   float width =
                       instance
@@ -459,27 +467,38 @@ jobs:
                           .getDisplayMetrics()
                           .widthPixels;
 
+
                   float distance =
-                      width * 0.25f;
+                      width * 0.22f;
+
 
                   float endX;
 
+
                   if (right) {
 
-                      endX = x + distance;
+                      endX =
+                          Math.min(
+                              width - 10,
+                              x + distance);
 
                   } else {
 
-                      endX = x - distance;
+                      endX =
+                          Math.max(
+                              10,
+                              x - distance);
                   }
 
+
                   return instance.swipeXY(
-                      x,
-                      y,
-                      endX,
-                      y,
-                      900);
+                          x,
+                          y,
+                          endX,
+                          y,
+                          900);
               }
+
 
               private boolean tapXY(
                       float x,
@@ -490,30 +509,27 @@ jobs:
 
                   path.moveTo(x, y);
 
+
                   GestureDescription gesture =
                           new GestureDescription
-                                  .Builder()
+                              .Builder()
 
                               .addStroke(
-
                                   new GestureDescription
                                       .StrokeDescription(
-
                                           path,
-
                                           0,
-
-                                          70
-                                      )
-                              )
+                                          80))
 
                               .build();
+
 
                   return dispatchGesture(
                           gesture,
                           null,
                           null);
               }
+
 
               private boolean swipeXY(
                       float x1,
@@ -533,29 +549,186 @@ jobs:
                           x2,
                           y2);
 
+
                   GestureDescription gesture =
                           new GestureDescription
-                                  .Builder()
+                              .Builder()
 
                               .addStroke(
-
                                   new GestureDescription
                                       .StrokeDescription(
-
                                           path,
-
                                           0,
-
-                                          duration
-                                      )
-                              )
+                                          duration))
 
                               .build();
+
 
                   return dispatchGesture(
                           gesture,
                           null,
                           null);
+              }
+          }
+          EOF
+
+
+          cat > app/src/main/java/com/dustinbot/BotEngine.java <<'EOF'
+          package com.dustinbot;
+
+          public class BotEngine {
+
+              private static volatile boolean running;
+
+              private static Thread worker;
+
+
+              public static void start() {
+
+                  if (running) {
+
+                      return;
+                  }
+
+
+                  if (
+                      !BotAccessibility.ready()
+                  ) {
+
+                      return;
+                  }
+
+
+                  if (
+                      !BotAccessibility.configured("move") ||
+                      !BotAccessibility.configured("attack") ||
+                      !BotAccessibility.configured("loot")
+                  ) {
+
+                      return;
+                  }
+
+
+                  running = true;
+
+
+                  worker =
+                      new Thread(
+                          BotEngine::loop,
+                          "DustinBot-AI");
+
+
+                  worker.start();
+              }
+
+
+              public static void stop() {
+
+                  running = false;
+
+
+                  if (worker != null) {
+
+                      worker.interrupt();
+
+                      worker = null;
+                  }
+              }
+
+
+              public static boolean isRunning() {
+
+                  return running;
+              }
+
+
+              private static void loop() {
+
+                  boolean right = true;
+
+
+                  while (running) {
+
+                      try {
+
+                          /*
+                           * WALK
+                           *
+                           * เกมจัดการ Target เอง
+                           */
+
+                          BotAccessibility.move(
+                                  right);
+
+
+                          Thread.sleep(1100);
+
+
+                          /*
+                           * ATTACK
+                           */
+
+                          for (
+                              int i = 0;
+                              i < 6 && running;
+                              i++
+                          ) {
+
+                              BotAccessibility.tap(
+                                      "attack");
+
+                              Thread.sleep(550);
+                          }
+
+
+                          /*
+                           * WAIT
+                           */
+
+                          Thread.sleep(800);
+
+
+                          /*
+                           * LOOT
+                           */
+
+                          BotAccessibility.tap(
+                                  "loot");
+
+
+                          Thread.sleep(700);
+
+
+                          /*
+                           * เดินกลับอีกด้าน
+                           */
+
+                          right = !right;
+
+
+                      } catch (
+                          InterruptedException e
+                      ) {
+
+                          return;
+
+
+                      } catch (
+                          Exception e
+                      ) {
+
+                          try {
+
+                              Thread.sleep(1000);
+
+                          } catch (
+                              InterruptedException ignored
+                          ) {
+
+                              return;
+                          }
+                      }
+                  }
               }
           }
           EOF
@@ -574,16 +747,17 @@ jobs:
           import android.widget.LinearLayout;
           import android.widget.TextView;
 
-          public class MainActivity
-                  extends Activity {
+          public class MainActivity extends Activity {
 
-              TextView status;
+              private TextView status;
+
 
               @Override
               protected void onCreate(
                       Bundle state) {
 
                   super.onCreate(state);
+
 
                   LinearLayout root =
                           new LinearLayout(this);
@@ -592,10 +766,13 @@ jobs:
                           LinearLayout.VERTICAL);
 
                   root.setPadding(
-                          24,
-                          24,
-                          24,
-                          24);
+                          25,
+                          25,
+                          25,
+                          25);
+
+                  root.setGravity(
+                          Gravity.CENTER_HORIZONTAL);
 
                   root.setBackgroundColor(
                           Color.WHITE);
@@ -605,7 +782,7 @@ jobs:
                           new TextView(this);
 
                   title.setText(
-                          "DUSTINBOT ANDROID V1.2");
+                          "DUSTINBOT ANDROID V1.3");
 
                   title.setTextSize(26);
 
@@ -622,8 +799,8 @@ jobs:
                           new TextView(this);
 
                   info.setText(
-                          "\nเดิน → เกมล็อกเป้า → " +
-                          "ตี → เก็บของ → เดินต่อ");
+                      "\nเดิน → เกมล็อกเป้า → ตี → " +
+                      "เก็บของ → เดินต่อ\n");
 
                   info.setTextSize(17);
 
@@ -633,11 +810,11 @@ jobs:
                   root.addView(info);
 
 
-                  Button accessibility =
+                  Button access =
                           button(
                               "1. เปิด ACCESSIBILITY");
 
-                  accessibility.setOnClickListener(
+                  access.setOnClickListener(
                           v -> {
 
                       startActivity(
@@ -647,8 +824,7 @@ jobs:
 
                   });
 
-                  root.addView(
-                          accessibility);
+                  root.addView(access);
 
 
                   Button move =
@@ -712,10 +888,11 @@ jobs:
                   testMove.setOnClickListener(
                           v -> {
 
-                      if (!ready()) return;
+                      if (!ready())
+                          return;
 
                       BotAccessibility.move(
-                          true);
+                              true);
 
                       status.setText(
                           "ส่งคำสั่งเดินแล้ว");
@@ -732,10 +909,11 @@ jobs:
                   testAttack.setOnClickListener(
                           v -> {
 
-                      if (!ready()) return;
+                      if (!ready())
+                          return;
 
                       BotAccessibility.tap(
-                          "attack");
+                              "attack");
 
                       status.setText(
                           "ส่งคำสั่งตีแล้ว");
@@ -752,10 +930,11 @@ jobs:
                   testLoot.setOnClickListener(
                           v -> {
 
-                      if (!ready()) return;
+                      if (!ready())
+                          return;
 
                       BotAccessibility.tap(
-                          "loot");
+                              "loot");
 
                       status.setText(
                           "ส่งคำสั่งเก็บแล้ว");
@@ -772,9 +951,18 @@ jobs:
                   start.setOnClickListener(
                           v -> {
 
-                      if (!ready()) return;
+                      if (!ready())
+                          return;
 
-                      if (!configured()) {
+
+                      if (
+                          !BotAccessibility.configured(
+                              "move") ||
+                          !BotAccessibility.configured(
+                              "attack") ||
+                          !BotAccessibility.configured(
+                              "loot")
+                      ) {
 
                           status.setText(
                               "ต้องตั้ง เดิน / ตี / เก็บของ ก่อน");
@@ -782,10 +970,12 @@ jobs:
                           return;
                       }
 
-                      BotThread.start();
+
+                      BotEngine.start();
+
 
                       status.setText(
-                          "สถานะ: RUNNING");
+                              "สถานะ: RUNNING");
 
                   });
 
@@ -799,10 +989,10 @@ jobs:
                   stop.setOnClickListener(
                           v -> {
 
-                      BotThread.stop();
+                      BotEngine.stop();
 
                       status.setText(
-                          "สถานะ: STOP");
+                              "สถานะ: STOP");
 
                   });
 
@@ -815,7 +1005,7 @@ jobs:
                   status.setText(
                           "\nสถานะ: STOP");
 
-                  status.setTextSize(17);
+                  status.setTextSize(18);
 
                   status.setGravity(
                           Gravity.CENTER);
@@ -826,6 +1016,7 @@ jobs:
                   setContentView(root);
               }
 
+
               private boolean ready() {
 
                   if (
@@ -833,21 +1024,15 @@ jobs:
                   ) {
 
                       status.setText(
-                          "กรุณาเปิด Accessibility ก่อน");
+                          "Accessibility ยังไม่พร้อม");
 
                       return false;
                   }
 
+
                   return true;
               }
 
-              private boolean configured() {
-
-                  return
-                      BotAccessibility.has("move") &&
-                      BotAccessibility.has("attack") &&
-                      BotAccessibility.has("loot");
-              }
 
               private Button button(
                       String text) {
@@ -860,135 +1045,6 @@ jobs:
                   b.setTextSize(16);
 
                   return b;
-              }
-          }
-          EOF
-
-
-          cat > app/src/main/java/com/dustinbot/BotThread.java <<'EOF'
-          package com.dustinbot;
-
-          public class BotThread {
-
-              private static volatile boolean running;
-
-              private static Thread thread;
-
-              public static void start() {
-
-                  if (running)
-                      return;
-
-                  running = true;
-
-                  thread =
-                      new Thread(
-                          () -> loop(),
-                          "DustinBotAI");
-
-                  thread.start();
-              }
-
-              public static void stop() {
-
-                  running = false;
-
-                  if (thread != null) {
-
-                      thread.interrupt();
-
-                      thread = null;
-                  }
-              }
-
-              private static void loop() {
-
-                  boolean right = true;
-
-                  while (running) {
-
-                      try {
-
-                          /*
-                           * 1. เดิน
-                           */
-
-                          BotAccessibility.move(
-                              right);
-
-                          Thread.sleep(900);
-
-
-                          /*
-                           * 2. ตี
-                           *
-                           * เกมเป็นคนล็อกเป้า
-                           */
-
-                          for (
-                              int i = 0;
-                              i < 5 && running;
-                              i++
-                          ) {
-
-                              BotAccessibility.tap(
-                                  "attack");
-
-                              Thread.sleep(500);
-                          }
-
-
-                          /*
-                           * 3. รอ
-                           */
-
-                          Thread.sleep(700);
-
-
-                          /*
-                           * 4. เก็บของ
-                           */
-
-                          BotAccessibility.tap(
-                              "loot");
-
-                          Thread.sleep(700);
-
-
-                          /*
-                           * 5. เดินอีกทาง
-                           */
-
-                          right = !right;
-
-                      }
-
-                      catch (
-                          InterruptedException e
-                      ) {
-
-                          return;
-
-                      }
-
-                      catch (
-                          Exception e
-                      ) {
-
-                          try {
-
-                              Thread.sleep(1000);
-
-                          }
-
-                          catch (
-                              InterruptedException ignored
-                          ) {
-
-                              return;
-                          }
-                      }
-                  }
               }
           }
           EOF
@@ -1009,18 +1065,13 @@ jobs:
         shell: bash
         run: |
 
-          test -f \
-            app/build/outputs/apk/debug/app-debug.apk
+          test -f app/build/outputs/apk/debug/app-debug.apk
 
-          ls -lh \
-            app/build/outputs/apk/debug/app-debug.apk
+          ls -lh app/build/outputs/apk/debug/app-debug.apk
 
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-
-          name: DustinBot-Android-V1.2
-
-          path:
-            app/build/outputs/apk/debug/app-debug.apk
+          name: DustinBot-Android-V1.3
+          path: app/build/outputs/apk/debug/app-debug.apk
