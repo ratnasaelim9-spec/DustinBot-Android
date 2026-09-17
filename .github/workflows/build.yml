@@ -1,4 +1,4 @@
-name: DustinBot Android V3
+name: DustinBot Android V4
 
 on:
   push:
@@ -11,11 +11,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
+      - name: Setup Java
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -25,7 +26,7 @@ jobs:
         run: |
           set -e
 
-          mkdir -p app/src/main/java/com/dustinbot/v3
+          mkdir -p app/src/main/java/com/dustinbot/v4
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/xml
 
@@ -40,13 +41,15 @@ jobs:
 
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
               repositories {
                   google()
                   mavenCentral()
               }
           }
 
-          rootProject.name = "DustinBotAndroidV3"
+          rootProject.name = "DustinBotAndroidV4"
+
           include(":app")
           EOF
 
@@ -58,8 +61,8 @@ jobs:
 
           cat > gradle.properties <<'EOF'
           org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
-          android.useAndroidX=true
-          android.nonTransitiveRClass=true
+          android.useAndroidX=false
+          android.nonTransitiveRClass=false
           EOF
 
           cat > app/build.gradle <<'EOF'
@@ -68,15 +71,16 @@ jobs:
           }
 
           android {
-              namespace 'com.dustinbot.v3'
+              namespace 'com.dustinbot.v4'
+
               compileSdk 35
 
               defaultConfig {
-                  applicationId 'com.dustinbot.v3'
+                  applicationId 'com.dustinbot.v4'
                   minSdk 26
                   targetSdk 35
-                  versionCode 30
-                  versionName '3.0'
+                  versionCode 40
+                  versionName '4.0'
               }
 
               buildTypes {
@@ -96,26 +100,28 @@ jobs:
           }
 
           dependencies {
-              implementation 'androidx.appcompat:appcompat:1.7.0'
-              implementation 'androidx.core:core:1.15.0'
           }
           EOF
 
           cat > app/src/main/res/values/strings.xml <<'EOF'
           <resources>
-              <string name="app_name">DustinBot Android V3</string>
+              <string name="app_name">DustinBot Android V4</string>
               <string name="accessibility_description">DustinBot Android automation service</string>
           </resources>
           EOF
 
           cat > app/src/main/res/values/themes.xml <<'EOF'
           <resources>
-              <style name="Theme.DustinBot" parent="Theme.AppCompat.NoActionBar">
+              <style name="DustinBotTheme"
+                  parent="@android:style/Theme.Material.NoActionBar">
+
                   <item name="android:fontFamily">sans</item>
+                  <item name="android:windowActionModeOverlay">true</item>
                   <item name="android:windowLightStatusBar">false</item>
                   <item name="android:statusBarColor">#070B12</item>
                   <item name="android:navigationBarColor">#070B12</item>
                   <item name="android:windowBackground">#070B12</item>
+
               </style>
           </resources>
           EOF
@@ -139,7 +145,7 @@ jobs:
                   android:allowBackup="true"
                   android:label="@string/app_name"
                   android:supportsRtl="true"
-                  android:theme="@style/Theme.DustinBot">
+                  android:theme="@style/DustinBotTheme">
 
                   <activity
                       android:name=".MainActivity"
@@ -176,45 +182,70 @@ jobs:
       - name: Create SettingsStore.java
         shell: bash
         run: |
-          cat > app/src/main/java/com/dustinbot/v3/SettingsStore.java <<'EOF'
-          package com.dustinbot.v3;
+          cat > app/src/main/java/com/dustinbot/v4/SettingsStore.java <<'EOF'
+          package com.dustinbot.v4;
 
           import android.content.Context;
           import android.content.SharedPreferences;
 
           public final class SettingsStore {
 
-              private static final String PREF = "dustinbot_settings";
+              private static final String PREF =
+                      "dustinbot_settings";
 
-              private SettingsStore() {}
+              private SettingsStore() {
+              }
 
-              private static SharedPreferences prefs(Context c) {
-                  return c.getSharedPreferences(PREF, Context.MODE_PRIVATE);
+              private static SharedPreferences prefs(
+                      Context context) {
+
+                  return context.getSharedPreferences(
+                          PREF,
+                          Context.MODE_PRIVATE
+                  );
               }
 
               public static void savePoint(
-                      Context c,
+                      Context context,
                       String name,
                       float x,
                       float y) {
 
-                  prefs(c)
+                  prefs(context)
                           .edit()
                           .putFloat(name + "_x", x)
                           .putFloat(name + "_y", y)
                           .apply();
               }
 
-              public static float getX(Context c, String name) {
-                  return prefs(c).getFloat(name + "_x", -1);
+              public static float getX(
+                      Context context,
+                      String name) {
+
+                  return prefs(context)
+                          .getFloat(
+                                  name + "_x",
+                                  -1
+                          );
               }
 
-              public static float getY(Context c, String name) {
-                  return prefs(c).getFloat(name + "_y", -1);
+              public static float getY(
+                      Context context,
+                      String name) {
+
+                  return prefs(context)
+                          .getFloat(
+                                  name + "_y",
+                                  -1
+                          );
               }
 
-              public static boolean hasPoint(Context c, String name) {
-                  return getX(c, name) >= 0 && getY(c, name) >= 0;
+              public static boolean hasPoint(
+                      Context context,
+                      String name) {
+
+                  return getX(context, name) >= 0
+                          && getY(context, name) >= 0;
               }
           }
           EOF
@@ -222,38 +253,49 @@ jobs:
       - name: Create BotAccessibility.java
         shell: bash
         run: |
-          cat > app/src/main/java/com/dustinbot/v3/BotAccessibility.java <<'EOF'
-          package com.dustinbot.v3;
+          cat > app/src/main/java/com/dustinbot/v4/BotAccessibility.java <<'EOF'
+          package com.dustinbot.v4;
 
           import android.accessibilityservice.AccessibilityService;
           import android.accessibilityservice.GestureDescription;
+
           import android.graphics.Color;
           import android.graphics.Path;
           import android.graphics.PixelFormat;
+
           import android.os.Handler;
           import android.os.Looper;
+
           import android.view.Gravity;
           import android.view.WindowManager;
+
           import android.widget.Button;
           import android.widget.LinearLayout;
           import android.widget.TextView;
+
           import android.view.accessibility.AccessibilityEvent;
 
-          public class BotAccessibility extends AccessibilityService {
+          public class BotAccessibility
+                  extends AccessibilityService {
 
               private static BotAccessibility instance;
 
               private WindowManager windowManager;
-              private WindowManager.LayoutParams params;
+
               private LinearLayout panel;
+
               private TextView status;
+
               private TextView ai;
+
               private TextView console;
 
-              private final Handler handler =
-                      new Handler(Looper.getMainLooper());
-
               private BotEngine engine;
+
+              private final Handler handler =
+                      new Handler(
+                              Looper.getMainLooper()
+                      );
 
               public static BotAccessibility getInstance() {
                   return instance;
@@ -261,25 +303,32 @@ jobs:
 
               @Override
               protected void onServiceConnected() {
+
                   super.onServiceConnected();
 
                   instance = this;
 
                   windowManager =
-                          (WindowManager)getSystemService(WINDOW_SERVICE);
+                          (WindowManager)
+                                  getSystemService(
+                                          WINDOW_SERVICE
+                                  );
 
-                  engine = new BotEngine(this);
+                  engine =
+                          new BotEngine(this);
 
                   showBot();
               }
 
               @Override
-              public void onAccessibilityEvent(AccessibilityEvent event) {
-                  // Screen-state reading can be added here.
+              public void onAccessibilityEvent(
+                      AccessibilityEvent event) {
+
               }
 
               @Override
               public void onInterrupt() {
+
                   if (engine != null) {
                       engine.stop();
                   }
@@ -287,6 +336,7 @@ jobs:
 
               @Override
               public void onDestroy() {
+
                   if (engine != null) {
                       engine.stop();
                   }
@@ -298,82 +348,128 @@ jobs:
                   super.onDestroy();
               }
 
-              private TextView text(String s, int size) {
-                  TextView v = new TextView(this);
+              private TextView text(
+                      String value,
+                      int size) {
 
-                  v.setText(s);
-                  v.setTextColor(Color.WHITE);
-                  v.setTextSize(size);
-                  v.setPadding(8, 5, 8, 5);
+                  TextView text =
+                          new TextView(this);
 
-                  return v;
+                  text.setText(value);
+
+                  text.setTextColor(
+                          Color.WHITE
+                  );
+
+                  text.setTextSize(size);
+
+                  text.setPadding(
+                          10,
+                          8,
+                          10,
+                          8
+                  );
+
+                  return text;
               }
 
-              private Button button(String s) {
-                  Button b = new Button(this);
-                  b.setText(s);
-                  b.setTextSize(11);
-                  return b;
+              private Button button(
+                      String value) {
+
+                  Button button =
+                          new Button(this);
+
+                  button.setText(value);
+
+                  button.setTextSize(11);
+
+                  return button;
               }
 
               public void showBot() {
+
                   handler.post(() -> {
 
                       if (panel != null) {
                           return;
                       }
 
-                      panel = new LinearLayout(this);
+                      panel =
+                              new LinearLayout(this);
 
                       panel.setOrientation(
-                              LinearLayout.VERTICAL);
+                              LinearLayout.VERTICAL
+                      );
 
                       panel.setPadding(
-                              12, 8, 12, 8);
+                              12,
+                              8,
+                              12,
+                              8
+                      );
 
                       panel.setBackgroundColor(
-                              Color.rgb(8, 14, 23));
+                              Color.rgb(
+                                      8,
+                                      14,
+                                      23
+                              )
+                      );
 
                       TextView title =
-                              text("🤖 DUSTINBOT ANDROID V3", 17);
+                              text(
+                                      "🤖 DUSTINBOT V4",
+                                      18
+                              );
 
                       panel.addView(title);
 
                       status =
-                              text("● STOPPED", 13);
+                              text(
+                                      "● STOPPED",
+                                      14
+                              );
 
                       panel.addView(status);
 
-                      panel.addView(
+                      TextView character =
                               text(
                                       "CHARACTER\n" +
                                       "Level: --\n" +
                                       "Job: --\n" +
                                       "HP: --\n" +
                                       "SP: --",
-                                      12));
+                                      13
+                              );
 
-                      panel.addView(
+                      panel.addView(character);
+
+                      TextView target =
                               text(
                                       "TARGET\n" +
                                       "Monster: GAME LOCK\n" +
                                       "HP: --\n" +
                                       "Distance: --\n" +
                                       "State: GAME LOCK",
-                                      12));
+                                      13
+                              );
+
+                      panel.addView(target);
 
                       ai =
                               text(
                                       "AI STATUS\nIDLE",
-                                      12);
+                                      13
+                              );
 
                       panel.addView(ai);
 
-                      LinearLayout buttons =
+                      LinearLayout mainButtons =
                               new LinearLayout(this);
 
-                      buttons.setOrientation(
-                              LinearLayout.HORIZONTAL);
+                      mainButtons.setOrientation(
+                              LinearLayout.HORIZONTAL
+                      );
 
                       Button start =
                               button("START");
@@ -382,45 +478,70 @@ jobs:
                               button("STOP");
 
                       Button hide =
-                              button("MIN");
+                              button("HIDE");
 
-                      buttons.addView(
+                      mainButtons.addView(
                               start,
                               new LinearLayout.LayoutParams(
-                                      0, 60, 1));
+                                      0,
+                                      65,
+                                      1
+                              )
+                      );
 
-                      buttons.addView(
+                      mainButtons.addView(
                               stop,
                               new LinearLayout.LayoutParams(
-                                      0, 60, 1));
+                                      0,
+                                      65,
+                                      1
+                              )
+                      );
 
-                      buttons.addView(
+                      mainButtons.addView(
                               hide,
                               new LinearLayout.LayoutParams(
-                                      0, 60, 1));
+                                      0,
+                                      65,
+                                      1
+                              )
+                      );
 
-                      panel.addView(buttons);
+                      panel.addView(
+                              mainButtons
+                      );
 
                       Button move =
-                              button("SET MOVE POSITION");
+                              button(
+                                      "SET MOVE POSITION"
+                              );
 
                       Button attack =
-                              button("SET ATTACK POSITION");
+                              button(
+                                      "SET ATTACK POSITION"
+                              );
 
                       Button loot =
-                              button("SET LOOT POSITION");
+                              button(
+                                      "SET LOOT POSITION"
+                              );
 
                       panel.addView(move);
                       panel.addView(attack);
                       panel.addView(loot);
 
                       panel.addView(
-                              text("CONSOLE", 13));
+                              text(
+                                      "CONSOLE",
+                                      14
+                              )
+                      );
 
                       console =
                               text(
                                       "DustinBot initialized.",
-                                      11);
+                                      11
+                              );
 
                       panel.addView(console);
 
@@ -430,7 +551,8 @@ jobs:
                                   if (engine != null) {
                                       engine.start();
                                   }
-                              });
+                              }
+                      );
 
                       stop.setOnClickListener(
                               v -> {
@@ -438,35 +560,45 @@ jobs:
                                   if (engine != null) {
                                       engine.stop();
                                   }
-
-                                  setStatus("● STOPPED");
-                              });
+                              }
+                      );
 
                       hide.setOnClickListener(
-                              v -> removePanel());
+                              v -> removePanel()
+                      );
 
                       move.setOnClickListener(
-                              v -> CalibrationOverlay.show(
-                                      this,
-                                      "MOVE"));
+                              v ->
+                                      CalibrationOverlay.show(
+                                              this,
+                                              "MOVE"
+                                      )
+                      );
 
                       attack.setOnClickListener(
-                              v -> CalibrationOverlay.show(
-                                      this,
-                                      "ATTACK"));
+                              v ->
+                                      CalibrationOverlay.show(
+                                              this,
+                                              "ATTACK"
+                                      )
+                      );
 
                       loot.setOnClickListener(
-                              v -> CalibrationOverlay.show(
-                                      this,
-                                      "LOOT"));
+                              v ->
+                                      CalibrationOverlay.show(
+                                              this,
+                                              "LOOT"
+                                      )
+                      );
 
-                      params =
+                      WindowManager.LayoutParams params =
                               new WindowManager.LayoutParams(
                                       700,
                                       WindowManager.LayoutParams.WRAP_CONTENT,
                                       WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
                                       WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                                      PixelFormat.TRANSLUCENT);
+                                      PixelFormat.TRANSLUCENT
+                              );
 
                       params.gravity =
                               Gravity.TOP |
@@ -477,18 +609,24 @@ jobs:
 
                       windowManager.addView(
                               panel,
-                              params);
+                              params
+                      );
                   });
               }
 
               public void removePanel() {
+
                   handler.post(() -> {
 
                       if (panel != null &&
                               windowManager != null) {
 
                           try {
-                              windowManager.removeView(panel);
+
+                              windowManager.removeView(
+                                      panel
+                              );
+
                           } catch (Exception ignored) {
                           }
                       }
@@ -497,45 +635,65 @@ jobs:
                   });
               }
 
-              public void setStatus(String s) {
+              public void setStatus(
+                      String value) {
+
                   handler.post(() -> {
 
                       if (status != null) {
-                          status.setText(s);
+                          status.setText(value);
                       }
                   });
               }
 
-              public void setAI(String s) {
+              public void setAI(
+                      String value) {
+
                   handler.post(() -> {
 
                       if (ai != null) {
+
                           ai.setText(
-                                  "AI STATUS\n" + s);
+                                  "AI STATUS\n" +
+                                  value
+                          );
                       }
                   });
               }
 
-              public void log(String s) {
+              public void log(
+                      String value) {
+
                   handler.post(() -> {
 
                       if (console != null) {
+
                           console.append(
-                                  "\n> " + s);
+                                  "\n> " +
+                                  value
+                          );
                       }
                   });
               }
 
-              public boolean tap(float x, float y) {
+              public boolean tap(
+                      float x,
+                      float y) {
 
-                  Path path = new Path();
-                  path.moveTo(x, y);
+                  Path path =
+                          new Path();
+
+                  path.moveTo(
+                          x,
+                          y
+                  );
 
                   GestureDescription.StrokeDescription stroke =
                           new GestureDescription.StrokeDescription(
                                   path,
                                   0,
-                                  80);
+                                  80
+                          );
 
                   GestureDescription gesture =
                           new GestureDescription.Builder()
@@ -545,7 +703,8 @@ jobs:
                   return dispatchGesture(
                           gesture,
                           null,
-                          null);
+                          null
+                  );
               }
 
               public boolean swipe(
@@ -555,16 +714,25 @@ jobs:
                       float y2,
                       long duration) {
 
-                  Path path = new Path();
+                  Path path =
+                          new Path();
 
-                  path.moveTo(x1, y1);
-                  path.lineTo(x2, y2);
+                  path.moveTo(
+                          x1,
+                          y1
+                  );
+
+                  path.lineTo(
+                          x2,
+                          y2
+                  );
 
                   GestureDescription.StrokeDescription stroke =
                           new GestureDescription.StrokeDescription(
                                   path,
                                   0,
-                                  duration);
+                                  duration
+                          );
 
                   GestureDescription gesture =
                           new GestureDescription.Builder()
@@ -574,7 +742,8 @@ jobs:
                   return dispatchGesture(
                           gesture,
                           null,
-                          null);
+                          null
+                  );
               }
           }
           EOF
@@ -582,8 +751,8 @@ jobs:
       - name: Create BotEngine.java
         shell: bash
         run: |
-          cat > app/src/main/java/com/dustinbot/v3/BotEngine.java <<'EOF'
-          package com.dustinbot.v3;
+          cat > app/src/main/java/com/dustinbot/v4/BotEngine.java <<'EOF'
+          package com.dustinbot.v4;
 
           import android.content.Context;
           import android.os.Handler;
@@ -592,43 +761,63 @@ jobs:
           public class BotEngine {
 
               private final Context context;
+
               private final Handler handler =
-                      new Handler(Looper.getMainLooper());
+                      new Handler(
+                              Looper.getMainLooper()
+                      );
 
               private boolean running;
+
               private boolean right = true;
 
-              public BotEngine(Context context) {
-                  this.context = context.getApplicationContext();
+              public BotEngine(
+                      Context context) {
+
+                  this.context =
+                          context.getApplicationContext();
               }
 
               public void start() {
 
                   BotAccessibility bot =
-                          BotAccessibility.getInstance();
+                          BotAccessibility
+                                  .getInstance();
 
                   if (bot == null) {
                       return;
                   }
 
                   if (!SettingsStore.hasPoint(
-                          context, "MOVE")) {
+                          context,
+                          "MOVE")) {
 
-                      bot.log("MOVE ยังไม่ได้ตั้งค่า");
+                      bot.log(
+                              "MOVE ยังไม่ได้ตั้งค่า"
+                      );
+
                       return;
                   }
 
                   if (!SettingsStore.hasPoint(
-                          context, "ATTACK")) {
+                          context,
+                          "ATTACK")) {
 
-                      bot.log("ATTACK ยังไม่ได้ตั้งค่า");
+                      bot.log(
+                              "ATTACK ยังไม่ได้ตั้งค่า"
+                      );
+
                       return;
                   }
 
                   if (!SettingsStore.hasPoint(
-                          context, "LOOT")) {
+                          context,
+                          "LOOT")) {
 
-                      bot.log("LOOT ยังไม่ได้ตั้งค่า");
+                      bot.log(
+                              "LOOT ยังไม่ได้ตั้งค่า"
+                      );
+
                       return;
                   }
 
@@ -638,9 +827,13 @@ jobs:
 
                   running = true;
 
-                  bot.setStatus("● RUNNING");
-                  bot.setAI("WALK");
-                  bot.log("BOT STARTED");
+                  bot.setStatus(
+                          "● RUNNING"
+                  );
+
+                  bot.log(
+                          "BOT STARTED"
+                  );
 
                   loop();
               }
@@ -649,15 +842,27 @@ jobs:
 
                   running = false;
 
-                  handler.removeCallbacksAndMessages(null);
+                  handler.removeCallbacksAndMessages(
+                          null
+                  );
 
                   BotAccessibility bot =
-                          BotAccessibility.getInstance();
+                          BotAccessibility
+                                  .getInstance();
 
                   if (bot != null) {
-                      bot.setStatus("● STOPPED");
-                      bot.setAI("IDLE");
-                      bot.log("BOT STOPPED");
+
+                      bot.setStatus(
+                              "● STOPPED"
+                      );
+
+                      bot.setAI(
+                              "IDLE"
+                      );
+
+                      bot.log(
+                              "BOT STOPPED"
+                      );
                   }
               }
 
@@ -689,44 +894,59 @@ jobs:
 
                                           handler.postDelayed(
                                                   this::loop,
-                                                  1200);
+                                                  1200
+                                          );
 
                                       },
-                                      1800);
+                                      1800
+                              );
 
                           },
-                          2200);
+                          2200
+                  );
               }
 
               private void walk() {
 
                   BotAccessibility bot =
-                          BotAccessibility.getInstance();
+                          BotAccessibility
+                                  .getInstance();
 
                   if (bot == null) {
                       return;
                   }
 
-                  bot.setAI("WALK");
+                  bot.setAI(
+                          "WALK"
+                  );
 
-                  bot.log("Walking...");
+                  bot.log(
+                          "เดิน"
+                  );
 
                   float x =
                           SettingsStore.getX(
                                   context,
-                                  "MOVE");
+                                  "MOVE"
+                          );
 
                   float y =
                           SettingsStore.getY(
                                   context,
-                                  "MOVE");
+                                  "MOVE"
+                          );
 
-                  float x2;
+                  float destination;
 
                   if (right) {
-                      x2 = x + 220;
+
+                      destination =
+                              x + 220;
+
                   } else {
-                      x2 = x - 220;
+
+                      destination =
+                              x - 220;
                   }
 
                   right = !right;
@@ -734,38 +954,49 @@ jobs:
                   bot.swipe(
                           x,
                           y,
-                          x2,
+                          destination,
                           y,
-                          1200);
+                          1200
+                  );
               }
 
               private void attack() {
 
                   BotAccessibility bot =
-                          BotAccessibility.getInstance();
+                          BotAccessibility
+                                  .getInstance();
 
                   if (bot == null) {
                       return;
                   }
 
-                  bot.setAI("ATTACK GAME LOCK");
+                  bot.setAI(
+                          "ATTACK GAME LOCK"
+                  );
 
                   bot.log(
-                          "โจมตีเป้าหมายที่เกมล็อก");
+                          "โจมตีเป้าหมายที่เกมล็อก"
+                  );
 
                   float x =
                           SettingsStore.getX(
                                   context,
-                                  "ATTACK");
+                                  "ATTACK"
+                          );
 
                   float y =
                           SettingsStore.getY(
                                   context,
-                                  "ATTACK");
+                                  "ATTACK"
+                          );
 
-                  for (int i = 0; i < 5; i++) {
+                  for (
+                          int i = 0;
+                          i < 5;
+                          i++
+                  ) {
 
-                      final int n = i;
+                      final int index = i;
 
                       handler.postDelayed(
                               () -> {
@@ -779,38 +1010,53 @@ jobs:
                                                   .getInstance();
 
                                   if (current != null) {
-                                      current.tap(x, y);
+
+                                      current.tap(
+                                              x,
+                                              y
+                                      );
                                   }
 
                               },
-                              n * 250L);
+                              index * 250L
+                      );
                   }
               }
 
               private void loot() {
 
                   BotAccessibility bot =
-                          BotAccessibility.getInstance();
+                          BotAccessibility
+                                  .getInstance();
 
                   if (bot == null) {
                       return;
                   }
 
-                  bot.setAI("LOOT");
+                  bot.setAI(
+                          "LOOT"
+                  );
 
-                  bot.log("เก็บของ");
+                  bot.log(
+                          "เก็บของ"
+                  );
 
                   float x =
                           SettingsStore.getX(
                                   context,
-                                  "LOOT");
+                                  "LOOT"
+                          );
 
                   float y =
                           SettingsStore.getY(
                                   context,
-                                  "LOOT");
+                                  "LOOT"
+                          );
 
-                  bot.tap(x, y);
+                  bot.tap(
+                          x,
+                          y
+                  );
               }
           }
           EOF
@@ -818,23 +1064,24 @@ jobs:
       - name: Create CalibrationOverlay.java
         shell: bash
         run: |
-          cat > app/src/main/java/com/dustinbot/v3/CalibrationOverlay.java <<'EOF'
-          package com.dustinbot.v3;
+          cat > app/src/main/java/com/dustinbot/v4/CalibrationOverlay.java <<'EOF'
+          package com.dustinbot.v4;
 
           import android.graphics.Color;
           import android.graphics.PixelFormat;
+
           import android.view.Gravity;
           import android.view.MotionEvent;
-          import android.view.View;
           import android.view.WindowManager;
+
           import android.widget.Button;
-          import android.widget.FrameLayout;
           import android.widget.LinearLayout;
           import android.widget.TextView;
 
           public final class CalibrationOverlay {
 
-              private CalibrationOverlay() {}
+              private CalibrationOverlay() {
+              }
 
               public static void show(
                       BotAccessibility service,
@@ -843,61 +1090,123 @@ jobs:
                   WindowManager wm =
                           (WindowManager)
                                   service.getSystemService(
-                                          BotAccessibility.WINDOW_SERVICE);
+                                          BotAccessibility.WINDOW_SERVICE
+                                  );
 
-                  FrameLayout root =
-                          new FrameLayout(service);
+                  LinearLayout root =
+                          new LinearLayout(
+                                  service
+                          );
+
+                  root.setOrientation(
+                          LinearLayout.VERTICAL
+                  );
+
+                  root.setPadding(
+                          20,
+                          20,
+                          20,
+                          20
+                  );
 
                   root.setBackgroundColor(
-                          Color.TRANSPARENT);
-
-                  TextView info =
-                          new TextView(service);
-
-                  info.setText(
-                          "SET " + mode +
-                          " POSITION\n\n" +
-                          "แตะตำแหน่งบนหน้าเกม\n" +
-                          "แล้วกด SAVE");
-
-                  info.setTextColor(
-                          Color.WHITE);
-
-                  info.setTextSize(17);
-
-                  info.setPadding(
-                          20, 20, 20, 20);
-
-                  info.setBackgroundColor(
                           Color.argb(
                                   235,
-                                  8,
-                                  15,
-                                  25));
+                                  7,
+                                  12,
+                                  20
+                          )
+                  );
 
-                  FrameLayout.LayoutParams infoParams =
-                          new FrameLayout.LayoutParams(
-                                  650,
-                                  180);
+                  TextView title =
+                          new TextView(service);
 
-                  infoParams.gravity =
-                          Gravity.TOP |
-                          Gravity.CENTER_HORIZONTAL;
+                  title.setText(
+                          "SET " +
+                          mode +
+                          " POSITION"
+                  );
 
-                  infoParams.topMargin = 60;
+                  title.setTextColor(
+                          Color.WHITE
+                  );
 
-                  root.addView(
-                          info,
-                          infoParams);
+                  title.setTextSize(
+                          20
+                  );
+
+                  root.addView(title);
+
+                  TextView position =
+                          new TextView(service);
+
+                  position.setText(
+                          "แตะตำแหน่งบนหน้าเกม"
+                  );
+
+                  position.setTextColor(
+                          Color.WHITE
+                  );
+
+                  position.setTextSize(
+                          15
+                  );
+
+                  root.addView(position);
 
                   final float[] point =
                           {-1, -1};
 
-                  root.setOnTouchListener(
-                          (v, event) -> {
+                  Button save =
+                          new Button(service);
 
-                              if (event.getAction() ==
-                                      MotionEvent.ACTION_UP) {
+                  save.setText(
+                          "SAVE"
+                  );
+
+                  Button cancel =
+                          new Button(service);
+
+                  cancel.setText(
+                          "CANCEL"
+                  );
+
+                  LinearLayout buttons =
+                          new LinearLayout(
+                                  service
+                          );
+
+                  buttons.setOrientation(
+                          LinearLayout.HORIZONTAL
+                  );
+
+                  buttons.addView(
+                          save,
+                          new LinearLayout.LayoutParams(
+                                  0,
+                                  70,
+                                  1
+                          )
+                  );
+
+                  buttons.addView(
+                          cancel,
+                          new LinearLayout.LayoutParams(
+                                  0,
+                                  70,
+                                  1
+                          )
+                  );
+
+                  root.addView(buttons);
+
+                  root.setOnTouchListener(
+                          (view, event) -> {
+
+                              if (
+                                      event.getAction()
+                                              == MotionEvent.ACTION_UP
+                              ) {
 
                                   point[0] =
                                           event.getRawX();
@@ -905,106 +1214,81 @@ jobs:
                                   point[1] =
                                           event.getRawY();
 
-                                  info.setText(
-                                          "SET " + mode +
-                                          " POSITION\n\n" +
-                                          "X: " + point[0] +
-                                          "   Y: " + point[1] +
-                                          "\n\n" +
-                                          "กด SAVE");
+                                  position.setText(
+                                          "X: " +
+                                          point[0] +
+                                          "   Y: " +
+                                          point[1]
+                                  );
 
                                   return true;
                               }
 
                               return true;
-                          });
-
-                  LinearLayout buttons =
-                          new LinearLayout(service);
-
-                  buttons.setOrientation(
-                          LinearLayout.HORIZONTAL);
-
-                  Button save =
-                          new Button(service);
-
-                  save.setText("SAVE");
-
-                  Button cancel =
-                          new Button(service);
-
-                  cancel.setText("CANCEL");
-
-                  buttons.addView(
-                          save,
-                          new LinearLayout.LayoutParams(
-                                  0, 70, 1));
-
-                  buttons.addView(
-                          cancel,
-                          new LinearLayout.LayoutParams(
-                                  0, 70, 1));
-
-                  FrameLayout.LayoutParams bp =
-                          new FrameLayout.LayoutParams(
-                                  650,
-                                  80);
-
-                  bp.gravity =
-                          Gravity.TOP |
-                          Gravity.CENTER_HORIZONTAL;
-
-                  bp.topMargin = 250;
-
-                  root.addView(
-                          buttons,
-                          bp);
-
-                  WindowManager.LayoutParams params =
-                          new WindowManager.LayoutParams(
-                                  -1,
-                                  -1,
-                                  WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
-                                  WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                                  PixelFormat.TRANSLUCENT);
-
-                  params.gravity =
-                          Gravity.TOP |
-                          Gravity.START;
+                          }
+                  );
 
                   save.setOnClickListener(
                           v -> {
 
-                              if (point[0] >= 0 &&
-                                      point[1] >= 0) {
+                              if (
+                                      point[0] >= 0 &&
+                                      point[1] >= 0
+                              ) {
 
                                   SettingsStore.savePoint(
                                           service,
                                           mode,
                                           point[0],
-                                          point[1]);
+                                          point[1]
+                                  );
 
-                                  info.setText(
-                                          "SAVED\n\n" +
+                                  position.setText(
+                                          "SAVED\n" +
                                           "X: " +
                                           point[0] +
                                           "\nY: " +
-                                          point[1]);
+                                          point[1]
+                                  );
                               }
-                          });
+                          }
+                  );
+
+                  WindowManager.LayoutParams params =
+                          new WindowManager.LayoutParams(
+                                  700,
+                                  WindowManager.LayoutParams.WRAP_CONTENT,
+                                  WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+                                  WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                                  PixelFormat.TRANSLUCENT
+                          );
+
+                  params.gravity =
+                          Gravity.TOP |
+                          Gravity.CENTER_HORIZONTAL;
+
+                  params.y = 100;
 
                   cancel.setOnClickListener(
                           v -> {
 
                               try {
-                                  wm.removeView(root);
-                              } catch (Exception ignored) {
+
+                                  wm.removeView(
+                                          root
+                                  );
+
+                              } catch (
+                                      Exception ignored
+                              ) {
                               }
-                          });
+                          }
+                  );
 
                   wm.addView(
                           root,
-                          params);
+                          params
+                  );
               }
           }
           EOF
@@ -1012,56 +1296,74 @@ jobs:
       - name: Create MainActivity.java
         shell: bash
         run: |
-          cat > app/src/main/java/com/dustinbot/v3/MainActivity.java <<'EOF'
-          package com.dustinbot.v3;
+          cat > app/src/main/java/com/dustinbot/v4/MainActivity.java <<'EOF'
+          package com.dustinbot.v4;
 
           import android.app.Activity;
+
           import android.content.Intent;
+
           import android.graphics.Color;
+
           import android.os.Bundle;
+
           import android.provider.Settings;
+
           import android.view.Gravity;
+
           import android.widget.Button;
           import android.widget.LinearLayout;
           import android.widget.TextView;
 
-          public class MainActivity extends Activity {
+          public class MainActivity
+                  extends Activity {
 
-              private int dp(int n) {
+              private int dp(int value) {
+
                   return (int)(
-                          n *
+                          value *
                           getResources()
                                   .getDisplayMetrics()
-                                  .density);
+                                  .density
+                  );
               }
 
               private TextView text(
-                      String s,
+                      String value,
                       int size) {
 
-                  TextView t =
+                  TextView text =
                           new TextView(this);
 
-                  t.setText(s);
-                  t.setTextColor(Color.WHITE);
-                  t.setTextSize(size);
-                  t.setPadding(
-                          dp(10),
-                          dp(10),
-                          dp(10),
-                          dp(10));
+                  text.setText(value);
 
-                  return t;
+                  text.setTextColor(
+                          Color.WHITE
+                  );
+
+                  text.setTextSize(
+                          size
+                  );
+
+                  text.setPadding(
+                          dp(10),
+                          dp(10),
+                          dp(10),
+                          dp(10)
+                  );
+
+                  return text;
               }
 
-              private Button button(String s) {
+              private Button button(
+                      String value) {
 
-                  Button b =
+                  Button button =
                           new Button(this);
 
-                  b.setText(s);
+                  button.setText(value);
 
-                  return b;
+                  return button;
               }
 
               @Override
@@ -1069,47 +1371,60 @@ jobs:
                       Bundle savedInstanceState) {
 
                   super.onCreate(
-                          savedInstanceState);
+                          savedInstanceState
+                  );
 
                   LinearLayout root =
-                          new LinearLayout(this);
+                          new LinearLayout(
+                                  this
+                          );
 
                   root.setOrientation(
-                          LinearLayout.VERTICAL);
+                          LinearLayout.VERTICAL
+                  );
 
                   root.setPadding(
                           dp(15),
                           dp(15),
                           dp(15),
-                          dp(15));
+                          dp(15)
+                  );
 
                   root.setBackgroundColor(
                           Color.rgb(
                                   7,
                                   11,
-                                  18));
+                                  18
+                          )
+                  );
 
                   TextView title =
                           text(
                                   "🤖 DUSTINBOT\n" +
-                                  "ANDROID V3",
-                                  26);
+                                  "ANDROID V4",
+                                  26
+                          );
 
                   title.setGravity(
-                          Gravity.CENTER);
+                          Gravity.CENTER
+                  );
 
                   root.addView(title);
 
                   root.addView(
                           text(
-                                  "OpenKore-style Android Bot\n\n" +
-                                  "เปิดเกม Dustin RO แล้วใช้ " +
-                                  "DustinBot เป็นหน้าต่างลอย",
-                                  16));
+                                  "Android Game Automation\n\n" +
+                                  "GAME LOCK = ให้เกมเลือกเป้าหมายเอง\n\n" +
+                                  "BOT LOOP\n" +
+                                  "WALK → ATTACK → LOOT → WALK",
+                                  16
+                          )
+                  );
 
                   Button accessibility =
                           button(
-                                  "OPEN ACCESSIBILITY");
+                                  "OPEN ACCESSIBILITY"
+                          );
 
                   accessibility.setOnClickListener(
                           v -> {
@@ -1117,15 +1432,20 @@ jobs:
                               startActivity(
                                       new Intent(
                                               Settings
-                                                      .ACTION_ACCESSIBILITY_SETTINGS));
-                          });
+                                                      .ACTION_ACCESSIBILITY_SETTINGS
+                                      )
+                              );
+                          }
+                  );
 
                   root.addView(
-                          accessibility);
+                          accessibility
+                  );
 
                   Button show =
                           button(
-                                  "SHOW BOT OVER GAME");
+                                  "SHOW BOT OVER GAME"
+                          );
 
                   show.setOnClickListener(
                           v -> {
@@ -1135,12 +1455,20 @@ jobs:
                                               .getInstance();
 
                               if (bot != null) {
+
                                   bot.showBot();
+
                               } else {
-                                  accessibility
-                                          .performClick();
+
+                                  startActivity(
+                                          new Intent(
+                                                  Settings
+                                                          .ACTION_ACCESSIBILITY_SETTINGS
+                                          )
+                                  );
                               }
-                          });
+                          }
+                  );
 
                   root.addView(show);
 
@@ -1149,18 +1477,21 @@ jobs:
                                   "วิธีใช้งาน\n\n" +
                                   "1. เปิด Accessibility\n" +
                                   "2. เปิด DustinBot\n" +
-                                  "3. เปิด Dustin RO\n" +
-                                  "4. กลับมา DustinBot\n" +
-                                  "5. SHOW BOT OVER GAME\n" +
-                                  "6. ตั้ง MOVE\n" +
-                                  "7. ตั้ง ATTACK\n" +
-                                  "8. ตั้ง LOOT\n" +
-                                  "9. START\n\n" +
-                                  "BOT LOOP\n" +
-                                  "WALK → GAME LOCK → ATTACK → LOOT → WALK",
-                                  15));
+                                  "3. เปิดเกม Dustin RO\n" +
+                                  "4. DustinBot จะเป็นหน้าต่างลอย\n" +
+                                  "5. ตั้ง MOVE\n" +
+                                  "6. ตั้ง ATTACK\n" +
+                                  "7. ตั้ง LOOT\n" +
+                                  "8. START\n\n" +
+                                  "ตัวบอทใช้ Accessibility " +
+                                  "สำหรับการแตะ/ลากบนหน้าจอ",
+                                  15
+                          )
+                  );
 
-                  setContentView(root);
+                  setContentView(
+                          root
+                  );
               }
           }
           EOF
@@ -1221,12 +1552,15 @@ jobs:
             assembleDebug \
             --stacktrace
 
-      - name: Show APK
+      - name: Find APK
         shell: bash
         run: |
           set -e
 
-          find app/build/outputs/apk/debug \
+          echo "========== APK =========="
+
+          find \
+            app/build/outputs/apk/debug \
             -type f \
             -name "*.apk" \
             -print
@@ -1234,7 +1568,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DustinBot-Android-V3
+          name: DustinBot-Android-V4
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 30
