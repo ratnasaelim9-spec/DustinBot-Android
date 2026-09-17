@@ -1,10 +1,11 @@
-name: Build DustinBot Android V3
+name: DustinBot Android V3
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
+
+  workflow_dispatch:
 
 jobs:
   build:
@@ -12,16 +13,30 @@ jobs:
 
     steps:
 
-      - name: Checkout repository
+      # ============================================================
+      # CHECKOUT
+      # ============================================================
+
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java 17
+
+      # ============================================================
+      # JAVA 17
+      # ============================================================
+
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Create project folders
+
+      # ============================================================
+      # CREATE DIRECTORIES
+      # ============================================================
+
+      - name: Create project directories
         shell: bash
         run: |
           set -e
@@ -29,6 +44,11 @@ jobs:
           mkdir -p app/src/main/java/com/dustinbot/v3
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/xml
+
+
+      # ============================================================
+      # SETTINGS.GRADLE
+      # ============================================================
 
       - name: Create settings.gradle
         shell: bash
@@ -58,6 +78,11 @@ rootProject.name = "DustinBotAndroidV3"
 include(":app")
 EOF
 
+
+      # ============================================================
+      # ROOT BUILD.GRADLE
+      # ============================================================
+
       - name: Create root build.gradle
         shell: bash
         run: |
@@ -67,6 +92,11 @@ plugins {
 }
 EOF
 
+
+      # ============================================================
+      # GRADLE PROPERTIES
+      # ============================================================
+
       - name: Create gradle.properties
         shell: bash
         run: |
@@ -75,6 +105,11 @@ org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
 android.useAndroidX=true
 android.nonTransitiveRClass=true
 EOF
+
+
+      # ============================================================
+      # APP BUILD.GRADLE
+      # ============================================================
 
       - name: Create app build.gradle
         shell: bash
@@ -93,6 +128,7 @@ android {
         applicationId 'com.dustinbot.v3'
         minSdk 26
         targetSdk 35
+
         versionCode 30
         versionName '3.0'
     }
@@ -116,9 +152,13 @@ android {
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.core:core:1.15.0'
-    implementation 'com.google.android.material:material:1.12.0'
 }
 EOF
+
+
+      # ============================================================
+      # STRINGS.XML
+      # ============================================================
 
       - name: Create strings.xml
         shell: bash
@@ -126,9 +166,14 @@ EOF
           cat > app/src/main/res/values/strings.xml <<'EOF'
 <resources>
     <string name="app_name">DustinBot Android V3</string>
-    <string name="accessibility_description">DustinBot automation service</string>
+    <string name="accessibility_description">DustinBot Android automation service</string>
 </resources>
 EOF
+
+
+      # ============================================================
+      # THEMES.XML
+      # ============================================================
 
       - name: Create themes.xml
         shell: bash
@@ -137,7 +182,7 @@ EOF
 <resources>
     <style
         name="Theme.DustinBot"
-        parent="Theme.Material3.DayNight.NoActionBar">
+        parent="Theme.AppCompat.NoActionBar">
 
         <item name="android:fontFamily">sans</item>
         <item name="android:windowLightStatusBar">false</item>
@@ -147,6 +192,11 @@ EOF
     </style>
 </resources>
 EOF
+
+
+      # ============================================================
+      # ACCESSIBILITY.XML
+      # ============================================================
 
       - name: Create accessibility.xml
         shell: bash
@@ -162,6 +212,11 @@ EOF
     android:description="@string/accessibility_description"
     android:notificationTimeout="100" />
 EOF
+
+
+      # ============================================================
+      # ANDROID MANIFEST
+      # ============================================================
 
       - name: Create AndroidManifest.xml
         shell: bash
@@ -207,6 +262,11 @@ EOF
 </manifest>
 EOF
 
+
+      # ============================================================
+      # SETTINGS STORE
+      # ============================================================
+
       - name: Create SettingsStore.java
         shell: bash
         run: |
@@ -219,12 +279,12 @@ import android.content.SharedPreferences;
 public final class SettingsStore {
 
     private static final String PREF =
-            "dustinbot_v3_settings";
+            "dustinbot_settings";
 
     private SettingsStore() {
     }
 
-    private static SharedPreferences prefs(
+    private static SharedPreferences getPrefs(
             Context context
     ) {
         return context.getSharedPreferences(
@@ -235,42 +295,57 @@ public final class SettingsStore {
 
     public static void savePoint(
             Context context,
-            String key,
+            String name,
             float x,
             float y
     ) {
-        prefs(context)
+
+        getPrefs(context)
                 .edit()
-                .putFloat(key + "_x", x)
-                .putFloat(key + "_y", y)
+                .putFloat(name + "_x", x)
+                .putFloat(name + "_y", y)
                 .apply();
     }
 
     public static float getX(
             Context context,
-            String key
+            String name
     ) {
-        return prefs(context)
-                .getFloat(key + "_x", -1);
+
+        return getPrefs(context)
+                .getFloat(
+                        name + "_x",
+                        -1
+                );
     }
 
     public static float getY(
             Context context,
-            String key
+            String name
     ) {
-        return prefs(context)
-                .getFloat(key + "_y", -1);
+
+        return getPrefs(context)
+                .getFloat(
+                        name + "_y",
+                        -1
+                );
     }
 
     public static boolean hasPoint(
             Context context,
-            String key
+            String name
     ) {
-        return getX(context, key) >= 0
-                && getY(context, key) >= 0;
+
+        return getX(context, name) >= 0
+                && getY(context, name) >= 0;
     }
 }
 EOF
+
+
+      # ============================================================
+      # BOT ACCESSIBILITY
+      # ============================================================
 
       - name: Create BotAccessibility.java
         shell: bash
@@ -312,25 +387,37 @@ public class BotAccessibility
     private WindowManager.LayoutParams overlayParams;
 
     private final Handler handler =
-            new Handler(Looper.getMainLooper());
+            new Handler(
+                    Looper.getMainLooper()
+            );
 
     private BotEngine botEngine;
 
     private TextView statusText;
 
-    private TextView aiText;
+    private TextView characterText;
 
     private TextView targetText;
 
-    private TextView characterText;
+    private TextView aiText;
 
     private TextView consoleText;
 
-    private boolean overlayVisible = false;
+    private boolean overlayVisible;
+
+
+    // ============================================================
+    // INSTANCE
+    // ============================================================
 
     public static BotAccessibility getInstance() {
         return instance;
     }
+
+
+    // ============================================================
+    // CONNECT
+    // ============================================================
 
     @Override
     protected void onServiceConnected() {
@@ -371,18 +458,28 @@ public class BotAccessibility
         showOverlay();
     }
 
+
+    // ============================================================
+    // ACCESSIBILITY EVENT
+    // ============================================================
+
     @Override
     public void onAccessibilityEvent(
             AccessibilityEvent event
     ) {
-        // Reserved for game screen-state reading.
+
+        // Reserved for future screen-state reading.
+        // No packet injection.
+        // No client modification.
     }
+
 
     @Override
     public void onInterrupt() {
 
         stopBot();
     }
+
 
     @Override
     public void onDestroy() {
@@ -395,6 +492,11 @@ public class BotAccessibility
 
         super.onDestroy();
     }
+
+
+    // ============================================================
+    // SHOW OVERLAY
+    // ============================================================
 
     public void showOverlay() {
 
@@ -409,6 +511,11 @@ public class BotAccessibility
                 }
         );
     }
+
+
+    // ============================================================
+    // CREATE OVERLAY
+    // ============================================================
 
     private void createOverlay() {
 
@@ -425,18 +532,23 @@ public class BotAccessibility
 
         root.setPadding(
                 12,
-                10,
+                8,
                 12,
-                10
+                8
         );
 
         root.setBackgroundColor(
                 Color.rgb(
-                        10,
-                        17,
-                        27
+                        9,
+                        16,
+                        26
                 )
         );
+
+
+        // --------------------------------------------------------
+        // HEADER
+        // --------------------------------------------------------
 
         LinearLayout header =
                 new LinearLayout(this);
@@ -455,7 +567,7 @@ public class BotAccessibility
                 title,
                 new LinearLayout.LayoutParams(
                         0,
-                        -2,
+                        60,
                         1
                 )
         );
@@ -473,13 +585,23 @@ public class BotAccessibility
 
         root.addView(header);
 
+
+        // --------------------------------------------------------
+        // STATUS
+        // --------------------------------------------------------
+
         statusText =
                 makeText(
                         "● STOPPED",
-                        15
+                        14
                 );
 
         root.addView(statusText);
+
+
+        // --------------------------------------------------------
+        // CHARACTER
+        // --------------------------------------------------------
 
         characterText =
                 makeText(
@@ -493,6 +615,11 @@ public class BotAccessibility
 
         root.addView(characterText);
 
+
+        // --------------------------------------------------------
+        // TARGET
+        // --------------------------------------------------------
+
         targetText =
                 makeText(
                         "TARGET\n" +
@@ -505,6 +632,11 @@ public class BotAccessibility
 
         root.addView(targetText);
 
+
+        // --------------------------------------------------------
+        // AI
+        // --------------------------------------------------------
+
         aiText =
                 makeText(
                         "AI STATUS\nIDLE",
@@ -512,6 +644,11 @@ public class BotAccessibility
                 );
 
         root.addView(aiText);
+
+
+        // --------------------------------------------------------
+        // MAIN CONTROLS
+        // --------------------------------------------------------
 
         LinearLayout controls =
                 new LinearLayout(this);
@@ -558,20 +695,36 @@ public class BotAccessibility
 
         root.addView(controls);
 
+
+        // --------------------------------------------------------
+        // CALIBRATION
+        // --------------------------------------------------------
+
         Button move =
-                makeButton("SET MOVE");
+                makeButton(
+                        "SET MOVE POSITION"
+                );
 
         Button attack =
-                makeButton("SET ATTACK");
+                makeButton(
+                        "SET ATTACK POSITION"
+                );
 
         Button loot =
-                makeButton("SET LOOT");
+                makeButton(
+                        "SET LOOT POSITION"
+                );
 
         root.addView(move);
 
         root.addView(attack);
 
         root.addView(loot);
+
+
+        // --------------------------------------------------------
+        // CONSOLE
+        // --------------------------------------------------------
 
         TextView consoleTitle =
                 makeText(
@@ -583,24 +736,29 @@ public class BotAccessibility
 
         consoleText =
                 makeText(
-                        "DustinBot ready.",
+                        "DustinBot initialized.",
                         11
                 );
 
-        ScrollView scroll =
+        ScrollView consoleScroll =
                 new ScrollView(this);
 
-        scroll.addView(
+        consoleScroll.addView(
                 consoleText
         );
 
         root.addView(
-                scroll,
+                consoleScroll,
                 new LinearLayout.LayoutParams(
                         -1,
                         180
                 )
         );
+
+
+        // --------------------------------------------------------
+        // BUTTON ACTIONS
+        // --------------------------------------------------------
 
         start.setOnClickListener(
                 v -> startBot()
@@ -619,16 +777,30 @@ public class BotAccessibility
         );
 
         move.setOnClickListener(
-                v -> startCalibration("MOVE")
+                v -> CalibrationOverlay.show(
+                        this,
+                        "MOVE"
+                )
         );
 
         attack.setOnClickListener(
-                v -> startCalibration("ATTACK")
+                v -> CalibrationOverlay.show(
+                        this,
+                        "ATTACK"
+                )
         );
 
         loot.setOnClickListener(
-                v -> startCalibration("LOOT")
+                v -> CalibrationOverlay.show(
+                        this,
+                        "LOOT"
+                )
         );
+
+
+        // --------------------------------------------------------
+        // WINDOW
+        // --------------------------------------------------------
 
         overlayParams =
                 new WindowManager.LayoutParams(
@@ -643,9 +815,10 @@ public class BotAccessibility
                 Gravity.TOP |
                 Gravity.START;
 
-        overlayParams.x = 25;
+        overlayParams.x = 20;
 
-        overlayParams.y = 120;
+        overlayParams.y = 100;
+
 
         overlay = root;
 
@@ -657,11 +830,12 @@ public class BotAccessibility
         overlayVisible = true;
     }
 
-    private void minimizeOverlay() {
 
-        if (!overlayVisible) {
-            return;
-        }
+    // ============================================================
+    // MINIMIZE
+    // ============================================================
+
+    private void minimizeOverlay() {
 
         removeOverlay();
 
@@ -673,7 +847,7 @@ public class BotAccessibility
         );
 
         mini.setPadding(
-                15,
+                10,
                 5,
                 5,
                 5
@@ -681,9 +855,9 @@ public class BotAccessibility
 
         mini.setBackgroundColor(
                 Color.rgb(
-                        10,
-                        17,
-                        27
+                        9,
+                        16,
+                        26
                 )
         );
 
@@ -725,7 +899,7 @@ public class BotAccessibility
         overlayParams =
                 new WindowManager.LayoutParams(
                         400,
-                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        70,
                         WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                         PixelFormat.TRANSLUCENT
@@ -735,9 +909,9 @@ public class BotAccessibility
                 Gravity.TOP |
                 Gravity.START;
 
-        overlayParams.x = 25;
+        overlayParams.x = 20;
 
-        overlayParams.y = 120;
+        overlayParams.y = 100;
 
         overlay = mini;
 
@@ -748,6 +922,11 @@ public class BotAccessibility
 
         overlayVisible = true;
     }
+
+
+    // ============================================================
+    // REMOVE OVERLAY
+    // ============================================================
 
     public void removeOverlay() {
 
@@ -776,6 +955,11 @@ public class BotAccessibility
         );
     }
 
+
+    // ============================================================
+    // START
+    // ============================================================
+
     private void startBot() {
 
         if (botEngine == null) {
@@ -792,6 +976,11 @@ public class BotAccessibility
         }
     }
 
+
+    // ============================================================
+    // STOP
+    // ============================================================
+
     private void stopBot() {
 
         if (botEngine != null) {
@@ -807,15 +996,10 @@ public class BotAccessibility
         }
     }
 
-    private void startCalibration(
-            String mode
-    ) {
 
-        CalibrationOverlay.show(
-                this,
-                mode
-        );
-    }
+    // ============================================================
+    // AI
+    // ============================================================
 
     private void updateAI(
             String state
@@ -835,6 +1019,11 @@ public class BotAccessibility
         );
     }
 
+
+    // ============================================================
+    // CONSOLE
+    // ============================================================
+
     private void appendConsole(
             String message
     ) {
@@ -853,33 +1042,43 @@ public class BotAccessibility
         );
     }
 
+
+    // ============================================================
+    // TEXT
+    // ============================================================
+
     private TextView makeText(
             String value,
             int size
     ) {
 
-        TextView view =
+        TextView text =
                 new TextView(this);
 
-        view.setText(value);
+        text.setText(value);
 
-        view.setTextColor(
+        text.setTextColor(
                 Color.WHITE
         );
 
-        view.setTextSize(
+        text.setTextSize(
                 size
         );
 
-        view.setPadding(
-                6,
-                6,
-                6,
-                6
+        text.setPadding(
+                5,
+                5,
+                5,
+                5
         );
 
-        return view;
+        return text;
     }
+
+
+    // ============================================================
+    // BUTTON
+    // ============================================================
 
     private Button makeButton(
             String value
@@ -890,10 +1089,15 @@ public class BotAccessibility
 
         button.setText(value);
 
-        button.setTextSize(11);
+        button.setTextSize(10);
 
         return button;
     }
+
+
+    // ============================================================
+    // TAP
+    // ============================================================
 
     public boolean tap(
             float x,
@@ -926,6 +1130,11 @@ public class BotAccessibility
                 null
         );
     }
+
+
+    // ============================================================
+    // SWIPE
+    // ============================================================
 
     public boolean swipe(
             float x1,
@@ -969,6 +1178,11 @@ public class BotAccessibility
 }
 EOF
 
+
+      # ============================================================
+      # CALIBRATION OVERLAY
+      # ============================================================
+
       - name: Create CalibrationOverlay.java
         shell: bash
         run: |
@@ -984,6 +1198,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -991,6 +1206,7 @@ public final class CalibrationOverlay {
 
     private CalibrationOverlay() {
     }
+
 
     public static void show(
             BotAccessibility service,
@@ -1003,35 +1219,62 @@ public final class CalibrationOverlay {
                                 BotAccessibility.WINDOW_SERVICE
                         );
 
-        LinearLayout root =
+
+        FrameLayout root =
+                new FrameLayout(service);
+
+        root.setBackgroundColor(
+                Color.TRANSPARENT
+        );
+
+
+        // ========================================================
+        // TOUCH LAYER
+        // ========================================================
+
+        View touchLayer =
+                new View(service);
+
+        touchLayer.setBackgroundColor(
+                Color.TRANSPARENT
+        );
+
+
+        // ========================================================
+        // INFO PANEL
+        // ========================================================
+
+        LinearLayout panel =
                 new LinearLayout(service);
 
-        root.setOrientation(
+        panel.setOrientation(
                 LinearLayout.VERTICAL
         );
 
-        root.setPadding(
+        panel.setPadding(
+                18,
                 15,
-                12,
-                15,
-                12
+                18,
+                15
         );
 
-        root.setBackgroundColor(
-                Color.rgb(
+        panel.setBackgroundColor(
+                Color.argb(
+                        235,
                         8,
                         15,
-                        24
+                        25
                 )
         );
+
 
         TextView title =
                 new TextView(service);
 
         title.setText(
-                "CALIBRATION: " +
+                "SET " +
                 mode +
-                "\nแตะตำแหน่งบนหน้าเกม"
+                " POSITION"
         );
 
         title.setTextColor(
@@ -1039,80 +1282,125 @@ public final class CalibrationOverlay {
         );
 
         title.setTextSize(
-                16
+                18
         );
 
-        root.addView(title);
+        panel.addView(
+                title
+        );
 
-        TextView coordinate =
+
+        TextView instruction =
                 new TextView(service);
 
-        coordinate.setText(
-                "X: --   Y: --"
+        instruction.setText(
+                "แตะตำแหน่งที่ต้องการบนหน้าเกม\n" +
+                "จากนั้นกด SAVE"
         );
 
-        coordinate.setTextColor(
+        instruction.setTextColor(
                 Color.WHITE
         );
 
-        coordinate.setTextSize(
+        instruction.setTextSize(
                 14
         );
 
-        root.addView(coordinate);
+        panel.addView(
+                instruction
+        );
+
+
+        TextView coordinates =
+                new TextView(service);
+
+        coordinates.setText(
+                "X: --   Y: --"
+        );
+
+        coordinates.setTextColor(
+                Color.WHITE
+        );
+
+        coordinates.setTextSize(
+                14
+        );
+
+        panel.addView(
+                coordinates
+        );
+
+
+        LinearLayout buttons =
+                new LinearLayout(service);
+
+        buttons.setOrientation(
+                LinearLayout.HORIZONTAL
+        );
+
 
         Button save =
                 new Button(service);
 
-        save.setText("SAVE");
+        save.setText(
+                "SAVE"
+        );
 
-        save.setEnabled(false);
+        save.setEnabled(
+                false
+        );
 
-        root.addView(save);
 
         Button cancel =
                 new Button(service);
 
-        cancel.setText("CANCEL");
+        cancel.setText(
+                "CANCEL"
+        );
 
-        root.addView(cancel);
 
-        final float[] point =
-                new float[]{-1, -1};
-
-        WindowManager.LayoutParams params =
-                new WindowManager.LayoutParams(
-                        650,
-                        WindowManager.LayoutParams.WRAP_CONTENT,
-                        WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                        PixelFormat.TRANSLUCENT
-                );
-
-        params.gravity =
-                Gravity.TOP |
-                Gravity.CENTER_HORIZONTAL;
-
-        params.y = 80;
-
-        View touchView =
-                new View(service);
-
-        touchView.setBackgroundColor(
-                Color.argb(
-                        1,
-                        255,
-                        255,
-                        255
+        buttons.addView(
+                save,
+                new LinearLayout.LayoutParams(
+                        0,
+                        60,
+                        1
                 )
         );
 
-        touchView.setOnTouchListener(
+
+        buttons.addView(
+                cancel,
+                new LinearLayout.LayoutParams(
+                        0,
+                        60,
+                        1
+                )
+        );
+
+
+        panel.addView(
+                buttons
+        );
+
+
+        // ========================================================
+        // STORE POINT
+        // ========================================================
+
+        final float[] point =
+                new float[]{
+                        -1,
+                        -1
+                };
+
+
+        touchLayer.setOnTouchListener(
                 new View.OnTouchListener() {
 
                     @Override
                     public boolean onTouch(
-                            View v,
+                            View view,
                             MotionEvent event
                     ) {
 
@@ -1127,39 +1415,36 @@ public final class CalibrationOverlay {
                             point[1] =
                                     event.getRawY();
 
-                            coordinate.setText(
+
+                            coordinates.setText(
                                     "X: " +
                                     point[0] +
                                     "   Y: " +
                                     point[1]
                             );
 
+
                             save.setEnabled(
                                     true
                             );
 
+
                             return true;
                         }
+
 
                         return true;
                     }
                 }
         );
 
-        LinearLayout.LayoutParams touchParams =
-                new LinearLayout.LayoutParams(
-                        -1,
-                        120
-                );
 
-        root.addView(
-                touchView,
-                0,
-                touchParams
-        );
+        // ========================================================
+        // SAVE
+        // ========================================================
 
         save.setOnClickListener(
-                v -> {
+                view -> {
 
                     if (
                             point[0] >= 0 &&
@@ -1173,7 +1458,8 @@ public final class CalibrationOverlay {
                                 point[1]
                         );
 
-                        coordinate.setText(
+
+                        coordinates.setText(
                                 "SAVED\n" +
                                 "X: " +
                                 point[0] +
@@ -1184,8 +1470,13 @@ public final class CalibrationOverlay {
                 }
         );
 
+
+        // ========================================================
+        // CANCEL
+        // ========================================================
+
         cancel.setOnClickListener(
-                v -> {
+                view -> {
 
                     try {
 
@@ -1198,6 +1489,60 @@ public final class CalibrationOverlay {
                 }
         );
 
+
+        // ========================================================
+        // ROOT
+        // ========================================================
+
+        root.addView(
+                touchLayer,
+                new FrameLayout.LayoutParams(
+                        -1,
+                        -1
+                )
+        );
+
+
+        FrameLayout.LayoutParams panelParams =
+                new FrameLayout.LayoutParams(
+                        650,
+                        -2
+                );
+
+
+        panelParams.gravity =
+                Gravity.TOP |
+                Gravity.CENTER_HORIZONTAL;
+
+        panelParams.topMargin =
+                70;
+
+
+        root.addView(
+                panel,
+                panelParams
+        );
+
+
+        // ========================================================
+        // WINDOW
+        // ========================================================
+
+        WindowManager.LayoutParams params =
+                new WindowManager.LayoutParams(
+                        -1,
+                        -1,
+                        WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                );
+
+
+        params.gravity =
+                Gravity.TOP |
+                Gravity.START;
+
+
         wm.addView(
                 root,
                 params
@@ -1205,6 +1550,11 @@ public final class CalibrationOverlay {
     }
 }
 EOF
+
+
+      # ============================================================
+      # BOT ENGINE
+      # ============================================================
 
       - name: Create BotEngine.java
         shell: bash
@@ -1229,6 +1579,7 @@ public class BotEngine {
         );
     }
 
+
     private final Context context;
 
     private final Listener listener;
@@ -1238,11 +1589,11 @@ public class BotEngine {
                     Looper.getMainLooper()
             );
 
-    private boolean running =
-            false;
 
-    private boolean directionRight =
-            true;
+    private boolean running;
+
+    private boolean directionRight = true;
+
 
     public BotEngine(
             Context context,
@@ -1256,10 +1607,10 @@ public class BotEngine {
                 listener;
     }
 
-    public boolean isRunning() {
 
-        return running;
-    }
+    // ============================================================
+    // START
+    // ============================================================
 
     public void start() {
 
@@ -1275,6 +1626,7 @@ public class BotEngine {
             return;
         }
 
+
         if (!SettingsStore.hasPoint(
                 context,
                 "ATTACK"
@@ -1286,6 +1638,7 @@ public class BotEngine {
 
             return;
         }
+
 
         if (!SettingsStore.hasPoint(
                 context,
@@ -1299,26 +1652,45 @@ public class BotEngine {
             return;
         }
 
+
         if (
                 BotAccessibility.getInstance()
                         == null
         ) {
 
             listener.onConsole(
-                    "Accessibility Service ยังไม่ทำงาน"
+                    "Accessibility ยังไม่ทำงาน"
             );
 
             return;
         }
 
+
+        if (running) {
+            return;
+        }
+
+
         running = true;
+
+
+        listener.onState(
+                "RUNNING"
+        );
+
 
         listener.onConsole(
                 "BOT STARTED"
         );
 
+
         loop();
     }
+
+
+    // ============================================================
+    // STOP
+    // ============================================================
 
     public void stop() {
 
@@ -1337,13 +1709,20 @@ public class BotEngine {
         );
     }
 
+
+    // ============================================================
+    // MAIN LOOP
+    // ============================================================
+
     private void loop() {
 
         if (!running) {
             return;
         }
 
+
         walk();
+
 
         handler.postDelayed(
                 () -> {
@@ -1352,7 +1731,9 @@ public class BotEngine {
                         return;
                     }
 
+
                     attack();
+
 
                     handler.postDelayed(
                             () -> {
@@ -1361,38 +1742,51 @@ public class BotEngine {
                                     return;
                                 }
 
+
                                 loot();
+
 
                                 handler.postDelayed(
                                         this::loop,
                                         1200
                                 );
 
+
                             },
                             1800
                     );
+
 
                 },
                 2200
         );
     }
 
+
+    // ============================================================
+    // WALK
+    // ============================================================
+
     private void walk() {
 
         BotAccessibility service =
                 BotAccessibility.getInstance();
 
+
         if (service == null) {
             return;
         }
+
 
         listener.onState(
                 "WALK"
         );
 
+
         listener.onConsole(
                 "Walking..."
         );
+
 
         float x =
                 SettingsStore.getX(
@@ -1400,45 +1794,67 @@ public class BotEngine {
                         "MOVE"
                 );
 
+
         float y =
                 SettingsStore.getY(
                         context,
                         "MOVE"
                 );
 
-        float x2 =
-                directionRight
-                        ? x + 220
-                        : x - 220;
+
+        float destinationX;
+
+
+        if (directionRight) {
+
+            destinationX =
+                    x + 220;
+
+        } else {
+
+            destinationX =
+                    x - 220;
+        }
+
 
         service.swipe(
                 x,
                 y,
-                x2,
+                destinationX,
                 y,
                 1200
         );
 
+
         directionRight =
                 !directionRight;
     }
+
+
+    // ============================================================
+    // ATTACK
+    // ============================================================
 
     private void attack() {
 
         BotAccessibility service =
                 BotAccessibility.getInstance();
 
+
         if (service == null) {
             return;
         }
+
 
         listener.onState(
                 "ATTACK"
         );
 
+
         listener.onConsole(
-                "Attacking game locked target..."
+                "ATTACK GAME LOCK TARGET"
         );
+
 
         float x =
                 SettingsStore.getX(
@@ -1446,11 +1862,13 @@ public class BotEngine {
                         "ATTACK"
                 );
 
+
         float y =
                 SettingsStore.getY(
                         context,
                         "ATTACK"
                 );
+
 
         for (
                 int i = 0;
@@ -1461,6 +1879,7 @@ public class BotEngine {
             final int index =
                     i;
 
+
             handler.postDelayed(
                     () -> {
 
@@ -1468,9 +1887,11 @@ public class BotEngine {
                             return;
                         }
 
+
                         BotAccessibility current =
                                 BotAccessibility
                                         .getInstance();
+
 
                         if (current != null) {
 
@@ -1486,22 +1907,31 @@ public class BotEngine {
         }
     }
 
+
+    // ============================================================
+    // LOOT
+    // ============================================================
+
     private void loot() {
 
         BotAccessibility service =
                 BotAccessibility.getInstance();
 
+
         if (service == null) {
             return;
         }
+
 
         listener.onState(
                 "LOOT"
         );
 
+
         listener.onConsole(
-                "Loot..."
+                "LOOT"
         );
+
 
         float x =
                 SettingsStore.getX(
@@ -1509,11 +1939,13 @@ public class BotEngine {
                         "LOOT"
                 );
 
+
         float y =
                 SettingsStore.getY(
                         context,
                         "LOOT"
                 );
+
 
         service.tap(
                 x,
@@ -1522,6 +1954,11 @@ public class BotEngine {
     }
 }
 EOF
+
+
+      # ============================================================
+      # MAIN ACTIVITY
+      # ============================================================
 
       - name: Create MainActivity.java
         shell: bash
@@ -1552,51 +1989,57 @@ public class MainActivity
             int value
     ) {
 
-        return (int) (
-                value *
-                getResources()
-                        .getDisplayMetrics()
-                        .density
-        );
+        return (int)
+                (
+                        value *
+                        getResources()
+                                .getDisplayMetrics()
+                                .density
+                );
     }
 
-    private TextView text(
+
+    private TextView makeText(
             String value,
             int size
     ) {
 
-        TextView t =
+        TextView text =
                 new TextView(this);
 
-        t.setText(value);
+        text.setText(value);
 
-        t.setTextColor(
+        text.setTextColor(
                 Color.WHITE
         );
 
-        t.setTextSize(size);
-
-        t.setPadding(
-                dp(12),
-                dp(12),
-                dp(12),
-                dp(12)
+        text.setTextSize(
+                size
         );
 
-        return t;
+        text.setPadding(
+                dp(10),
+                dp(10),
+                dp(10),
+                dp(10)
+        );
+
+        return text;
     }
 
-    private Button button(
+
+    private Button makeButton(
             String value
     ) {
 
-        Button b =
+        Button button =
                 new Button(this);
 
-        b.setText(value);
+        button.setText(value);
 
-        return b;
+        return button;
     }
+
 
     @Override
     protected void onCreate(
@@ -1607,6 +2050,7 @@ public class MainActivity
                 savedInstanceState
         );
 
+
         LinearLayout root =
                 new LinearLayout(this);
 
@@ -1615,10 +2059,10 @@ public class MainActivity
         );
 
         root.setPadding(
-                dp(16),
-                dp(16),
-                dp(16),
-                dp(16)
+                dp(15),
+                dp(15),
+                dp(15),
+                dp(15)
         );
 
         root.setBackgroundColor(
@@ -1629,9 +2073,11 @@ public class MainActivity
                 )
         );
 
+
         TextView title =
-                text(
-                        "🤖 DUSTINBOT\nANDROID V3",
+                makeText(
+                        "🤖 DUSTINBOT\n" +
+                        "ANDROID V3",
                         26
                 );
 
@@ -1639,24 +2085,33 @@ public class MainActivity
                 Gravity.CENTER
         );
 
-        root.addView(title);
+        root.addView(
+                title
+        );
+
 
         root.addView(
-                text(
+                makeText(
                         "OpenKore-style Android Bot\n\n" +
-                        "Dustin RO จะยังแสดงอยู่ด้านหลัง\n" +
-                        "DustinBot ทำงานเป็น Floating Overlay",
+                        "ตัวเกม Dustin RO จะอยู่ด้านหลัง\n" +
+                        "DustinBot จะทำงานเป็นหน้าต่างลอย",
                         16
                 )
         );
 
+
+        // ========================================================
+        // ACCESSIBILITY
+        // ========================================================
+
         Button accessibility =
-                button(
-                        "1. OPEN ACCESSIBILITY"
+                makeButton(
+                        "OPEN ACCESSIBILITY"
                 );
 
+
         accessibility.setOnClickListener(
-                v -> {
+                view -> {
 
                     Intent intent =
                             new Intent(
@@ -1668,21 +2123,29 @@ public class MainActivity
                 }
         );
 
+
         root.addView(
                 accessibility
         );
 
+
+        // ========================================================
+        // SHOW BOT
+        // ========================================================
+
         Button show =
-                button(
-                        "2. SHOW BOT OVER GAME"
+                makeButton(
+                        "SHOW BOT OVER GAME"
                 );
 
+
         show.setOnClickListener(
-                v -> {
+                view -> {
 
                     BotAccessibility service =
                             BotAccessibility
                                     .getInstance();
+
 
                     if (service != null) {
 
@@ -1695,41 +2158,58 @@ public class MainActivity
                 }
         );
 
-        root.addView(show);
 
         root.addView(
-                text(
+                show
+        );
+
+
+        // ========================================================
+        // INFORMATION
+        // ========================================================
+
+        root.addView(
+                makeText(
                         "วิธีใช้งาน\n\n" +
-                        "1. เปิด Accessibility\n" +
-                        "2. เปิด Dustin RO\n" +
-                        "3. กลับมา DustinBot\n" +
-                        "4. SHOW BOT OVER GAME\n" +
-                        "5. หน้าต่างบอทจะลอยบนเกม\n" +
+                        "1. OPEN ACCESSIBILITY\n" +
+                        "2. เปิดบริการ DustinBot\n" +
+                        "3. เปิด Dustin RO\n" +
+                        "4. กลับมา DustinBot\n" +
+                        "5. SHOW BOT OVER GAME\n" +
                         "6. ตั้ง MOVE / ATTACK / LOOT\n" +
                         "7. START\n\n" +
-                        "เกมเป็นผู้ล็อกเป้าหมายเอง\n" +
-                        "บอทควบคุมการเดิน โจมตี และเก็บของ",
+                        "GAME LOCK = เกมล็อกเป้าหมายเอง\n\n" +
+                        "BOT LOOP\n" +
+                        "WALK → ATTACK → LOOT → WALK",
                         15
                 )
         );
+
 
         root.addView(
-                text(
+                makeText(
                         "STATUS\n\n" +
-                        "Accessibility: READY\n" +
-                        "Game: Dustin RO\n" +
+                        "Mode: Accessibility\n" +
                         "Target: GAME LOCK\n" +
-                        "Mode: WALK / ATTACK / LOOT",
+                        "Action: WALK / ATTACK / LOOT",
                         15
                 )
         );
 
-        setContentView(root);
+
+        setContentView(
+                root
+        );
     }
 }
 EOF
 
-      - name: Generate Gradle wrapper
+
+      # ============================================================
+      # GRADLE WRAPPER
+      # ============================================================
+
+      - name: Install Gradle
         shell: bash
         run: |
           set -e
@@ -1747,36 +2227,43 @@ EOF
           /tmp/gradle/gradle-8.7/bin/gradle wrapper \
             --gradle-version 8.7
 
-      - name: Validate XML files
+
+      # ============================================================
+      # VALIDATE XML
+      # ============================================================
+
+      - name: Validate XML
         shell: bash
         run: |
           set -e
 
-          echo "Checking XML files..."
-
-          for file in \
-            app/src/main/AndroidManifest.xml \
-            app/src/main/res/values/strings.xml \
-            app/src/main/res/values/themes.xml \
-            app/src/main/res/xml/accessibility.xml
-          do
-            echo "Checking $file"
-            python3 - "$file" <<'PY'
-import sys
+          python3 - <<'PY'
 import xml.etree.ElementTree as ET
 
-file = sys.argv[1]
+files = [
+    "app/src/main/AndroidManifest.xml",
+    "app/src/main/res/values/strings.xml",
+    "app/src/main/res/values/themes.xml",
+    "app/src/main/res/xml/accessibility.xml"
+]
 
-with open(file, "rb") as f:
-    data = f.read()
+for file in files:
+    print("Checking:", file)
 
-ET.fromstring(data)
+    with open(file, "rb") as f:
+        data = f.read()
 
-print("OK:", file)
+    ET.fromstring(data)
+
+    print("OK:", file)
 PY
-          done
 
-      - name: Build APK
+
+      # ============================================================
+      # BUILD
+      # ============================================================
+
+      - name: Build Debug APK
         shell: bash
         run: |
           set -e
@@ -1788,24 +2275,40 @@ PY
             assembleDebug \
             --stacktrace
 
-      - name: Check APK
+
+      # ============================================================
+      # FIND APK
+      # ============================================================
+
+      - name: Find APK
         shell: bash
         run: |
           set -e
 
           echo "======================================"
-          echo "DUSTINBOT ANDROID V3 APK"
+          echo "DUSTINBOT V3 APK"
           echo "======================================"
 
           find \
-            app/build/outputs/apk \
+            app/build/outputs/apk/debug \
             -type f \
+            -name "*.apk" \
             -print
+
+
+      # ============================================================
+      # UPLOAD APK
+      # ============================================================
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
+
         with:
           name: DustinBot-Android-V3
-          path: app/build/outputs/apk/debug/*.apk
+
+          path:
+            app/build/outputs/apk/debug/*.apk
+
           if-no-files-found: error
+
           retention-days: 30
