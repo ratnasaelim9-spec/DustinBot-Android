@@ -21,7 +21,7 @@ jobs:
 
 
       # ==========================================================
-      # JAVA
+      # JAVA 17
       # ==========================================================
 
       - name: Setup Java 17
@@ -40,7 +40,6 @@ jobs:
         run: |
 
           set -e
-
 
           mkdir -p app/src/main/java/com/dustinbot/auto
           mkdir -p app/src/main/res/xml
@@ -61,7 +60,9 @@ jobs:
           }
 
           dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositoriesMode.set(
+                  RepositoriesMode.FAIL_ON_PROJECT_REPOS
+              )
 
               repositories {
                   google()
@@ -76,7 +77,7 @@ jobs:
 
 
           # ======================================================
-          # build.gradle
+          # ROOT build.gradle
           # ======================================================
 
           cat > build.gradle <<'EOF'
@@ -119,9 +120,9 @@ jobs:
 
                   targetSdk 35
 
-                  versionCode 72
+                  versionCode 73
 
-                  versionName '7.2'
+                  versionName '7.3'
               }
 
               compileOptions {
@@ -191,7 +192,7 @@ jobs:
 
 
           # ======================================================
-          # ACCESSIBILITY CONFIG
+          # ACCESSIBILITY SERVICE CONFIG
           # ======================================================
 
           cat > app/src/main/res/xml/accessibility_service_config.xml <<'EOF'
@@ -199,23 +200,13 @@ jobs:
 
           <accessibility-service
               xmlns:android="http://schemas.android.com/apk/res/android"
-
-              android:accessibilityEventTypes="
-                  typeWindowStateChanged|
-                  typeWindowContentChanged"
-
+              android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
               android:accessibilityFeedbackType="feedbackGeneric"
-
               android:notificationTimeout="100"
-
               android:canRetrieveWindowContent="true"
-
               android:canPerformGestures="true"
-
               android:canTakeScreenshot="true"
-
               android:description="@string/accessibility_description" />
-
           EOF
 
 
@@ -229,34 +220,13 @@ jobs:
           <manifest
               xmlns:android="http://schemas.android.com/apk/res/android">
 
-              <queries>
-
-                  <intent>
-
-                      <action
-                          android:name="android.intent.action.MAIN" />
-
-                      <category
-                          android:name="android.intent.category.LAUNCHER" />
-
-                  </intent>
-
-              </queries>
-
-
               <application
-
                   android:allowBackup="false"
-
-                  android:label="DustinBot AUTO"
-
-                  android:theme="@style/DustinBotTheme"
-
+                  android:label="@string/app_name"
+                  android:theme="@style/DustinBotTheme">
 
                   <activity
-
                       android:name=".MainActivity"
-
                       android:exported="true">
 
                       <intent-filter>
@@ -273,34 +243,20 @@ jobs:
 
 
                   <service
-
                       android:name=".BotAccessibility"
-
-                      android:permission="
-                          android.permission.BIND_ACCESSIBILITY_SERVICE
-                      "
-
+                      android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
                       android:exported="false">
 
                       <intent-filter>
 
                           <action
-                              android:name="
-                              android.accessibilityservice.AccessibilityService
-                              " />
+                              android:name="android.accessibilityservice.AccessibilityService" />
 
                       </intent-filter>
 
-
                       <meta-data
-
-                          android:name="
-                          android.accessibilityservice
-                          "
-
-                          android:resource="
-                          @xml/accessibility_service_config
-                          " />
+                          android:name="android.accessibilityservice"
+                          android:resource="@xml/accessibility_service_config" />
 
                   </service>
 
@@ -339,22 +295,21 @@ jobs:
                       context.getPackageManager();
 
 
-                  Intent query =
+                  Intent launcherIntent =
                       new Intent(
                           Intent.ACTION_MAIN);
 
-
-                  query.addCategory(
+                  launcherIntent.addCategory(
                       Intent.CATEGORY_LAUNCHER);
 
 
                   List<ResolveInfo> apps =
                       pm.queryIntentActivities(
-                          query,
-                          PackageManager.MATCH_ALL);
+                          launcherIntent,
+                          0);
 
 
-                  String ragnarokPackage = null;
+                  String fallbackPackage = null;
 
 
                   for (ResolveInfo info : apps) {
@@ -366,15 +321,16 @@ jobs:
                                   Locale.ROOT);
 
 
-                      String pkg =
+                      String packageName =
                           info.activityInfo
                               .packageName
                               .toLowerCase(
                                   Locale.ROOT);
 
 
-                      if (label.contains("dustin") ||
-                          pkg.contains("dustin")) {
+                      if (
+                          label.contains("dustin") ||
+                          packageName.contains("dustin")) {
 
                           return launch(
                               context,
@@ -383,21 +339,22 @@ jobs:
                       }
 
 
-                      if (label.contains("ragnarok") ||
+                      if (
+                          label.contains("ragnarok") ||
                           label.equals("ro")) {
 
-                          ragnarokPackage =
+                          fallbackPackage =
                               info.activityInfo
                                   .packageName;
                       }
                   }
 
 
-                  if (ragnarokPackage != null) {
+                  if (fallbackPackage != null) {
 
                       return launch(
                           context,
-                          ragnarokPackage);
+                          fallbackPackage);
                   }
 
 
@@ -423,7 +380,8 @@ jobs:
 
                   intent.addFlags(
                       Intent.FLAG_ACTIVITY_NEW_TASK |
-                      Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                      Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                  );
 
 
                   context.startActivity(intent);
@@ -633,7 +591,8 @@ jobs:
                               sx;
 
 
-                          if (!active[start] ||
+                          if (
+                              !active[start] ||
                               visited[start]) {
 
                               continue;
@@ -646,7 +605,8 @@ jobs:
 
                           queue.add(start);
 
-                          visited[start] = true;
+                          visited[start] =
+                              true;
 
 
                           int count = 0;
@@ -697,18 +657,15 @@ jobs:
                                       minX,
                                       x);
 
-
                               maxX =
                                   Math.max(
                                       maxX,
                                       x);
 
-
                               minY =
                                   Math.min(
                                       minY,
                                       y);
-
 
                               maxY =
                                   Math.max(
@@ -811,19 +768,6 @@ jobs:
                                   step);
 
 
-                          if (
-                              centerY >
-                              height * 0.58f &&
-                              Math.abs(
-                                  centerX -
-                                  width / 2)
-                              <
-                              width * 0.20f) {
-
-                              continue;
-                          }
-
-
                           result.add(
                               new Target(
                                   centerX,
@@ -868,18 +812,16 @@ jobs:
 
 
                   for (
-                      Target target :
+                      Target t :
                       targets) {
 
 
                       double dx =
-                          target.x -
-                          playerX;
+                          t.x - playerX;
 
 
                       double dy =
-                          target.y -
-                          playerY;
+                          t.y - playerY;
 
 
                       double distance =
@@ -889,7 +831,7 @@ jobs:
 
 
                       double score =
-                          target.size * 2.0 -
+                          t.size * 2.0 -
                           distance * 0.20;
 
 
@@ -900,8 +842,7 @@ jobs:
                           bestScore =
                               score;
 
-                          best =
-                              target;
+                          best = t;
                       }
                   }
 
@@ -995,27 +936,19 @@ jobs:
               }
 
 
-              /*
-               * Required by AccessibilityService.
-               */
-
-              @Override
-              public void onInterrupt() {
-              }
-
-
-              /*
-               * Required by AccessibilityService.
-               */
-
               @Override
               public void onAccessibilityEvent(
                       AccessibilityEvent event) {
 
                   /*
-                   * The bot uses screenshots
-                   * instead of accessibility nodes.
+                   * The bot operates using
+                   * screenshots and gestures.
                    */
+              }
+
+
+              @Override
+              public void onInterrupt() {
               }
 
 
@@ -1308,7 +1241,6 @@ jobs:
                           public void onFailure(
                                   int errorCode) {
 
-
                               handler.post(
                                   () ->
                                       callback.onResult(
@@ -1333,21 +1265,14 @@ jobs:
 
 
                   GestureDescription gesture =
-
                       new GestureDescription
                           .Builder()
-
                           .addStroke(
-
                               new GestureDescription
                                   .StrokeDescription(
-
-                                  path,
-
-                                  0,
-
-                                  70))
-
+                                      path,
+                                      0,
+                                      70))
                           .build();
 
 
@@ -1381,23 +1306,16 @@ jobs:
 
 
                   GestureDescription gesture =
-
                       new GestureDescription
                           .Builder()
-
                           .addStroke(
-
                               new GestureDescription
                                   .StrokeDescription(
-
-                                  path,
-
-                                  0,
-
-                                  Math.max(
-                                      120,
-                                      duration)))
-
+                                      path,
+                                      0,
+                                      Math.max(
+                                          120,
+                                          duration)))
                           .build();
 
 
@@ -1479,7 +1397,6 @@ jobs:
 
               public void start() {
 
-
                   if (running) {
 
                       return;
@@ -1488,13 +1405,13 @@ jobs:
 
                   running = true;
 
-
                   state =
                       "OPEN GAME";
 
-
                   target =
                       "-";
+
+                  searchMisses = 0;
 
 
                   service.updatePanel();
@@ -1510,13 +1427,10 @@ jobs:
                       state =
                           "GAME NOT FOUND";
 
-
                       running =
                           false;
 
-
                       service.updatePanel();
-
 
                       return;
                   }
@@ -1530,9 +1444,7 @@ jobs:
 
               public void stop() {
 
-
-                  running =
-                      false;
+                  running = false;
 
 
                   handler.removeCallbacksAndMessages(
@@ -1553,7 +1465,6 @@ jobs:
 
               private void search() {
 
-
                   if (!running) {
 
                       return;
@@ -1569,7 +1480,6 @@ jobs:
 
                   service.screenshot(
                       bitmap -> {
-
 
                           if (!running) {
 
@@ -1589,19 +1499,14 @@ jobs:
 
                           List<Vision.Target>
                               targets =
-
                               Vision.detect(
                                   bitmap);
 
 
                           Vision.Target selected =
-
                               Vision.nearest(
-
                                   targets,
-
                                   bitmap.getWidth(),
-
                                   bitmap.getHeight());
 
 
@@ -1617,7 +1522,6 @@ jobs:
 
 
                           if (selected == null) {
-
 
                               searchMisses++;
 
@@ -1652,38 +1556,24 @@ jobs:
 
 
                               if (
-                                  searchMisses %
-                                  2 == 0) {
-
+                                  searchMisses % 2 == 0) {
 
                                   service.swipe(
-
                                       joystickX,
-
                                       joystickY,
-
                                       joystickX +
-                                      movement,
-
+                                          movement,
                                       joystickY,
-
                                       450);
-
 
                               } else {
 
-
                                   service.swipe(
-
                                       joystickX,
-
                                       joystickY,
-
                                       joystickX -
-                                      movement,
-
+                                          movement,
                                       joystickY,
-
                                       450);
                               }
 
@@ -1711,21 +1601,15 @@ jobs:
 
 
                           service.tap(
-
                               selected.x,
-
                               selected.y);
 
 
                           handler.postDelayed(
-
                               () ->
                                   attack(
-
                                       selected.x,
-
                                       selected.y),
-
                               500);
                       });
               }
@@ -1734,7 +1618,6 @@ jobs:
               private void attack(
                       int x,
                       int y) {
-
 
                   if (!running) {
 
@@ -1761,12 +1644,10 @@ jobs:
 
 
                   handler.postDelayed(
-
                       () ->
                           checkTarget(
                               x,
                               y),
-
                       700);
               }
 
@@ -1775,7 +1656,6 @@ jobs:
                       int x,
                       int y) {
 
-
                   if (!running) {
 
                       return;
@@ -1783,9 +1663,7 @@ jobs:
 
 
                   service.screenshot(
-
                       bitmap -> {
-
 
                           if (!running) {
 
@@ -1797,19 +1675,15 @@ jobs:
 
                           if (bitmap == null) {
 
-
                               service.tap(
                                   x,
                                   y);
 
-
                               handler.postDelayed(
-
                                   () ->
                                       checkTarget(
                                           x,
                                           y),
-
                                   900);
 
                               return;
@@ -1818,7 +1692,6 @@ jobs:
 
                           List<Vision.Target>
                               targets =
-
                               Vision.detect(
                                   bitmap);
 
@@ -1835,10 +1708,8 @@ jobs:
 
                           if (near == null) {
 
-
                               state =
                                   "LOOT";
-
 
                               target =
                                   "-";
@@ -1848,9 +1719,7 @@ jobs:
 
 
                               handler.postDelayed(
-
                                   this::loot,
-
                                   600);
 
 
@@ -1864,12 +1733,10 @@ jobs:
 
 
                           handler.postDelayed(
-
                               () ->
                                   checkTarget(
                                       x,
                                       y),
-
                               700);
                       });
               }
@@ -1879,7 +1746,6 @@ jobs:
                       List<Vision.Target> targets,
                       int x,
                       int y) {
-
 
                   Vision.Target best =
                       null;
@@ -1892,7 +1758,6 @@ jobs:
                   for (
                       Vision.Target t :
                       targets) {
-
 
                       double dx =
                           t.x - x;
@@ -1914,8 +1779,7 @@ jobs:
                           bestDistance =
                               distance;
 
-                          best =
-                              t;
+                          best = t;
                       }
                   }
 
@@ -1934,7 +1798,6 @@ jobs:
 
 
               private void loot() {
-
 
                   if (!running) {
 
@@ -1968,18 +1831,14 @@ jobs:
 
 
                   service.tap(
-
                       centerX,
-
                       (int)(
                           height *
                           0.72f));
 
 
                   handler.postDelayed(
-
                       () -> {
-
 
                           if (!running) {
 
@@ -1988,18 +1847,14 @@ jobs:
 
 
                           service.tap(
-
                               centerX,
-
                               (int)(
                                   height *
                                   0.64f));
 
 
                           handler.postDelayed(
-
                               () -> {
-
 
                                   if (!running) {
 
@@ -2017,18 +1872,15 @@ jobs:
                                   retry(700);
 
                               },
-
                               450);
 
                       },
-
                       400);
               }
 
 
               private void retry(
                       long delay) {
-
 
                   if (!running) {
 
@@ -2037,16 +1889,13 @@ jobs:
 
 
                   handler.postDelayed(
-
                       this::search,
-
                       delay);
               }
 
 
               private void recycle(
                       Bitmap bitmap) {
-
 
                   if (
                       bitmap != null &&
@@ -2077,9 +1926,7 @@ jobs:
           import android.view.Gravity;
 
           import android.widget.Button;
-
           import android.widget.LinearLayout;
-
           import android.widget.TextView;
 
 
@@ -2152,17 +1999,25 @@ jobs:
 
                   info.setText(
 
-                      "AUTO START BOT\n\n" +
+                      "AUTO START\n\n" +
 
-                      "START = เปิดเกมและเริ่มทำงาน\n\n" +
+                      "กด START เพื่อเริ่ม\n\n" +
 
-                      "ค้นหา Monster\n" +
+                      "1. เปิดเกม\n" +
 
-                      "โจมตี\n" +
+                      "2. จับภาพหน้าจอ\n" +
 
-                      "เก็บของ\n" +
+                      "3. ค้นหาเป้าหมาย\n" +
 
-                      "ค้นหา Monster ใหม่"
+                      "4. แตะเป้าหมาย\n" +
+
+                      "5. โจมตี\n" +
+
+                      "6. ตรวจสอบเป้าหมาย\n" +
+
+                      "7. เก็บของ\n" +
+
+                      "8. ค้นหาใหม่"
                   );
 
 
@@ -2233,17 +2088,14 @@ jobs:
                       0);
 
 
-                  root.addView(
-                      status);
+                  root.addView(status);
 
 
                   accessibility.setOnClickListener(
-
                       v -> {
 
                           Intent intent =
                               new Intent(
-
                                   "android.settings.ACCESSIBILITY_SETTINGS"
                               );
 
@@ -2253,7 +2105,6 @@ jobs:
 
 
                   start.setOnClickListener(
-
                       v -> {
 
                           if (
@@ -2261,7 +2112,7 @@ jobs:
                               == null) {
 
                               status.setText(
-                                  "เปิด Accessibility ก่อน");
+                                  "กรุณาเปิด Accessibility ก่อน");
 
                               return;
                           }
@@ -2276,15 +2127,14 @@ jobs:
                       });
 
 
-                  setContentView(
-                      root);
+                  setContentView(root);
               }
           }
           EOF
 
 
           # ======================================================
-          # GRADLE WRAPPER
+          # CREATE GRADLE WRAPPER
           # ======================================================
 
           gradle wrapper \
@@ -2296,7 +2146,7 @@ jobs:
 
 
           # ======================================================
-          # BUILD
+          # BUILD APK
           # ======================================================
 
           ./gradlew assembleDebug --stacktrace
@@ -2310,7 +2160,5 @@ jobs:
         uses: actions/upload-artifact@v4
 
         with:
-
-          name: DustinBot-AUTO-START-V72
-
+          name: DustinBot-AUTO-START-V73
           path: app/build/outputs/apk/debug/app-debug.apk
