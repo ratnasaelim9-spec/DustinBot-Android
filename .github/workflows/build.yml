@@ -1,4 +1,4 @@
-name: DustinBot Android V6
+name: DustinBot Android AUTO START
 
 on:
   workflow_dispatch:
@@ -7,33 +7,35 @@ permissions:
   contents: read
 
 jobs:
+
   build:
+
     runs-on: ubuntu-latest
 
     steps:
 
-      # ============================================================
+      # ==========================================================
       # CHECKOUT
-      # ============================================================
+      # ==========================================================
 
       - name: Checkout
         uses: actions/checkout@v4
 
 
-      # ============================================================
-      # JAVA 17
-      # ============================================================
+      # ==========================================================
+      # JAVA
+      # ==========================================================
 
-      - name: Setup JDK 17
+      - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
 
-      # ============================================================
+      # ==========================================================
       # CREATE PROJECT
-      # ============================================================
+      # ==========================================================
 
       - name: Create Android Project
         shell: bash
@@ -41,14 +43,14 @@ jobs:
 
           set -e
 
-          mkdir -p app/src/main/java/com/dustinbot/v6
+          mkdir -p app/src/main/java/com/dustinbot/auto
           mkdir -p app/src/main/res/xml
           mkdir -p app/src/main/res/values
 
 
-          # ========================================================
+          # ======================================================
           # SETTINGS
-          # ========================================================
+          # ======================================================
 
           cat > settings.gradle <<'EOF'
           pluginManagement {
@@ -68,15 +70,15 @@ jobs:
               }
           }
 
-          rootProject.name = "DustinBotV6"
+          rootProject.name = "DustinBotAuto"
 
           include(":app")
           EOF
 
 
-          # ========================================================
+          # ======================================================
           # ROOT BUILD
-          # ========================================================
+          # ======================================================
 
           cat > build.gradle <<'EOF'
           plugins {
@@ -85,9 +87,9 @@ jobs:
           EOF
 
 
-          # ========================================================
+          # ======================================================
           # GRADLE PROPERTIES
-          # ========================================================
+          # ======================================================
 
           cat > gradle.properties <<'EOF'
           org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
@@ -95,9 +97,9 @@ jobs:
           EOF
 
 
-          # ========================================================
+          # ======================================================
           # APP BUILD
-          # ========================================================
+          # ======================================================
 
           cat > app/build.gradle <<'EOF'
           plugins {
@@ -106,21 +108,21 @@ jobs:
 
           android {
 
-              namespace 'com.dustinbot.v6'
+              namespace 'com.dustinbot.auto'
 
               compileSdk 35
 
               defaultConfig {
 
-                  applicationId 'com.dustinbot.v6'
+                  applicationId 'com.dustinbot.auto'
 
                   minSdk 30
 
                   targetSdk 35
 
-                  versionCode 60
+                  versionCode 70
 
-                  versionName '6.0'
+                  versionName '7.0'
               }
 
               compileOptions {
@@ -133,28 +135,28 @@ jobs:
           EOF
 
 
-          # ========================================================
-          # COLORS
-          # ========================================================
+          # ======================================================
+          # STRINGS
+          # ======================================================
 
-          cat > app/src/main/res/values/colors.xml <<'EOF'
+          cat > app/src/main/res/values/strings.xml <<'EOF'
           <resources>
 
-              <color name="black">
-                  #000000
-              </color>
+              <string name="app_name">
+                  DustinBot AUTO
+              </string>
 
-              <color name="white">
-                  #FFFFFF
-              </color>
+              <string name="accessibility_description">
+                  DustinBot automatic screen automation service.
+              </string>
 
           </resources>
           EOF
 
 
-          # ========================================================
+          # ======================================================
           # STYLE
-          # ========================================================
+          # ======================================================
 
           cat > app/src/main/res/values/styles.xml <<'EOF'
           <resources>
@@ -189,28 +191,9 @@ jobs:
           EOF
 
 
-          # ========================================================
-          # STRINGS
-          # ========================================================
-
-          cat > app/src/main/res/values/strings.xml <<'EOF'
-          <resources>
-
-              <string name="app_name">
-                  DustinBot V6
-              </string>
-
-              <string name="accessibility_description">
-                  DustinBot controls the game using visible screen interaction.
-              </string>
-
-          </resources>
-          EOF
-
-
-          # ========================================================
+          # ======================================================
           # ACCESSIBILITY CONFIG
-          # ========================================================
+          # ======================================================
 
           cat > app/src/main/res/xml/accessibility_service_config.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
@@ -238,9 +221,9 @@ jobs:
           EOF
 
 
-          # ========================================================
+          # ======================================================
           # MANIFEST
-          # ========================================================
+          # ======================================================
 
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
@@ -252,11 +235,12 @@ jobs:
 
                   android:allowBackup="false"
 
-                  android:label="DustinBot V6"
+                  android:label="DustinBot AUTO"
 
                   android:theme="@style/DustinBotTheme"
 
                   android:supportsRtl="true">
+
 
                   <activity
 
@@ -315,12 +299,12 @@ jobs:
           EOF
 
 
-          # ========================================================
+          # ======================================================
           # GAME LAUNCHER
-          # ========================================================
+          # ======================================================
 
-          cat > app/src/main/java/com/dustinbot/v6/GameLauncher.java <<'EOF'
-          package com.dustinbot.v6;
+          cat > app/src/main/java/com/dustinbot/auto/GameLauncher.java <<'EOF'
+          package com.dustinbot.auto;
 
           import android.content.Context;
           import android.content.Intent;
@@ -337,7 +321,7 @@ jobs:
               }
 
 
-              public static String findGamePackage(
+              public static String findGame(
                       Context context) {
 
                   PackageManager pm =
@@ -345,7 +329,9 @@ jobs:
 
 
                   Intent intent =
-                          new Intent(Intent.ACTION_MAIN);
+                          new Intent(
+                                  Intent.ACTION_MAIN);
+
 
                   intent.addCategory(
                           Intent.CATEGORY_LAUNCHER);
@@ -357,7 +343,7 @@ jobs:
                                   PackageManager.MATCH_ALL);
 
 
-                  String fallback = null;
+                  String possible = null;
 
 
                   for (ResolveInfo info : apps) {
@@ -376,31 +362,38 @@ jobs:
                                               Locale.ROOT);
 
 
-                      if (label.contains("dustin") ||
-                          pkg.contains("dustin")) {
+                      if (label.contains("dustin")) {
 
-                          return info.activityInfo.packageName;
+                          return info.activityInfo
+                                  .packageName;
                       }
 
 
-                      if (label.contains("ragnarok") ||
-                          label.equals("ro")) {
+                      if (label.contains("ragnarok")) {
 
-                          fallback =
-                                  info.activityInfo.packageName;
+                          possible =
+                                  info.activityInfo
+                                          .packageName;
+                      }
+
+
+                      if (pkg.contains("dustin")) {
+
+                          return info.activityInfo
+                                  .packageName;
                       }
                   }
 
 
-                  return fallback;
+                  return possible;
               }
 
 
-              public static boolean launch(
+              public static boolean open(
                       Context context) {
 
                   String pkg =
-                          findGamePackage(context);
+                          findGame(context);
 
 
                   if (pkg == null) {
@@ -412,7 +405,8 @@ jobs:
                   Intent launch =
                           context
                                   .getPackageManager()
-                                  .getLaunchIntentForPackage(pkg);
+                                  .getLaunchIntentForPackage(
+                                          pkg);
 
 
                   if (launch == null) {
@@ -427,7 +421,9 @@ jobs:
                   );
 
 
-                  context.startActivity(launch);
+                  context.startActivity(
+                          launch);
+
 
                   return true;
               }
@@ -435,210 +431,12 @@ jobs:
           EOF
 
 
-          # ========================================================
-          # MAIN ACTIVITY
-          # ========================================================
-
-          cat > app/src/main/java/com/dustinbot/v6/MainActivity.java <<'EOF'
-          package com.dustinbot.v6;
-
-          import android.app.Activity;
-          import android.content.Intent;
-          import android.graphics.Color;
-          import android.os.Bundle;
-          import android.view.Gravity;
-          import android.widget.Button;
-          import android.widget.LinearLayout;
-          import android.widget.TextView;
-
-
-          public class MainActivity extends Activity {
-
-              private TextView status;
-
-
-              @Override
-              protected void onCreate(
-                      Bundle savedInstanceState) {
-
-                  super.onCreate(savedInstanceState);
-
-
-                  LinearLayout root =
-                          new LinearLayout(this);
-
-                  root.setOrientation(
-                          LinearLayout.VERTICAL);
-
-                  root.setGravity(
-                          Gravity.CENTER_HORIZONTAL);
-
-                  root.setPadding(
-                          30,
-                          50,
-                          30,
-                          30);
-
-                  root.setBackgroundColor(
-                          Color.rgb(18,18,18));
-
-
-                  TextView title =
-                          new TextView(this);
-
-                  title.setText(
-                          "DUSTIN BOT V6");
-
-                  title.setTextColor(
-                          Color.WHITE);
-
-                  title.setTextSize(28);
-
-                  title.setGravity(
-                          Gravity.CENTER);
-
-
-                  root.addView(title);
-
-
-                  TextView info =
-                          new TextView(this);
-
-                  info.setText(
-                          "AUTO VISION\\n\\n" +
-                          "เปิดเกมอัตโนมัติ\\n" +
-                          "ค้นหาเป้าหมายจากหน้าจอ\\n" +
-                          "ควบคุมด้วย Accessibility");
-
-                  info.setTextColor(
-                          Color.LTGRAY);
-
-                  info.setTextSize(16);
-
-                  info.setPadding(
-                          0,
-                          30,
-                          0,
-                          30);
-
-
-                  root.addView(info);
-
-
-                  Button accessibility =
-                          new Button(this);
-
-                  accessibility.setText(
-                          "OPEN ACCESSIBILITY");
-
-
-                  root.addView(
-                          accessibility);
-
-
-                  Button start =
-                          new Button(this);
-
-                  start.setText(
-                          "START BOT");
-
-
-                  root.addView(start);
-
-
-                  Button game =
-                          new Button(this);
-
-                  game.setText(
-                          "OPEN GAME");
-
-
-                  root.addView(game);
-
-
-                  status =
-                          new TextView(this);
-
-                  status.setTextColor(
-                          Color.WHITE);
-
-                  status.setTextSize(15);
-
-                  status.setPadding(
-                          0,
-                          30,
-                          0,
-                          0);
-
-
-                  root.addView(status);
-
-
-                  accessibility.setOnClickListener(
-                          v -> {
-
-                              Intent i =
-                                      new Intent(
-                                              "android.settings.ACCESSIBILITY_SETTINGS");
-
-                              startActivity(i);
-                          });
-
-
-                  game.setOnClickListener(
-                          v -> {
-
-                              boolean ok =
-                                      GameLauncher.launch(
-                                              this);
-
-                              if (ok) {
-
-                                  status.setText(
-                                          "Dustin RO เปิดแล้ว");
-
-                              } else {
-
-                                  status.setText(
-                                          "ไม่พบ Dustin RO");
-                              }
-                          });
-
-
-                  start.setOnClickListener(
-                          v -> {
-
-                              if (BotAccessibility.instance
-                                      == null) {
-
-                                  status.setText(
-                                          "กรุณาเปิด Accessibility ก่อน");
-
-                                  return;
-                              }
-
-
-                              BotAccessibility.instance
-                                      .startBot();
-
-
-                              status.setText(
-                                      "BOT STARTED");
-                          });
-
-
-                  setContentView(root);
-              }
-          }
-          EOF
-
-
-          # ========================================================
-          # VISION DETECTOR
-          # ========================================================
-
-          cat > app/src/main/java/com/dustinbot/v6/VisionDetector.java <<'EOF'
-          package com.dustinbot.v6;
+          # ======================================================
+          # VISION
+          # ======================================================
+
+          cat > app/src/main/java/com/dustinbot/auto/Vision.java <<'EOF'
+          package com.dustinbot.auto;
 
           import android.graphics.Bitmap;
           import android.graphics.Color;
@@ -648,40 +446,57 @@ jobs:
           import java.util.List;
 
 
-          public final class VisionDetector {
+          public final class Vision {
 
 
-              public static final class Target {
+              public static class ObjectPoint {
 
-                  public final int x;
+                  public int x;
 
-                  public final int y;
+                  public int y;
 
-                  public final int size;
+                  public int width;
+
+                  public int height;
+
+                  public int score;
 
 
-                  public Target(
+                  public ObjectPoint(
                           int x,
                           int y,
-                          int size) {
+                          int width,
+                          int height,
+                          int score) {
 
                       this.x = x;
 
                       this.y = y;
 
-                      this.size = size;
+                      this.width = width;
+
+                      this.height = height;
+
+                      this.score = score;
                   }
               }
 
 
-              private VisionDetector() {
+              private Vision() {
               }
 
 
-              public static List<Target> find(
+              /*
+               * Detect compact coloured objects
+               * inside the actual game field.
+               *
+               * Bottom UI is excluded.
+               */
+
+              public static List<ObjectPoint> detect(
                       Bitmap bitmap) {
 
-                  ArrayList<Target> result =
+                  ArrayList<ObjectPoint> result =
                           new ArrayList<>();
 
 
@@ -691,95 +506,93 @@ jobs:
                   }
 
 
-                  int w =
+                  int width =
                           bitmap.getWidth();
 
-                  int h =
+                  int height =
                           bitmap.getHeight();
 
 
-                  if (w < 200 ||
-                      h < 300) {
+                  if (width < 300 ||
+                      height < 500) {
 
                       return result;
                   }
 
 
-                  /*
-                   * Playable area.
-                   */
-
                   int left =
-                          (int)(w * 0.06f);
+                          (int)(width * 0.04f);
 
                   int right =
-                          (int)(w * 0.94f);
+                          (int)(width * 0.96f);
 
                   int top =
-                          (int)(h * 0.12f);
+                          (int)(height * 0.10f);
 
                   int bottom =
-                          (int)(h * 0.76f);
+                          (int)(height * 0.70f);
 
 
                   int step =
                           Math.max(
                                   3,
-                                  Math.min(w,h) / 300);
+                                  Math.min(
+                                          width,
+                                          height) / 320);
 
 
-                  int gw =
+                  int gridW =
                           ((right-left)/step)+1;
 
-                  int gh =
+                  int gridH =
                           ((bottom-top)/step)+1;
 
 
                   boolean[] active =
-                          new boolean[gw * gh];
+                          new boolean[
+                                  gridW * gridH
+                          ];
 
 
                   boolean[] visited =
-                          new boolean[gw * gh];
+                          new boolean[
+                                  gridW * gridH
+                          ];
 
-
-                  /*
-                   * Find compact colored objects.
-                   */
 
                   for (int gy=0;
-                       gy<gh;
+                       gy<gridH;
                        gy++) {
 
                       for (int gx=0;
-                           gx<gw;
+                           gx<gridW;
                            gx++) {
 
                           int x =
                                   Math.min(
-                                          w-1,
-                                          left + gx*step);
+                                          width-1,
+                                          left+gx*step);
 
                           int y =
                                   Math.min(
-                                          h-1,
-                                          top + gy*step);
+                                          height-1,
+                                          top+gy*step);
 
 
-                          int c =
+                          int color =
                                   bitmap.getPixel(
                                           x,
                                           y);
 
 
                           int r =
-                                  Color.red(c);
+                                  Color.red(color);
 
                           int g =
-                                  Color.green(c);
+                                  Color.green(color);
 
                           int b =
-                                  Color.blue(c);
+                                  Color.blue(color);
 
 
                           int max =
@@ -801,30 +614,31 @@ jobs:
                                   (r+g+b)/3;
 
 
+                          /*
+                           * Ignore very dark,
+                           * grey and almost-white UI.
+                           */
+
                           active[
-                                  gy*gw+gx
+                                  gy*gridW+gx
                           ] =
-                                  saturation >= 55 &&
-                                  brightness >= 40 &&
-                                  brightness <= 235;
+                                  saturation >= 65 &&
+                                  brightness >= 35 &&
+                                  brightness <= 245;
                       }
                   }
 
 
-                  /*
-                   * Connected components.
-                   */
-
                   for (int sy=0;
-                       sy<gh;
+                       sy<gridH;
                        sy++) {
 
                       for (int sx=0;
-                           sx<gw;
+                           sx<gridW;
                            sx++) {
 
                           int start =
-                                  sy*gw+sx;
+                                  sy*gridW+sx;
 
 
                           if (!active[start] ||
@@ -845,6 +659,7 @@ jobs:
 
                           int count = 0;
 
+
                           int minX = sx;
 
                           int maxX = sx;
@@ -854,9 +669,9 @@ jobs:
                           int maxY = sy;
 
 
-                          long sumX = 0;
+                          long totalX = 0;
 
-                          long sumY = 0;
+                          long totalY = 0;
 
 
                           while (!queue.isEmpty()) {
@@ -866,18 +681,18 @@ jobs:
 
 
                               int x =
-                                      id % gw;
+                                      id % gridW;
 
                               int y =
-                                      id / gw;
+                                      id / gridW;
 
 
                               count++;
 
 
-                              sumX += x;
+                              totalX += x;
 
-                              sumY += y;
+                              totalY += y;
 
 
                               minX =
@@ -924,61 +739,62 @@ jobs:
 
 
                                       if (nx<0 ||
-                                          nx>=gw ||
+                                          nx>=gridW ||
                                           ny<0 ||
-                                          ny>=gh) {
+                                          ny>=gridH) {
 
                                           continue;
                                       }
 
 
-                                      int ni =
-                                              ny*gw+nx;
+                                      int next =
+                                              ny*gridW+nx;
 
 
-                                      if (active[ni] &&
-                                          !visited[ni]) {
+                                      if (active[next] &&
+                                          !visited[next]) {
 
-                                          visited[ni] =
+                                          visited[next] =
                                                   true;
 
                                           queue.addLast(
-                                                  ni);
+                                                  next);
                                       }
                                   }
                               }
                           }
 
 
-                          int bw =
+                          int objectWidth =
                                   (maxX-minX+1)
                                   * step;
 
-                          int bh =
+
+                          int objectHeight =
                                   (maxY-minY+1)
                                   * step;
 
 
                           /*
-                           * Noise filtering.
+                           * Filter noise.
                            */
 
-                          if (count < 7 ||
-                              count > 500) {
+                          if (count < 8 ||
+                              count > 700) {
 
                               continue;
                           }
 
 
-                          if (bw < 8 ||
-                              bh < 8) {
+                          if (objectWidth < 10 ||
+                              objectHeight < 10) {
 
                               continue;
                           }
 
 
-                          if (bw > 150 ||
-                              bh > 150) {
+                          if (objectWidth > 180 ||
+                              objectHeight > 180) {
 
                               continue;
                           }
@@ -987,24 +803,46 @@ jobs:
                           int centerX =
                                   left +
                                   Math.round(
-                                      sumX/(float)count
-                                      * step);
+                                      totalX /
+                                      (float)count *
+                                      step);
 
 
                           int centerY =
                                   top +
                                   Math.round(
-                                      sumY/(float)count
-                                      * step);
+                                      totalY /
+                                      (float)count *
+                                      step);
+
+
+                          /*
+                           * Avoid character
+                           * center-bottom region.
+                           */
+
+                          if (centerY >
+                              height * 0.58f &&
+                              Math.abs(
+                                  centerX -
+                                  width/2) <
+                              width * 0.20f) {
+
+                              continue;
+                          }
+
+
+                          int score =
+                                  count;
 
 
                           result.add(
-                                  new Target(
+                                  new ObjectPoint(
                                           centerX,
                                           centerY,
-                                          Math.max(
-                                              bw,
-                                              bh)));
+                                          objectWidth,
+                                          objectHeight,
+                                          score));
                       }
                   }
 
@@ -1013,54 +851,74 @@ jobs:
               }
 
 
-              public static Target nearest(
-                      List<Target> targets,
+              public static ObjectPoint chooseTarget(
+                      List<ObjectPoint> objects,
                       int width,
                       int height) {
 
-                  if (targets == null ||
-                      targets.isEmpty()) {
+                  if (objects == null ||
+                      objects.isEmpty()) {
 
                       return null;
                   }
 
 
-                  float centerX =
+                  ObjectPoint best =
+                          null;
+
+
+                  double bestScore =
+                          -999999;
+
+
+                  float playerX =
                           width / 2f;
 
-
-                  float centerY =
+                  float playerY =
                           height * 0.48f;
 
 
-                  Target best = null;
-
-                  double bestDistance =
-                          Double.MAX_VALUE;
-
-
-                  for (Target t :
-                          targets) {
+                  for (ObjectPoint object :
+                          objects) {
 
                       double dx =
-                              t.x-centerX;
+                              object.x-playerX;
 
                       double dy =
-                              t.y-centerY;
+                              object.y-playerY;
 
 
                       double distance =
-                              dx*dx +
-                              dy*dy;
+                              Math.sqrt(
+                                      dx*dx+
+                                      dy*dy);
 
 
-                      if (distance <
-                          bestDistance) {
+                      /*
+                       * Prefer objects that are
+                       * reasonably close and large.
+                       */
 
-                          bestDistance =
-                                  distance;
+                      double value =
+                              object.score * 2.0
+                              - distance * 0.20;
 
-                          best = t;
+
+                      if (object.y >
+                          height * 0.65f) {
+
+                          value -= 200;
+                      }
+
+
+                      if (value >
+                          bestScore) {
+
+                          bestScore =
+                                  value;
+
+                          best =
+                                  object;
                       }
                   }
 
@@ -1071,12 +929,12 @@ jobs:
           EOF
 
 
-          # ========================================================
-          # ACCESSIBILITY SERVICE
-          # ========================================================
+          # ======================================================
+          # ACCESSIBILITY
+          # ======================================================
 
-          cat > app/src/main/java/com/dustinbot/v6/BotAccessibility.java <<'EOF'
-          package com.dustinbot.v6;
+          cat > app/src/main/java/com/dustinbot/auto/BotAccessibility.java <<'EOF'
+          package com.dustinbot.auto;
 
           import android.accessibilityservice.AccessibilityService;
           import android.accessibilityservice.GestureDescription;
@@ -1127,12 +985,12 @@ jobs:
               private TextView targetText;
 
 
-              BotEngine engine;
+              private BotEngine engine;
 
 
               public interface ScreenshotCallback {
 
-                  void onBitmap(Bitmap bitmap);
+                  void result(Bitmap bitmap);
               }
 
 
@@ -1151,7 +1009,7 @@ jobs:
                                   handler);
 
 
-                  showPanel();
+                  createPanel();
               }
 
 
@@ -1195,7 +1053,7 @@ jobs:
                   }
 
 
-                  refreshPanel();
+                  updatePanel();
               }
 
 
@@ -1207,11 +1065,11 @@ jobs:
                   }
 
 
-                  refreshPanel();
+                  updatePanel();
               }
 
 
-              private void showPanel() {
+              private void createPanel() {
 
                   windowManager =
                           (WindowManager)
@@ -1268,13 +1126,12 @@ jobs:
                           targetText);
 
 
-                  LinearLayout row =
+                  LinearLayout buttons =
                           new LinearLayout(this);
 
 
                   Button start =
                           new Button(this);
-
 
                   start.setText(
                           "START");
@@ -1283,17 +1140,17 @@ jobs:
                   Button stop =
                           new Button(this);
 
-
                   stop.setText(
                           "STOP");
 
 
-                  row.addView(start);
+                  buttons.addView(start);
 
-                  row.addView(stop);
+                  buttons.addView(stop);
 
 
-                  panel.addView(row);
+                  panel.addView(
+                          buttons);
 
 
                   start.setOnClickListener(
@@ -1305,6 +1162,7 @@ jobs:
 
 
                   WindowManager.LayoutParams lp =
+
                           new WindowManager.LayoutParams(
 
                                   WindowManager.LayoutParams.WRAP_CONTENT,
@@ -1327,7 +1185,7 @@ jobs:
 
                   lp.x = 8;
 
-                  lp.y = 55;
+                  lp.y = 50;
 
 
                   windowManager.addView(
@@ -1335,11 +1193,11 @@ jobs:
                           lp);
 
 
-                  refreshPanel();
+                  updatePanel();
               }
 
 
-              public void refreshPanel() {
+              public void updatePanel() {
 
                   if (stateText == null ||
                       targetText == null ||
@@ -1350,27 +1208,31 @@ jobs:
 
 
                   stateText.setText(
-                          "DUSTIN BOT V6\\n" +
+                          "DUSTIN BOT AUTO\\n" +
                           "● " +
-                          (engine.isRunning()
-                                  ? "RUNNING"
-                                  : "STOPPED") +
+                          (
+                              engine.isRunning()
+                              ? "RUNNING"
+                              : "STOPPED"
+                          ) +
                           "\\nSTATE: " +
-                          engine.getState());
+                          engine.getState()
+                  );
 
 
                   targetText.setText(
                           "TARGET: " +
-                          engine.getTargetInfo());
+                          engine.getTarget()
+                  );
               }
 
 
-              public void takeScreen(
+              public void screenshot(
                       ScreenshotCallback callback) {
 
                   if (Build.VERSION.SDK_INT < 30) {
 
-                      callback.onBitmap(null);
+                      callback.result(null);
 
                       return;
                   }
@@ -1404,9 +1266,7 @@ jobs:
 
                                           Bitmap hardware =
                                                   Bitmap.wrapHardwareBuffer(
-
                                                           buffer,
-
                                                           result.getColorSpace()
                                                   );
 
@@ -1415,9 +1275,7 @@ jobs:
 
                                               bitmap =
                                                       hardware.copy(
-
                                                               Bitmap.Config.ARGB_8888,
-
                                                               false
                                                       );
 
@@ -1439,7 +1297,7 @@ jobs:
 
                                   handler.post(
                                           () -> callback
-                                                  .onBitmap(
+                                                  .result(
                                                           finalBitmap));
                               }
 
@@ -1450,7 +1308,7 @@ jobs:
 
                                   handler.post(
                                           () -> callback
-                                                  .onBitmap(
+                                                  .result(
                                                           null));
                               }
                           });
@@ -1470,25 +1328,17 @@ jobs:
                           y);
 
 
-                  GestureDescription.StrokeDescription stroke =
-
-                          new GestureDescription
-                                  .StrokeDescription(
-
-                                  path,
-
-                                  0,
-
-                                  70
-                          );
-
-
                   GestureDescription gesture =
 
                           new GestureDescription
                                   .Builder()
 
-                                  .addStroke(stroke)
+                                  .addStroke(
+                                          new GestureDescription
+                                                  .StrokeDescription(
+                                                  path,
+                                                  0,
+                                                  70))
 
                                   .build();
 
@@ -1521,27 +1371,19 @@ jobs:
                           y2);
 
 
-                  GestureDescription.StrokeDescription stroke =
-
-                          new GestureDescription
-                                  .StrokeDescription(
-
-                                  path,
-
-                                  0,
-
-                                  Math.max(
-                                          120,
-                                          duration)
-                          );
-
-
                   GestureDescription gesture =
 
                           new GestureDescription
                                   .Builder()
 
-                                  .addStroke(stroke)
+                                  .addStroke(
+                                          new GestureDescription
+                                                  .StrokeDescription(
+                                                  path,
+                                                  0,
+                                                  Math.max(
+                                                          120,
+                                                          duration)))
 
                                   .build();
 
@@ -1555,12 +1397,12 @@ jobs:
           EOF
 
 
-          # ========================================================
+          # ======================================================
           # BOT ENGINE
-          # ========================================================
+          # ======================================================
 
-          cat > app/src/main/java/com/dustinbot/v6/BotEngine.java <<'EOF'
-          package com.dustinbot.v6;
+          cat > app/src/main/java/com/dustinbot/auto/BotEngine.java <<'EOF'
+          package com.dustinbot.auto;
 
           import android.graphics.Bitmap;
           import android.os.Handler;
@@ -1576,7 +1418,7 @@ jobs:
               private final Handler handler;
 
 
-              volatile boolean running =
+              private volatile boolean running =
                       false;
 
 
@@ -1584,11 +1426,11 @@ jobs:
                       "IDLE";
 
 
-              private String targetInfo =
+              private String target =
                       "-";
 
 
-              private int searchMisses =
+              private int noTargetCount =
                       0;
 
 
@@ -1616,9 +1458,9 @@ jobs:
               }
 
 
-              public String getTargetInfo() {
+              public String getTarget() {
 
-                  return targetInfo;
+                  return target;
               }
 
 
@@ -1630,46 +1472,47 @@ jobs:
                   }
 
 
-                  running = true;
+                  running =
+                          true;
 
 
                   state =
-                          "OPEN GAME";
+                          "OPEN DUSTIN RO";
 
 
-                  targetInfo =
+                  target =
                           "-";
 
 
-                  service.refreshPanel();
+                  service.updatePanel();
 
 
                   boolean opened =
-                          GameLauncher.launch(
+                          GameLauncher.open(
                                   service);
 
 
                   if (!opened) {
 
                       state =
-                              "GAME NOT FOUND";
+                              "DUSTIN RO NOT FOUND";
 
                       running =
                               false;
 
-                      service.refreshPanel();
+                      service.updatePanel();
 
                       return;
                   }
 
 
                   /*
-                   * Wait for the game to appear.
+                   * Wait for the game to load.
                    */
 
                   handler.postDelayed(
                           this::search,
-                          4000);
+                          5000);
               }
 
 
@@ -1687,11 +1530,11 @@ jobs:
                           "STOPPED";
 
 
-                  targetInfo =
+                  target =
                           "-";
 
 
-                  service.refreshPanel();
+                  service.updatePanel();
               }
 
 
@@ -1707,10 +1550,10 @@ jobs:
                           "SEARCH MONSTER";
 
 
-                  service.refreshPanel();
+                  service.updatePanel();
 
 
-                  service.takeScreen(
+                  service.screenshot(
                           bitmap -> {
 
 
@@ -1730,28 +1573,25 @@ jobs:
                               }
 
 
-                              List<VisionDetector.Target>
-                                      targets =
-
-                                      VisionDetector.find(
+                              List<Vision.ObjectPoint>
+                                      objects =
+                                      Vision.detect(
                                               bitmap);
 
 
-                              VisionDetector.Target target =
+                              Vision.ObjectPoint selected =
 
-                                      VisionDetector.nearest(
+                                      Vision.chooseTarget(
 
-                                              targets,
+                                              objects,
 
                                               bitmap.getWidth(),
 
-                                              bitmap.getHeight()
-                                      );
+                                              bitmap.getHeight());
 
 
                               int width =
                                       bitmap.getWidth();
-
 
                               int height =
                                       bitmap.getHeight();
@@ -1760,41 +1600,54 @@ jobs:
                               recycle(bitmap);
 
 
-                              if (target == null) {
+                              if (selected == null) {
 
-                                  searchMisses++;
-
-
-                                  targetInfo =
-                                          "NOT FOUND";
+                                  noTargetCount++;
 
 
-                                  service.refreshPanel();
+                                  target =
+                                          "NONE";
+
+
+                                  state =
+                                          "SEARCHING";
+
+
+                                  service.updatePanel();
 
 
                                   /*
-                                   * Change visible field
-                                   * slightly.
+                                   * Move around to expose
+                                   * another part of the map.
+                                   *
+                                   * Adaptive to screen size.
                                    */
 
-                                  int cx =
-                                          width / 2;
-
-
-                                  int cy =
+                                  int joystickX =
                                           (int)
-                                          (height * 0.82f);
+                                          (width * 0.16f);
 
 
-                                  if (searchMisses % 2 == 0) {
+                                  int joystickY =
+                                          (int)
+                                          (height * 0.80f);
+
+
+                                  int distance =
+                                          (int)
+                                          (width * 0.18f);
+
+
+                                  if (noTargetCount % 2 == 0) {
 
                                       service.swipe(
 
-                                              cx,
-                                              cy,
+                                              joystickX,
+                                              joystickY,
 
-                                              cx + 220,
-                                              cy,
+                                              joystickX +
+                                              distance,
+                                              joystickY,
 
                                               450);
 
@@ -1802,11 +1655,12 @@ jobs:
 
                                       service.swipe(
 
-                                              cx,
-                                              cy,
+                                              joystickX,
+                                              joystickY,
 
-                                              cx - 220,
-                                              cy,
+                                              joystickX -
+                                              distance,
+                                              joystickY,
 
                                               450);
                                   }
@@ -1818,38 +1672,38 @@ jobs:
                               }
 
 
-                              searchMisses =
+                              noTargetCount =
                                       0;
 
 
-                              targetInfo =
-                                      target.x +
+                              target =
+                                      selected.x +
                                       "," +
-                                      target.y;
+                                      selected.y;
 
 
                               state =
                                       "TARGET";
 
 
-                              service.refreshPanel();
+                              service.updatePanel();
 
 
                               /*
-                               * Select target.
+                               * Select monster.
                                */
 
                               service.tap(
-                                      target.x,
-                                      target.y);
+                                      selected.x,
+                                      selected.y);
 
 
                               handler.postDelayed(
 
                                       () -> attack(
 
-                                              target.x,
-                                              target.y),
+                                              selected.x,
+                                              selected.y),
 
                                       500);
                           });
@@ -1870,12 +1724,16 @@ jobs:
                           "ATTACK";
 
 
-                  targetInfo =
+                  target =
                           x + "," + y;
 
 
-                  service.refreshPanel();
+                  service.updatePanel();
 
+
+                  /*
+                   * Tap target.
+                   */
 
                   service.tap(
                           x,
@@ -1883,21 +1741,21 @@ jobs:
 
 
                   /*
-                   * Repeated visible attack
-                   * until the visual target disappears.
+                   * Continue checking
+                   * visible target.
                    */
 
                   handler.postDelayed(
 
-                          () -> checkTarget(
+                          () -> attackCheck(
                                   x,
                                   y),
 
-                          700);
+                          650);
               }
 
 
-              private void checkTarget(
+              private void attackCheck(
                       int x,
                       int y) {
 
@@ -1907,7 +1765,7 @@ jobs:
                   }
 
 
-                  service.takeScreen(
+                  service.screenshot(
                           bitmap -> {
 
 
@@ -1921,6 +1779,10 @@ jobs:
 
                               if (bitmap == null) {
 
+                                  service.tap(
+                                          x,
+                                          y);
+
                                   retryAttack(
                                           x,
                                           y);
@@ -1929,10 +1791,9 @@ jobs:
                               }
 
 
-                              List<VisionDetector.Target>
-                                      targets =
-
-                                      VisionDetector.find(
+                              List<Vision.ObjectPoint>
+                                      objects =
+                                      Vision.detect(
                                               bitmap);
 
 
@@ -1940,31 +1801,45 @@ jobs:
 
 
                               /*
-                               * If nothing is detected,
-                               * go to loot.
+                               * If screen no longer
+                               * contains a suitable
+                               * object, assume the
+                               * current target changed
+                               * or disappeared.
                                */
 
-                              if (targets.isEmpty()) {
+                              Vision.ObjectPoint near =
+                                      nearest(
+                                              objects,
+                                              x,
+                                              y);
+
+
+                              if (near == null) {
 
                                   state =
                                           "LOOT";
 
 
-                                  service.refreshPanel();
+                                  target =
+                                          "-";
+
+
+                                  service.updatePanel();
 
 
                                   handler.postDelayed(
 
                                           this::loot,
 
-                                          500);
+                                          600);
 
                                   return;
                               }
 
 
                               /*
-                               * Continue attack cycle.
+                               * Attack again.
                                */
 
                               service.tap(
@@ -1974,7 +1849,7 @@ jobs:
 
                               handler.postDelayed(
 
-                                      () -> checkTarget(
+                                      () -> attackCheck(
                                               x,
                                               y),
 
@@ -1993,18 +1868,69 @@ jobs:
                   }
 
 
-                  service.tap(
-                          x,
-                          y);
-
-
                   handler.postDelayed(
 
-                          () -> checkTarget(
+                          () -> attackCheck(
                                   x,
                                   y),
 
                           900);
+              }
+
+
+              private Vision.ObjectPoint nearest(
+                      List<Vision.ObjectPoint> list,
+                      int x,
+                      int y) {
+
+                  Vision.ObjectPoint best =
+                          null;
+
+
+                  double distance =
+                          Double.MAX_VALUE;
+
+
+                  for (Vision.ObjectPoint object :
+                          list) {
+
+                      double dx =
+                              object.x-x;
+
+                      double dy =
+                              object.y-y;
+
+
+                      double d =
+                              dx*dx+
+                              dy*dy;
+
+
+                      if (d <
+                          distance) {
+
+                          distance =
+                                  d;
+
+                          best =
+                                  object;
+                      }
+                  }
+
+
+                  /*
+                   * Don't consider a completely
+                   * unrelated object a target.
+                   */
+
+                  if (best != null &&
+                      distance < 180*180) {
+
+                      return best;
+                  }
+
+
+                  return null;
               }
 
 
@@ -2020,19 +1946,21 @@ jobs:
                           "LOOT";
 
 
-                  targetInfo =
-                          "-";
-
-
-                  service.refreshPanel();
+                  service.updatePanel();
 
 
                   /*
-                   * Lower-center area.
-                   *
-                   * This is intentionally only
-                   * visible screen interaction.
+                   * Tap several adaptive pickup
+                   * positions instead of requiring
+                   * manual calibration.
                    */
+
+                  int width =
+                          service
+                                  .getResources()
+                                  .getDisplayMetrics()
+                                  .widthPixels;
+
 
                   int height =
                           service
@@ -2041,10 +1969,18 @@ jobs:
                                   .heightPixels;
 
 
+                  int centerX =
+                          width/2;
+
+
+                  int lower =
+                          (int)(
+                                  height*0.72f);
+
+
                   service.tap(
-                          540,
-                          (int)
-                          (height * 0.82f));
+                          centerX,
+                          lower);
 
 
                   handler.postDelayed(
@@ -2057,18 +1993,38 @@ jobs:
                               }
 
 
-                              state =
-                                      "SEARCH MONSTER";
+                              service.tap(
+                                      centerX,
+                                      (int)(
+                                          height*0.64f));
 
 
-                              service.refreshPanel();
+                              handler.postDelayed(
+
+                                      () -> {
+
+                                          if (!running) {
+
+                                              return;
+                                          }
 
 
-                              retry(800);
+                                          state =
+                                                  "SEARCH MONSTER";
+
+
+                                          service.updatePanel();
+
+
+                                          retry(700);
+
+                                      },
+
+                                      450);
 
                           },
 
-                          600);
+                          400);
               }
 
 
@@ -2100,9 +2056,232 @@ jobs:
           EOF
 
 
-          # ========================================================
-          # BUILD
-          # ========================================================
+          # ======================================================
+          # MAIN ACTIVITY
+          # ======================================================
+
+          cat > app/src/main/java/com/dustinbot/auto/MainActivity.java <<'EOF'
+          package com.dustinbot.auto;
+
+          import android.app.Activity;
+
+          import android.content.Intent;
+
+          import android.graphics.Color;
+
+          import android.os.Bundle;
+
+          import android.view.Gravity;
+
+          import android.widget.Button;
+
+          import android.widget.LinearLayout;
+
+          import android.widget.TextView;
+
+
+          public class MainActivity
+                  extends Activity {
+
+
+              private TextView status;
+
+
+              @Override
+              protected void onCreate(
+                      Bundle savedInstanceState) {
+
+                  super.onCreate(
+                          savedInstanceState);
+
+
+                  LinearLayout root =
+                          new LinearLayout(this);
+
+
+                  root.setOrientation(
+                          LinearLayout.VERTICAL);
+
+
+                  root.setGravity(
+                          Gravity.CENTER_HORIZONTAL);
+
+
+                  root.setPadding(
+                          30,
+                          50,
+                          30,
+                          30);
+
+
+                  root.setBackgroundColor(
+                          Color.rgb(
+                                  15,
+                                  15,
+                                  15));
+
+
+                  TextView title =
+                          new TextView(this);
+
+
+                  title.setText(
+                          "DUSTIN BOT AUTO");
+
+
+                  title.setTextColor(
+                          Color.WHITE);
+
+
+                  title.setTextSize(30);
+
+
+                  title.setGravity(
+                          Gravity.CENTER);
+
+
+                  root.addView(
+                          title);
+
+
+                  TextView description =
+                          new TextView(this);
+
+
+                  description.setText(
+
+                          "กด START = ทำงานอัตโนมัติ\\n\\n" +
+
+                          "เปิด Dustin RO\\n" +
+
+                          "ค้นหา Monster\\n" +
+
+                          "โจมตี\\n" +
+
+                          "เก็บของ\\n" +
+
+                          "ค้นหา Monster ใหม่"
+                  );
+
+
+                  description.setTextColor(
+                          Color.LTGRAY);
+
+
+                  description.setTextSize(17);
+
+
+                  description.setGravity(
+                          Gravity.CENTER);
+
+
+                  description.setPadding(
+                          0,
+                          35,
+                          0,
+                          35);
+
+
+                  root.addView(
+                          description);
+
+
+                  Button accessibility =
+                          new Button(this);
+
+
+                  accessibility.setText(
+                          "OPEN ACCESSIBILITY");
+
+
+                  root.addView(
+                          accessibility);
+
+
+                  Button start =
+                          new Button(this);
+
+
+                  start.setText(
+                          "START BOT");
+
+
+                  root.addView(
+                          start);
+
+
+                  status =
+                          new TextView(this);
+
+
+                  status.setTextColor(
+                          Color.WHITE);
+
+
+                  status.setTextSize(16);
+
+
+                  status.setGravity(
+                          Gravity.CENTER);
+
+
+                  status.setPadding(
+                          0,
+                          30,
+                          0,
+                          0);
+
+
+                  root.addView(
+                          status);
+
+
+                  accessibility.setOnClickListener(
+
+                          v -> {
+
+                              Intent intent =
+                                      new Intent(
+                                          "android.settings.ACCESSIBILITY_SETTINGS");
+
+                              startActivity(
+                                      intent);
+                          });
+
+
+                  start.setOnClickListener(
+
+                          v -> {
+
+                              if (BotAccessibility.instance
+                                      == null) {
+
+                                  status.setText(
+                                      "เปิด Accessibility ก่อน");
+
+                                  return;
+                              }
+
+
+                              BotAccessibility.instance
+                                      .startBot();
+
+
+                              status.setText(
+                                      "BOT STARTED");
+                          });
+
+
+                  setContentView(
+                          root);
+              }
+          }
+          EOF
+
+
+          # ======================================================
+          # GRADLE
+          # ======================================================
 
           gradle wrapper \
             --gradle-version 8.10.2 \
@@ -2112,17 +2291,23 @@ jobs:
           chmod +x gradlew
 
 
-          ./gradlew \
-            assembleDebug \
-            --stacktrace
+          # ======================================================
+          # BUILD
+          # ======================================================
+
+          ./gradlew assembleDebug --stacktrace
 
 
-      # ============================================================
-      # UPLOAD APK
-      # ============================================================
+      # ==========================================================
+      # APK
+      # ==========================================================
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
+
         with:
-          name: DustinBot-V6-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+
+          name: DustinBot-AUTO-START
+
+          path:
+            app/build/outputs/apk/debug/app-debug.apk
