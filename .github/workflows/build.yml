@@ -1,4 +1,4 @@
-name: DustinBot Android AUTO START
+name: DustinBot Android V8 HYBRID
 
 on:
   workflow_dispatch:
@@ -11,18 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-      # ==========================================================
-      # CHECKOUT
-      # ==========================================================
-
       - name: Checkout
         uses: actions/checkout@v4
-
-
-      # ==========================================================
-      # JAVA 17
-      # ==========================================================
 
       - name: Setup Java 17
         uses: actions/setup-java@v4
@@ -30,25 +20,14 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-
-      # ==========================================================
-      # CREATE ANDROID PROJECT
-      # ==========================================================
-
-      - name: Create Android Project
+      - name: Create Android V8 project
         shell: bash
         run: |
-
           set -e
 
-          mkdir -p app/src/main/java/com/dustinbot/auto
+          mkdir -p app/src/main/java/com/dustinbot/v8
           mkdir -p app/src/main/res/xml
           mkdir -p app/src/main/res/values
-
-
-          # ======================================================
-          # settings.gradle
-          # ======================================================
 
           cat > settings.gradle <<'EOF'
           pluginManagement {
@@ -60,25 +39,16 @@ jobs:
           }
 
           dependencyResolutionManagement {
-              repositoriesMode.set(
-                  RepositoriesMode.FAIL_ON_PROJECT_REPOS
-              )
-
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
               repositories {
                   google()
                   mavenCentral()
               }
           }
 
-          rootProject.name = "DustinBotAuto"
-
+          rootProject.name = "DustinBotV8"
           include(":app")
           EOF
-
-
-          # ======================================================
-          # ROOT build.gradle
-          # ======================================================
 
           cat > build.gradle <<'EOF'
           plugins {
@@ -86,20 +56,10 @@ jobs:
           }
           EOF
 
-
-          # ======================================================
-          # gradle.properties
-          # ======================================================
-
           cat > gradle.properties <<'EOF'
           org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
           android.useAndroidX=false
           EOF
-
-
-          # ======================================================
-          # app/build.gradle
-          # ======================================================
 
           cat > app/build.gradle <<'EOF'
           plugins {
@@ -107,97 +67,45 @@ jobs:
           }
 
           android {
-
-              namespace 'com.dustinbot.auto'
-
+              namespace 'com.dustinbot.v8'
               compileSdk 35
 
               defaultConfig {
-
-                  applicationId 'com.dustinbot.auto'
-
+                  applicationId 'com.dustinbot.v8'
                   minSdk 30
-
                   targetSdk 35
-
-                  versionCode 73
-
-                  versionName '7.3'
+                  versionCode 80
+                  versionName '8.0'
               }
 
               compileOptions {
-
                   sourceCompatibility JavaVersion.VERSION_17
-
                   targetCompatibility JavaVersion.VERSION_17
               }
           }
           EOF
 
-
-          # ======================================================
-          # strings.xml
-          # ======================================================
-
           cat > app/src/main/res/values/strings.xml <<'EOF'
           <resources>
-
-              <string name="app_name">
-                  DustinBot AUTO
-              </string>
-
-              <string name="accessibility_description">
-                  DustinBot automatic screen automation service
-              </string>
-
+              <string name="app_name">DustinBot V8</string>
+              <string name="accessibility_description">DustinBot V8 screen automation</string>
           </resources>
           EOF
-
-
-          # ======================================================
-          # styles.xml
-          # ======================================================
 
           cat > app/src/main/res/values/styles.xml <<'EOF'
           <resources>
-
-              <style
-                  name="DustinBotTheme"
-                  parent="@android:style/Theme.Material.NoActionBar">
-
-                  <item name="android:fontFamily">
-                      sans
-                  </item>
-
-                  <item name="android:windowNoTitle">
-                      true
-                  </item>
-
-                  <item name="android:colorAccent">
-                      #00C853
-                  </item>
-
-                  <item name="android:statusBarColor">
-                      #000000
-                  </item>
-
-                  <item name="android:navigationBarColor">
-                      #000000
-                  </item>
-
+              <style name="DustinBotTheme" parent="@android:style/Theme.Material.NoActionBar">
+                  <item name="android:fontFamily">sans</item>
+                  <item name="android:windowNoTitle">true</item>
+                  <item name="android:colorAccent">#00C853</item>
+                  <item name="android:statusBarColor">#000000</item>
+                  <item name="android:navigationBarColor">#000000</item>
               </style>
-
           </resources>
           EOF
 
-
-          # ======================================================
-          # ACCESSIBILITY SERVICE CONFIG
-          # ======================================================
-
           cat > app/src/main/res/xml/accessibility_service_config.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
-
           <accessibility-service
               xmlns:android="http://schemas.android.com/apk/res/android"
               android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
@@ -209,17 +117,9 @@ jobs:
               android:description="@string/accessibility_description" />
           EOF
 
-
-          # ======================================================
-          # AndroidManifest.xml
-          # ======================================================
-
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
-
-          <manifest
-              xmlns:android="http://schemas.android.com/apk/res/android">
-
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <application
                   android:allowBackup="false"
                   android:label="@string/app_name"
@@ -228,1060 +128,387 @@ jobs:
                   <activity
                       android:name=".MainActivity"
                       android:exported="true">
-
                       <intent-filter>
-
-                          <action
-                              android:name="android.intent.action.MAIN" />
-
-                          <category
-                              android:name="android.intent.category.LAUNCHER" />
-
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
                       </intent-filter>
-
                   </activity>
-
 
                   <service
                       android:name=".BotAccessibility"
                       android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
                       android:exported="false">
-
                       <intent-filter>
-
-                          <action
-                              android:name="android.accessibilityservice.AccessibilityService" />
-
+                          <action android:name="android.accessibilityservice.AccessibilityService" />
                       </intent-filter>
-
                       <meta-data
                           android:name="android.accessibilityservice"
                           android:resource="@xml/accessibility_service_config" />
-
                   </service>
-
               </application>
-
           </manifest>
           EOF
 
-
-          # ======================================================
-          # GameLauncher.java
-          # ======================================================
-
-          cat > app/src/main/java/com/dustinbot/auto/GameLauncher.java <<'EOF'
-          package com.dustinbot.auto;
+          cat > app/src/main/java/com/dustinbot/v8/GameLauncher.java <<'EOF'
+          package com.dustinbot.v8;
 
           import android.content.Context;
           import android.content.Intent;
           import android.content.pm.PackageManager;
           import android.content.pm.ResolveInfo;
-
           import java.util.List;
           import java.util.Locale;
 
-
           public final class GameLauncher {
+              private GameLauncher() {}
 
-              private GameLauncher() {
-              }
+              public static boolean open(Context context) {
+                  PackageManager pm = context.getPackageManager();
+                  Intent query = new Intent(Intent.ACTION_MAIN);
+                  query.addCategory(Intent.CATEGORY_LAUNCHER);
 
-
-              public static boolean open(
-                      Context context) {
-
-                  PackageManager pm =
-                      context.getPackageManager();
-
-
-                  Intent launcherIntent =
-                      new Intent(
-                          Intent.ACTION_MAIN);
-
-                  launcherIntent.addCategory(
-                      Intent.CATEGORY_LAUNCHER);
-
-
-                  List<ResolveInfo> apps =
-                      pm.queryIntentActivities(
-                          launcherIntent,
-                          0);
-
-
-                  String fallbackPackage = null;
-
+                  List<ResolveInfo> apps = pm.queryIntentActivities(query, 0);
+                  String fallback = null;
 
                   for (ResolveInfo info : apps) {
+                      String label = String.valueOf(info.loadLabel(pm)).toLowerCase(Locale.ROOT);
+                      String pkg = info.activityInfo.packageName.toLowerCase(Locale.ROOT);
 
-                      String label =
-                          String.valueOf(
-                              info.loadLabel(pm))
-                              .toLowerCase(
-                                  Locale.ROOT);
-
-
-                      String packageName =
-                          info.activityInfo
-                              .packageName
-                              .toLowerCase(
-                                  Locale.ROOT);
-
-
-                      if (
-                          label.contains("dustin") ||
-                          packageName.contains("dustin")) {
-
-                          return launch(
-                              context,
-                              info.activityInfo
-                                  .packageName);
+                      if (label.contains("dustin") || pkg.contains("dustin")) {
+                          return launch(context, info.activityInfo.packageName);
                       }
 
-
-                      if (
-                          label.contains("ragnarok") ||
-                          label.equals("ro")) {
-
-                          fallbackPackage =
-                              info.activityInfo
-                                  .packageName;
+                      if (label.contains("ragnarok") || label.equals("ro")) {
+                          fallback = info.activityInfo.packageName;
                       }
                   }
 
-
-                  if (fallbackPackage != null) {
-
-                      return launch(
-                          context,
-                          fallbackPackage);
-                  }
-
-
-                  return false;
+                  return fallback != null && launch(context, fallback);
               }
 
-
-              private static boolean launch(
-                      Context context,
-                      String packageName) {
-
-                  Intent intent =
-                      context.getPackageManager()
-                          .getLaunchIntentForPackage(
-                              packageName);
-
-
-                  if (intent == null) {
-
-                      return false;
-                  }
-
+              private static boolean launch(Context context, String pkg) {
+                  Intent intent = context.getPackageManager().getLaunchIntentForPackage(pkg);
+                  if (intent == null) return false;
 
                   intent.addFlags(
                       Intent.FLAG_ACTIVITY_NEW_TASK |
                       Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
                   );
 
-
                   context.startActivity(intent);
-
-
                   return true;
               }
           }
           EOF
 
-
-          # ======================================================
-          # Vision.java
-          # ======================================================
-
-          cat > app/src/main/java/com/dustinbot/auto/Vision.java <<'EOF'
-          package com.dustinbot.auto;
+          cat > app/src/main/java/com/dustinbot/v8/Vision.java <<'EOF'
+          package com.dustinbot.v8;
 
           import android.graphics.Bitmap;
           import android.graphics.Color;
-
           import java.util.ArrayDeque;
-          import java.util.ArrayList;
-          import java.util.List;
-
 
           public final class Vision {
 
-
-              public static final class Target {
-
+              public static final class Point {
                   public final int x;
-
                   public final int y;
+                  public final int area;
+                  public final int width;
+                  public final int height;
 
-                  public final int size;
-
-
-                  public Target(
-                          int x,
-                          int y,
-                          int size) {
-
+                  Point(int x, int y, int area, int width, int height) {
                       this.x = x;
-
                       this.y = y;
-
-                      this.size = size;
+                      this.area = area;
+                      this.width = width;
+                      this.height = height;
                   }
               }
 
+              private Vision() {}
 
-              private Vision() {
-              }
+              public static boolean menuOpen(Bitmap b) {
+                  if (b == null) return false;
 
+                  int w = b.getWidth();
+                  int h = b.getHeight();
 
-              public static List<Target> detect(
-                      Bitmap bitmap) {
+                  int left = (int)(w * 0.58f);
+                  int right = (int)(w * 0.74f);
+                  int top = (int)(h * 0.30f);
+                  int bottom = (int)(h * 0.84f);
 
-                  ArrayList<Target> result =
-                      new ArrayList<>();
+                  int bright = 0;
+                  int total = 0;
 
+                  for (int y = top; y < bottom; y += 4) {
+                      for (int x = left; x < right; x += 4) {
+                          int c = b.getPixel(x, y);
+                          int r = Color.red(c);
+                          int g = Color.green(c);
+                          int bl = Color.blue(c);
+                          int max = Math.max(r, Math.max(g, bl));
+                          int min = Math.min(r, Math.min(g, bl));
 
-                  if (bitmap == null) {
+                          if (max - min < 35 && (r + g + bl) / 3 > 220) {
+                              bright++;
+                          }
 
-                      return result;
-                  }
-
-
-                  int width =
-                      bitmap.getWidth();
-
-                  int height =
-                      bitmap.getHeight();
-
-
-                  int left =
-                      (int)(width * 0.04f);
-
-                  int right =
-                      (int)(width * 0.96f);
-
-                  int top =
-                      (int)(height * 0.10f);
-
-                  int bottom =
-                      (int)(height * 0.70f);
-
-
-                  int step =
-                      Math.max(
-                          3,
-                          Math.min(
-                              width,
-                              height) / 320);
-
-
-                  int gridWidth =
-                      (right - left) /
-                      step + 1;
-
-
-                  int gridHeight =
-                      (bottom - top) /
-                      step + 1;
-
-
-                  boolean[] active =
-                      new boolean[
-                          gridWidth *
-                          gridHeight];
-
-
-                  boolean[] visited =
-                      new boolean[
-                          gridWidth *
-                          gridHeight];
-
-
-                  for (
-                      int gy = 0;
-                      gy < gridHeight;
-                      gy++) {
-
-                      for (
-                          int gx = 0;
-                          gx < gridWidth;
-                          gx++) {
-
-
-                          int x =
-                              Math.min(
-                                  width - 1,
-                                  left +
-                                  gx * step);
-
-
-                          int y =
-                              Math.min(
-                                  height - 1,
-                                  top +
-                                  gy * step);
-
-
-                          int color =
-                              bitmap.getPixel(
-                                  x,
-                                  y);
-
-
-                          int r =
-                              Color.red(color);
-
-                          int g =
-                              Color.green(color);
-
-                          int b =
-                              Color.blue(color);
-
-
-                          int max =
-                              Math.max(
-                                  r,
-                                  Math.max(g, b));
-
-
-                          int min =
-                              Math.min(
-                                  r,
-                                  Math.min(g, b));
-
-
-                          int saturation =
-                              max - min;
-
-
-                          int brightness =
-                              (r + g + b) / 3;
-
-
-                          active[
-                              gy *
-                              gridWidth +
-                              gx
-                          ] =
-                              saturation >= 65 &&
-                              brightness >= 35 &&
-                              brightness <= 245;
+                          total++;
                       }
                   }
 
+                  return total > 0 && ((double) bright / total) > 0.08;
+              }
 
-                  for (
-                      int sy = 0;
-                      sy < gridHeight;
-                      sy++) {
+              public static Point findTargetArrow(Bitmap b) {
+                  if (b == null) return null;
 
-                      for (
-                          int sx = 0;
-                          sx < gridWidth;
-                          sx++) {
+                  int w = b.getWidth();
+                  int h = b.getHeight();
 
+                  int left = (int)(w * 0.05f);
+                  int right = (int)(w * 0.80f);
+                  int top = (int)(h * 0.12f);
+                  int bottom = (int)(h * 0.72f);
 
-                          int start =
-                              sy *
-                              gridWidth +
-                              sx;
+                  int step = Math.max(1, Math.min(w, h) / 700);
+                  int gw = (right - left) / step + 1;
+                  int gh = (bottom - top) / step + 1;
 
+                  boolean[] active = new boolean[gw * gh];
+                  boolean[] seen = new boolean[gw * gh];
 
-                          if (
-                              !active[start] ||
-                              visited[start]) {
+                  for (int gy = 0; gy < gh; gy++) {
+                      for (int gx = 0; gx < gw; gx++) {
+                          int x = Math.min(w - 1, left + gx * step);
+                          int y = Math.min(h - 1, top + gy * step);
 
-                              continue;
-                          }
+                          int c = b.getPixel(x, y);
+                          int r = Color.red(c);
+                          int g = Color.green(c);
+                          int bl = Color.blue(c);
 
+                          int max = Math.max(r, Math.max(g, bl));
+                          int min = Math.min(r, Math.min(g, bl));
+                          int avg = (r + g + bl) / 3;
 
-                          ArrayDeque<Integer> queue =
-                              new ArrayDeque<>();
+                          active[gy * gw + gx] =
+                              max - min < 55 && avg > 190;
+                      }
+                  }
 
+                  Point best = null;
+                  double bestScore = -1;
 
-                          queue.add(start);
+                  for (int sy = 0; sy < gh; sy++) {
+                      for (int sx = 0; sx < gw; sx++) {
+                          int start = sy * gw + sx;
+                          if (!active[start] || seen[start]) continue;
 
-                          visited[start] =
-                              true;
-
+                          ArrayDeque<Integer> q = new ArrayDeque<>();
+                          q.add(start);
+                          seen[start] = true;
 
                           int count = 0;
+                          int minX = sx, maxX = sx;
+                          int minY = sy, maxY = sy;
+                          long sumX = 0, sumY = 0;
 
-
-                          int minX = sx;
-
-                          int maxX = sx;
-
-                          int minY = sy;
-
-                          int maxY = sy;
-
-
-                          long sumX = 0;
-
-                          long sumY = 0;
-
-
-                          while (
-                              !queue.isEmpty()) {
-
-
-                              int id =
-                                  queue.removeFirst();
-
-
-                              int x =
-                                  id %
-                                  gridWidth;
-
-
-                              int y =
-                                  id /
-                                  gridWidth;
-
+                          while (!q.isEmpty()) {
+                              int id = q.removeFirst();
+                              int x = id % gw;
+                              int y = id / gw;
 
                               count++;
-
-
                               sumX += x;
-
                               sumY += y;
+                              minX = Math.min(minX, x);
+                              maxX = Math.max(maxX, x);
+                              minY = Math.min(minY, y);
+                              maxY = Math.max(maxY, y);
 
+                              for (int dy = -1; dy <= 1; dy++) {
+                                  for (int dx = -1; dx <= 1; dx++) {
+                                      if (dx == 0 && dy == 0) continue;
 
-                              minX =
-                                  Math.min(
-                                      minX,
-                                      x);
+                                      int nx = x + dx;
+                                      int ny = y + dy;
 
-                              maxX =
-                                  Math.max(
-                                      maxX,
-                                      x);
+                                      if (nx < 0 || nx >= gw || ny < 0 || ny >= gh) continue;
 
-                              minY =
-                                  Math.min(
-                                      minY,
-                                      y);
-
-                              maxY =
-                                  Math.max(
-                                      maxY,
-                                      y);
-
-
-                              for (
-                                  int dy = -1;
-                                  dy <= 1;
-                                  dy++) {
-
-                                  for (
-                                      int dx = -1;
-                                      dx <= 1;
-                                      dx++) {
-
-
-                                      if (
-                                          dx == 0 &&
-                                          dy == 0) {
-
-                                          continue;
-                                      }
-
-
-                                      int nx =
-                                          x + dx;
-
-                                      int ny =
-                                          y + dy;
-
-
-                                      if (
-                                          nx < 0 ||
-                                          nx >= gridWidth ||
-                                          ny < 0 ||
-                                          ny >= gridHeight) {
-
-                                          continue;
-                                      }
-
-
-                                      int next =
-                                          ny *
-                                          gridWidth +
-                                          nx;
-
-
-                                      if (
-                                          active[next] &&
-                                          !visited[next]) {
-
-                                          visited[next] =
-                                              true;
-
-                                          queue.addLast(
-                                              next);
+                                      int ni = ny * gw + nx;
+                                      if (active[ni] && !seen[ni]) {
+                                          seen[ni] = true;
+                                          q.add(ni);
                                       }
                                   }
                               }
                           }
 
+                          int cw = maxX - minX + 1;
+                          int ch = maxY - minY + 1;
 
-                          int objectWidth =
-                              (maxX - minX + 1) *
-                              step;
+                          if (cw < 6 || cw > 45 || ch < 4 || ch > 32) continue;
+                          if (count < 15 || count > 700) continue;
 
+                          double fill = (double) count / (cw * ch);
+                          if (fill < 0.18 || fill > 0.85) continue;
 
-                          int objectHeight =
-                              (maxY - minY + 1) *
-                              step;
+                          int cx = left + (int)Math.round((sumX / (double)count) * step);
+                          int cy = top + (int)Math.round((sumY / (double)count) * step);
 
+                          double ratio = (double)cw / ch;
+                          if (ratio < 0.45 || ratio > 2.2) continue;
 
-                          if (
-                              count < 8 ||
-                              count > 700 ||
-                              objectWidth < 10 ||
-                              objectHeight < 10 ||
-                              objectWidth > 180 ||
-                              objectHeight > 180) {
+                          double centerBias = 1.0 - Math.min(
+                              0.9,
+                              Math.abs(cx - w * 0.50) / (w * 0.65)
+                          );
 
-                              continue;
+                          double score =
+                              centerBias * 3.0 +
+                              Math.min(fill, 0.70) * 2.0 +
+                              (count >= 35 ? 1.0 : 0.0);
+
+                          if (score > bestScore) {
+                              bestScore = score;
+                              best = new Point(cx, cy, count, cw, ch);
                           }
-
-
-                          int centerX =
-                              left +
-                              Math.round(
-                                  sumX /
-                                  (float)count *
-                                  step);
-
-
-                          int centerY =
-                              top +
-                              Math.round(
-                                  sumY /
-                                  (float)count *
-                                  step);
-
-
-                          result.add(
-                              new Target(
-                                  centerX,
-                                  centerY,
-                                  Math.max(
-                                      objectWidth,
-                                      objectHeight)));
                       }
                   }
-
-
-                  return result;
-              }
-
-
-              public static Target nearest(
-                      List<Target> targets,
-                      int width,
-                      int height) {
-
-                  if (
-                      targets == null ||
-                      targets.isEmpty()) {
-
-                      return null;
-                  }
-
-
-                  float playerX =
-                      width / 2f;
-
-
-                  float playerY =
-                      height * 0.48f;
-
-
-                  Target best = null;
-
-
-                  double bestScore =
-                      -Double.MAX_VALUE;
-
-
-                  for (
-                      Target t :
-                      targets) {
-
-
-                      double dx =
-                          t.x - playerX;
-
-
-                      double dy =
-                          t.y - playerY;
-
-
-                      double distance =
-                          Math.sqrt(
-                              dx * dx +
-                              dy * dy);
-
-
-                      double score =
-                          t.size * 2.0 -
-                          distance * 0.20;
-
-
-                      if (
-                          score >
-                          bestScore) {
-
-                          bestScore =
-                              score;
-
-                          best = t;
-                      }
-                  }
-
 
                   return best;
+              }
+
+              public static boolean visualChanged(
+                      Bitmap before,
+                      Bitmap after,
+                      int cx,
+                      int cy) {
+
+                  if (before == null || after == null) return false;
+
+                  int w = Math.min(before.getWidth(), after.getWidth());
+                  int h = Math.min(before.getHeight(), after.getHeight());
+
+                  int radiusX = Math.max(45, w / 18);
+                  int radiusY = Math.max(45, h / 12);
+
+                  int left = Math.max(0, cx - radiusX);
+                  int right = Math.min(w - 1, cx + radiusX);
+                  int top = Math.max(0, cy - radiusY);
+                  int bottom = Math.min(h - 1, cy + radiusY);
+
+                  long diff = 0;
+                  long samples = 0;
+
+                  for (int y = top; y <= bottom; y += 4) {
+                      for (int x = left; x <= right; x += 4) {
+                          int a = before.getPixel(x, y);
+                          int b = after.getPixel(x, y);
+
+                          diff += Math.abs(Color.red(a) - Color.red(b));
+                          diff += Math.abs(Color.green(a) - Color.green(b));
+                          diff += Math.abs(Color.blue(a) - Color.blue(b));
+                          samples += 3;
+                      }
+                  }
+
+                  if (samples == 0) return false;
+                  return ((double) diff / samples) > 10.0;
               }
           }
           EOF
 
-
-          # ======================================================
-          # BotAccessibility.java
-          # ======================================================
-
-          cat > app/src/main/java/com/dustinbot/auto/BotAccessibility.java <<'EOF'
-          package com.dustinbot.auto;
+          cat > app/src/main/java/com/dustinbot/v8/BotAccessibility.java <<'EOF'
+          package com.dustinbot.v8;
 
           import android.accessibilityservice.AccessibilityService;
           import android.accessibilityservice.GestureDescription;
-
           import android.graphics.Bitmap;
           import android.graphics.Path;
-          import android.graphics.PixelFormat;
-
-          import android.hardware.HardwareBuffer;
-
-          import android.os.Build;
           import android.os.Handler;
           import android.os.Looper;
-
-          import android.view.Gravity;
-          import android.view.WindowManager;
-
           import android.view.accessibility.AccessibilityEvent;
 
-          import android.widget.Button;
-          import android.widget.LinearLayout;
-          import android.widget.TextView;
-
-          import java.util.concurrent.ExecutorService;
+          import java.util.concurrent.Executor;
           import java.util.concurrent.Executors;
+          import java.util.function.Consumer;
 
-
-          public class BotAccessibility
-              extends AccessibilityService {
-
+          public class BotAccessibility extends AccessibilityService {
 
               public static BotAccessibility instance;
 
-
               private final Handler handler =
-                  new Handler(
-                      Looper.getMainLooper());
-
-
-              private final ExecutorService screenshotExecutor =
-                  Executors.newSingleThreadExecutor();
-
-
-              private WindowManager windowManager;
-
-              private LinearLayout panel;
-
-              private TextView statusText;
+                  new Handler(Looper.getMainLooper());
 
               private BotEngine engine;
 
-
-              public interface ScreenshotCallback {
-
-                  void onResult(Bitmap bitmap);
-              }
-
+              private final Executor screenshotExecutor =
+                  Executors.newSingleThreadExecutor();
 
               @Override
               protected void onServiceConnected() {
-
                   super.onServiceConnected();
-
-
                   instance = this;
-
-
-                  engine =
-                      new BotEngine(
-                          this,
-                          handler);
-
-
-                  createPanel();
+                  engine = new BotEngine(this, handler);
               }
-
 
               @Override
-              public void onAccessibilityEvent(
-                      AccessibilityEvent event) {
-
-                  /*
-                   * The bot operates using
-                   * screenshots and gestures.
-                   */
+              public void onAccessibilityEvent(AccessibilityEvent event) {
               }
-
 
               @Override
               public void onInterrupt() {
               }
 
-
-              @Override
-              public void onDestroy() {
-
-                  if (engine != null) {
-
-                      engine.stop();
-                  }
-
-
-                  if (panel != null) {
-
-                      try {
-
-                          windowManager.removeView(
-                              panel);
-
-                      } catch (Exception ignored) {
-                      }
-                  }
-
-
-                  screenshotExecutor.shutdownNow();
-
-
-                  instance = null;
-
-
-                  super.onDestroy();
-              }
-
-
               public void startBot() {
-
-                  if (engine != null) {
-
-                      engine.start();
-                  }
-
-
-                  updatePanel();
+                  if (engine != null) engine.start();
               }
-
 
               public void stopBot() {
-
-                  if (engine != null) {
-
-                      engine.stop();
-                  }
-
-
-                  updatePanel();
+                  if (engine != null) engine.stop();
               }
 
-
-              private void createPanel() {
-
-                  windowManager =
-                      (WindowManager)
-                      getSystemService(
-                          WINDOW_SERVICE);
-
-
-                  panel =
-                      new LinearLayout(this);
-
-
-                  panel.setOrientation(
-                      LinearLayout.VERTICAL);
-
-
-                  panel.setPadding(
-                      14,
-                      10,
-                      14,
-                      10);
-
-
-                  panel.setBackgroundColor(
-                      0xE8202020);
-
-
-                  statusText =
-                      new TextView(this);
-
-
-                  statusText.setTextColor(
-                      0xFFFFFFFF);
-
-
-                  statusText.setTextSize(14);
-
-
-                  panel.addView(
-                      statusText);
-
-
-                  LinearLayout buttons =
-                      new LinearLayout(this);
-
-
-                  Button start =
-                      new Button(this);
-
-
-                  start.setText(
-                      "START");
-
-
-                  Button stop =
-                      new Button(this);
-
-
-                  stop.setText(
-                      "STOP");
-
-
-                  buttons.addView(start);
-
-                  buttons.addView(stop);
-
-
-                  panel.addView(
-                      buttons);
-
-
-                  start.setOnClickListener(
-                      v -> startBot());
-
-
-                  stop.setOnClickListener(
-                      v -> stopBot());
-
-
-                  WindowManager.LayoutParams lp =
-                      new WindowManager.LayoutParams(
-
-                          WindowManager.LayoutParams.WRAP_CONTENT,
-
-                          WindowManager.LayoutParams.WRAP_CONTENT,
-
-                          WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
-
-                          WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
-                          WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-
-                          PixelFormat.TRANSLUCENT
-                      );
-
-
-                  lp.gravity =
-                      Gravity.TOP |
-                      Gravity.LEFT;
-
-
-                  lp.x = 8;
-
-                  lp.y = 50;
-
-
-                  windowManager.addView(
-                      panel,
-                      lp);
-
-
-                  updatePanel();
-              }
-
-
-              public void updatePanel() {
-
-                  if (
-                      statusText == null ||
-                      engine == null) {
-
-                      return;
-                  }
-
-
-                  statusText.setText(
-
-                      "DUSTIN BOT AUTO\n" +
-
-                      (
-                          engine.isRunning()
-                          ? "● RUNNING"
-                          : "● STOPPED"
-                      ) +
-
-                      "\nSTATE: " +
-
-                      engine.getState() +
-
-                      "\nTARGET: " +
-
-                      engine.getTarget()
-                  );
-              }
-
-
-              public void screenshot(
-                      ScreenshotCallback callback) {
-
-
-                  if (
-                      Build.VERSION.SDK_INT <
-                      Build.VERSION_CODES.R) {
-
-                      callback.onResult(null);
-
-                      return;
-                  }
-
-
-                  takeScreenshot(
-
-                      android.view.Display.DEFAULT_DISPLAY,
-
-                      screenshotExecutor,
-
-                      new AccessibilityService
-                          .TakeScreenshotCallback() {
-
-
-                          @Override
-                          public void onSuccess(
-                                  ScreenshotResult result) {
-
-
-                              Bitmap bitmap =
-                                  null;
-
-
-                              try {
-
-                                  HardwareBuffer buffer =
-                                      result.getHardwareBuffer();
-
-
-                                  if (buffer != null) {
-
-                                      Bitmap source =
-                                          Bitmap.wrapHardwareBuffer(
-
-                                              buffer,
-
-                                              result.getColorSpace()
-                                          );
-
-
-                                      if (source != null) {
-
-                                          bitmap =
-                                              source.copy(
-
-                                                  Bitmap.Config.ARGB_8888,
-
-                                                  false
-                                              );
-
-
-                                          source.recycle();
-                                      }
-
-
-                                      buffer.close();
-                                  }
-
-
-                              } catch (
-                                  Exception ignored) {
+              public void screenshot(Consumer<Bitmap> consumer) {
+                  try {
+                      takeScreenshot(
+                          getDisplayId(),
+                          screenshotExecutor,
+                          new TakeScreenshotCallback() {
+                              @Override
+                              public void onSuccess(ScreenshotResult result) {
+                                  consumer.accept(result.getBitmap());
                               }
 
-
-                              Bitmap finalBitmap =
-                                  bitmap;
-
-
-                              handler.post(
-                                  () ->
-                                      callback.onResult(
-                                          finalBitmap));
+                              @Override
+                              public void onFailure(int errorCode) {
+                                  consumer.accept(null);
+                              }
                           }
-
-
-                          @Override
-                          public void onFailure(
-                                  int errorCode) {
-
-                              handler.post(
-                                  () ->
-                                      callback.onResult(
-                                          null));
-                          }
-                      });
+                      );
+                  } catch (Throwable t) {
+                      consumer.accept(null);
+                  }
               }
 
+              public void tap(int x, int y) {
+                  Path path = new Path();
+                  path.moveTo(x, y);
 
-              public void tap(
-                      int x,
-                      int y) {
-
-
-                  Path path =
-                      new Path();
-
-
-                  path.moveTo(
-                      x,
-                      y);
-
-
-                  GestureDescription gesture =
-                      new GestureDescription
-                          .Builder()
-                          .addStroke(
-                              new GestureDescription
-                                  .StrokeDescription(
-                                      path,
-                                      0,
-                                      70))
-                          .build();
-
+                  GestureDescription.StrokeDescription stroke =
+                      new GestureDescription.StrokeDescription(path, 0, 60);
 
                   dispatchGesture(
-                      gesture,
+                      new GestureDescription.Builder()
+                          .addStroke(stroke)
+                          .build(),
                       null,
-                      null);
+                      null
+                  );
               }
-
 
               public void swipe(
                       int x1,
@@ -1290,875 +517,452 @@ jobs:
                       int y2,
                       long duration) {
 
+                  Path path = new Path();
+                  path.moveTo(x1, y1);
+                  path.lineTo(x2, y2);
 
-                  Path path =
-                      new Path();
-
-
-                  path.moveTo(
-                      x1,
-                      y1);
-
-
-                  path.lineTo(
-                      x2,
-                      y2);
-
-
-                  GestureDescription gesture =
-                      new GestureDescription
-                          .Builder()
-                          .addStroke(
-                              new GestureDescription
-                                  .StrokeDescription(
-                                      path,
-                                      0,
-                                      Math.max(
-                                          120,
-                                          duration)))
-                          .build();
-
+                  GestureDescription.StrokeDescription stroke =
+                      new GestureDescription.StrokeDescription(
+                          path,
+                          0,
+                          Math.max(100, duration)
+                      );
 
                   dispatchGesture(
-                      gesture,
+                      new GestureDescription.Builder()
+                          .addStroke(stroke)
+                          .build(),
                       null,
-                      null);
+                      null
+                  );
               }
           }
           EOF
 
-
-          # ======================================================
-          # BotEngine.java
-          # ======================================================
-
-          cat > app/src/main/java/com/dustinbot/auto/BotEngine.java <<'EOF'
-          package com.dustinbot.auto;
+          cat > app/src/main/java/com/dustinbot/v8/BotEngine.java <<'EOF'
+          package com.dustinbot.v8;
 
           import android.graphics.Bitmap;
           import android.os.Handler;
 
-          import java.util.List;
-
-
           public final class BotEngine {
 
-
               private final BotAccessibility service;
-
               private final Handler handler;
 
+              private boolean running;
+              private int failedAttackChecks;
+              private int noTargetCount;
+              private int attackChecks;
 
-              private volatile boolean running =
-                  false;
+              private Bitmap beforeAttack;
 
+              private static final long GAME_START_WAIT = 5500;
+              private static final long TARGET_WAIT = 900;
+              private static final long ATTACK_INTERVAL = 1200;
+              private static final long MAX_ATTACK_TIME = 14000;
+              private static final long SKIP_COOLDOWN = 1200;
 
-              private String state =
-                  "IDLE";
-
-
-              private String target =
-                  "-";
-
-
-              private int searchMisses =
-                  0;
-
-
-              public BotEngine(
-                      BotAccessibility service,
-                      Handler handler) {
-
-                  this.service =
-                      service;
-
-                  this.handler =
-                      handler;
+              BotEngine(BotAccessibility service, Handler handler) {
+                  this.service = service;
+                  this.handler = handler;
               }
-
-
-              public boolean isRunning() {
-
-                  return running;
-              }
-
-
-              public String getState() {
-
-                  return state;
-              }
-
-
-              public String getTarget() {
-
-                  return target;
-              }
-
 
               public void start() {
-
-                  if (running) {
-
-                      return;
-                  }
-
+                  if (running) return;
 
                   running = true;
+                  failedAttackChecks = 0;
+                  noTargetCount = 0;
+                  attackChecks = 0;
 
-                  state =
-                      "OPEN GAME";
-
-                  target =
-                      "-";
-
-                  searchMisses = 0;
-
-
-                  service.updatePanel();
-
-
-                  boolean opened =
-                      GameLauncher.open(
-                          service);
-
-
-                  if (!opened) {
-
-                      state =
-                          "GAME NOT FOUND";
-
-                      running =
-                          false;
-
-                      service.updatePanel();
-
+                  if (!GameLauncher.open(service)) {
+                      running = false;
                       return;
                   }
 
-
                   handler.postDelayed(
-                      this::search,
-                      5000);
+                      this::enableAutoLock,
+                      GAME_START_WAIT
+                  );
               }
-
 
               public void stop() {
-
                   running = false;
+                  handler.removeCallbacksAndMessages(null);
 
-
-                  handler.removeCallbacksAndMessages(
-                      null);
-
-
-                  state =
-                      "STOPPED";
-
-
-                  target =
-                      "-";
-
-
-                  service.updatePanel();
+                  if (beforeAttack != null) {
+                      beforeAttack.recycle();
+                      beforeAttack = null;
+                  }
               }
 
+              private void enableAutoLock() {
+                  if (!running) return;
 
-              private void search() {
-
-                  if (!running) {
-
-                      return;
-                  }
-
-
-                  state =
-                      "SEARCH MONSTER";
-
-
-                  service.updatePanel();
-
-
-                  service.screenshot(
-                      bitmap -> {
-
-                          if (!running) {
-
-                              recycle(bitmap);
-
-                              return;
-                          }
-
-
-                          if (bitmap == null) {
-
-                              retry(1200);
-
-                              return;
-                          }
-
-
-                          List<Vision.Target>
-                              targets =
-                              Vision.detect(
-                                  bitmap);
-
-
-                          Vision.Target selected =
-                              Vision.nearest(
-                                  targets,
-                                  bitmap.getWidth(),
-                                  bitmap.getHeight());
-
-
-                          int width =
-                              bitmap.getWidth();
-
-
-                          int height =
-                              bitmap.getHeight();
-
-
+                  service.screenshot(bitmap -> {
+                      if (!running) {
                           recycle(bitmap);
-
-
-                          if (selected == null) {
-
-                              searchMisses++;
-
-
-                              state =
-                                  "SEARCHING";
-
-
-                              target =
-                                  "NONE";
-
-
-                              service.updatePanel();
-
-
-                              int joystickX =
-                                  (int)(
-                                      width *
-                                      0.16f);
-
-
-                              int joystickY =
-                                  (int)(
-                                      height *
-                                      0.80f);
-
-
-                              int movement =
-                                  (int)(
-                                      width *
-                                      0.18f);
-
-
-                              if (
-                                  searchMisses % 2 == 0) {
-
-                                  service.swipe(
-                                      joystickX,
-                                      joystickY,
-                                      joystickX +
-                                          movement,
-                                      joystickY,
-                                      450);
-
-                              } else {
-
-                                  service.swipe(
-                                      joystickX,
-                                      joystickY,
-                                      joystickX -
-                                          movement,
-                                      joystickY,
-                                      450);
-                              }
-
-
-                              retry(1000);
-
-                              return;
-                          }
-
-
-                          searchMisses = 0;
-
-
-                          target =
-                              selected.x +
-                              "," +
-                              selected.y;
-
-
-                          state =
-                              "TARGET";
-
-
-                          service.updatePanel();
-
-
-                          service.tap(
-                              selected.x,
-                              selected.y);
-
-
-                          handler.postDelayed(
-                              () ->
-                                  attack(
-                                      selected.x,
-                                      selected.y),
-                              500);
-                      });
-              }
-
-
-              private void attack(
-                      int x,
-                      int y) {
-
-                  if (!running) {
-
-                      return;
-                  }
-
-
-                  state =
-                      "ATTACK";
-
-
-                  target =
-                      x +
-                      "," +
-                      y;
-
-
-                  service.updatePanel();
-
-
-                  service.tap(
-                      x,
-                      y);
-
-
-                  handler.postDelayed(
-                      () ->
-                          checkTarget(
-                              x,
-                              y),
-                      700);
-              }
-
-
-              private void checkTarget(
-                      int x,
-                      int y) {
-
-                  if (!running) {
-
-                      return;
-                  }
-
-
-                  service.screenshot(
-                      bitmap -> {
-
-                          if (!running) {
-
-                              recycle(bitmap);
-
-                              return;
-                          }
-
-
-                          if (bitmap == null) {
-
-                              service.tap(
-                                  x,
-                                  y);
-
-                              handler.postDelayed(
-                                  () ->
-                                      checkTarget(
-                                          x,
-                                          y),
-                                  900);
-
-                              return;
-                          }
-
-
-                          List<Vision.Target>
-                              targets =
-                              Vision.detect(
-                                  bitmap);
-
-
-                          recycle(bitmap);
-
-
-                          Vision.Target near =
-                              findNear(
-                                  targets,
-                                  x,
-                                  y);
-
-
-                          if (near == null) {
-
-                              state =
-                                  "LOOT";
-
-                              target =
-                                  "-";
-
-
-                              service.updatePanel();
-
-
-                              handler.postDelayed(
-                                  this::loot,
-                                  600);
-
-
-                              return;
-                          }
-
-
-                          service.tap(
-                              x,
-                              y);
-
-
-                          handler.postDelayed(
-                              () ->
-                                  checkTarget(
-                                      x,
-                                      y),
-                              700);
-                      });
-              }
-
-
-              private Vision.Target findNear(
-                      List<Vision.Target> targets,
-                      int x,
-                      int y) {
-
-                  Vision.Target best =
-                      null;
-
-
-                  double bestDistance =
-                      Double.MAX_VALUE;
-
-
-                  for (
-                      Vision.Target t :
-                      targets) {
-
-                      double dx =
-                          t.x - x;
-
-
-                      double dy =
-                          t.y - y;
-
-
-                      double distance =
-                          dx * dx +
-                          dy * dy;
-
-
-                      if (
-                          distance <
-                          bestDistance) {
-
-                          bestDistance =
-                              distance;
-
-                          best = t;
+                          return;
                       }
-                  }
 
+                      boolean menu = Vision.menuOpen(bitmap);
+                      recycle(bitmap);
 
-                  if (
-                      best != null &&
-                      bestDistance <
-                      180 * 180) {
-
-                      return best;
-                  }
-
-
-                  return null;
+                      if (menu) {
+                          tapAutoLock();
+                      } else {
+                          openMenu();
+                      }
+                  });
               }
 
+              private void openMenu() {
+                  if (!running) return;
 
-              private void loot() {
-
-                  if (!running) {
-
-                      return;
-                  }
-
-
-                  state =
-                      "LOOT";
-
-
-                  service.updatePanel();
-
-
-                  int width =
-                      service
-                          .getResources()
-                          .getDisplayMetrics()
-                          .widthPixels;
-
-
-                  int height =
-                      service
-                          .getResources()
-                          .getDisplayMetrics()
-                          .heightPixels;
-
-
-                  int centerX =
-                      width / 2;
-
+                  int w = service.getResources().getDisplayMetrics().widthPixels;
+                  int h = service.getResources().getDisplayMetrics().heightPixels;
 
                   service.tap(
-                      centerX,
-                      (int)(
-                          height *
-                          0.72f));
-
+                      (int)(w * 0.783f),
+                      (int)(h * 0.192f)
+                  );
 
                   handler.postDelayed(
-                      () -> {
+                      this::tapAutoLock,
+                      650
+                  );
+              }
 
-                          if (!running) {
+              private void tapAutoLock() {
+                  if (!running) return;
 
-                              return;
+                  int w = service.getResources().getDisplayMetrics().widthPixels;
+                  int h = service.getResources().getDisplayMetrics().heightPixels;
+
+                  service.tap(
+                      (int)(w * 0.662f),
+                      (int)(h * 0.523f)
+                  );
+
+                  handler.postDelayed(
+                      this::searchTarget,
+                      900
+                  );
+              }
+
+              private void searchTarget() {
+                  if (!running) return;
+
+                  service.screenshot(bitmap -> {
+                      if (!running) {
+                          recycle(bitmap);
+                          return;
+                      }
+
+                      if (bitmap == null) {
+                          handler.postDelayed(this::searchTarget, 900);
+                          return;
+                      }
+
+                      Vision.Point arrow =
+                          Vision.findTargetArrow(bitmap);
+
+                      recycle(bitmap);
+
+                      if (arrow == null) {
+                          noTargetCount++;
+
+                          if (noTargetCount >= 7) {
+                              noTargetCount = 0;
+                              moveSearch();
                           }
 
-
-                          service.tap(
-                              centerX,
-                              (int)(
-                                  height *
-                                  0.64f));
-
-
                           handler.postDelayed(
-                              () -> {
+                              this::searchTarget,
+                              700
+                          );
+                          return;
+                      }
 
-                                  if (!running) {
+                      noTargetCount = 0;
 
-                                      return;
-                                  }
+                      int tx = arrow.x;
+                      int ty = arrow.y + 50;
 
-
-                                  state =
-                                      "SEARCH MONSTER";
-
-
-                                  service.updatePanel();
-
-
-                                  retry(700);
-
-                              },
-                              450);
-
-                      },
-                      400);
+                      attackStart(tx, ty);
+                  });
               }
 
+              private void attackStart(int x, int y) {
+                  if (!running) return;
 
-              private void retry(
-                      long delay) {
+                  attackChecks = 0;
+                  failedAttackChecks = 0;
 
-                  if (!running) {
+                  captureBeforeAttack(x, y);
+              }
 
-                      return;
-                  }
+              private void captureBeforeAttack(int x, int y) {
+                  if (!running) return;
 
+                  service.screenshot(bitmap -> {
+                      if (!running) {
+                          recycle(bitmap);
+                          return;
+                      }
+
+                      recycle(beforeAttack);
+                      beforeAttack = bitmap;
+
+                      pressAttack(x, y);
+                  });
+              }
+
+              private void pressAttack(int x, int y) {
+                  if (!running) return;
+
+                  int w = service.getResources().getDisplayMetrics().widthPixels;
+                  int h = service.getResources().getDisplayMetrics().heightPixels;
+
+                  service.tap(
+                      (int)(w * 0.815f),
+                      (int)(h * 0.805f)
+                  );
 
                   handler.postDelayed(
-                      this::search,
-                      delay);
+                      () -> validateCombat(x, y),
+                      TARGET_WAIT
+                  );
               }
 
+              private void validateCombat(int x, int y) {
+                  if (!running) return;
 
-              private void recycle(
-                      Bitmap bitmap) {
+                  service.screenshot(after -> {
+                      if (!running) {
+                          recycle(after);
+                          return;
+                      }
 
-                  if (
-                      bitmap != null &&
-                      !bitmap.isRecycled()) {
+                      if (after == null) {
+                          scheduleNextAttack(x, y);
+                          return;
+                      }
 
-                      bitmap.recycle();
+                      Vision.Point arrow =
+                          Vision.findTargetArrow(after);
+
+                      boolean changed =
+                          Vision.visualChanged(
+                              beforeAttack,
+                              after,
+                              x,
+                              y
+                          );
+
+                      recycle(beforeAttack);
+                      beforeAttack = after;
+
+                      if (arrow == null) {
+                          failedAttackChecks = 0;
+                          lootAndSearch();
+                          return;
+                      }
+
+                      if (changed) {
+                          failedAttackChecks = 0;
+                      } else {
+                          failedAttackChecks++;
+                      }
+
+                      attackChecks++;
+
+                      if (failedAttackChecks >= 3) {
+                          failedAttackChecks = 0;
+                          skipTarget();
+                          return;
+                      }
+
+                      if (attackChecks * ATTACK_INTERVAL >= MAX_ATTACK_TIME) {
+                          skipTarget();
+                          return;
+                      }
+
+                      scheduleNextAttack(x, y);
+                  });
+              }
+
+              private void scheduleNextAttack(int x, int y) {
+                  if (!running) return;
+
+                  handler.postDelayed(
+                      () -> captureBeforeAttack(x, y),
+                      ATTACK_INTERVAL
+                  );
+              }
+
+              private void skipTarget() {
+                  if (!running) return;
+
+                  recycle(beforeAttack);
+                  beforeAttack = null;
+
+                  handler.postDelayed(
+                      this::searchTarget,
+                      SKIP_COOLDOWN
+                  );
+              }
+
+              private void lootAndSearch() {
+                  if (!running) return;
+
+                  recycle(beforeAttack);
+                  beforeAttack = null;
+
+                  int w = service.getResources().getDisplayMetrics().widthPixels;
+                  int h = service.getResources().getDisplayMetrics().heightPixels;
+
+                  service.tap(
+                      (int)(w * 0.934f),
+                      (int)(h * 0.805f)
+                  );
+
+                  handler.postDelayed(
+                      this::searchTarget,
+                      700
+                  );
+              }
+
+              private void moveSearch() {
+                  if (!running) return;
+
+                  int w = service.getResources().getDisplayMetrics().widthPixels;
+                  int h = service.getResources().getDisplayMetrics().heightPixels;
+
+                  int x = (int)(w * 0.14f);
+                  int y = (int)(h * 0.76f);
+
+                  boolean right = (noTargetCount % 2 == 0);
+
+                  service.swipe(
+                      x,
+                      y,
+                      right ? x + (int)(w * 0.13f)
+                            : x - (int)(w * 0.13f),
+                      y,
+                      500
+                  );
+              }
+
+              private void recycle(Bitmap b) {
+                  if (b != null && !b.isRecycled()) {
+                      b.recycle();
                   }
               }
           }
           EOF
 
-
-          # ======================================================
-          # MainActivity.java
-          # ======================================================
-
-          cat > app/src/main/java/com/dustinbot/auto/MainActivity.java <<'EOF'
-          package com.dustinbot.auto;
+          cat > app/src/main/java/com/dustinbot/v8/MainActivity.java <<'EOF'
+          package com.dustinbot.v8;
 
           import android.app.Activity;
-
           import android.content.Intent;
-
           import android.graphics.Color;
-
           import android.os.Bundle;
-
           import android.view.Gravity;
-
           import android.widget.Button;
           import android.widget.LinearLayout;
           import android.widget.TextView;
 
-
-          public class MainActivity
-              extends Activity {
-
+          public class MainActivity extends Activity {
 
               private TextView status;
 
-
               @Override
-              protected void onCreate(
-                      Bundle savedInstanceState) {
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
 
-                  super.onCreate(
-                      savedInstanceState);
+                  LinearLayout root = new LinearLayout(this);
+                  root.setOrientation(LinearLayout.VERTICAL);
+                  root.setGravity(Gravity.CENTER);
+                  root.setPadding(30, 30, 30, 30);
+                  root.setBackgroundColor(Color.rgb(15, 15, 15));
 
-
-                  LinearLayout root =
-                      new LinearLayout(this);
-
-
-                  root.setOrientation(
-                      LinearLayout.VERTICAL);
-
-
-                  root.setGravity(
-                      Gravity.CENTER);
-
-
-                  root.setPadding(
-                      30,
-                      30,
-                      30,
-                      30);
-
-
-                  root.setBackgroundColor(
-                      Color.rgb(
-                          15,
-                          15,
-                          15));
-
-
-                  TextView title =
-                      new TextView(this);
-
-
-                  title.setText(
-                      "DUSTIN BOT AUTO");
-
-
-                  title.setTextColor(
-                      Color.WHITE);
-
-
+                  TextView title = new TextView(this);
+                  title.setText("DUSTIN BOT V8");
+                  title.setTextColor(Color.WHITE);
                   title.setTextSize(28);
-
-
-                  title.setGravity(
-                      Gravity.CENTER);
-
-
+                  title.setGravity(Gravity.CENTER);
                   root.addView(title);
 
-
-                  TextView info =
-                      new TextView(this);
-
-
+                  TextView info = new TextView(this);
                   info.setText(
-
-                      "AUTO START\n\n" +
-
-                      "กด START เพื่อเริ่ม\n\n" +
-
-                      "1. เปิดเกม\n" +
-
-                      "2. จับภาพหน้าจอ\n" +
-
-                      "3. ค้นหาเป้าหมาย\n" +
-
-                      "4. แตะเป้าหมาย\n" +
-
-                      "5. โจมตี\n" +
-
-                      "6. ตรวจสอบเป้าหมาย\n" +
-
-                      "7. เก็บของ\n" +
-
-                      "8. ค้นหาใหม่"
+                      "HYBRID AUTO BOT\\n\\n" +
+                      "AUTO LOCK → ATTACK → CHECK → LOOT → AUTO LOCK\\n\\n" +
+                      "ถ้าตีไม่ได้ จะข้ามเป้าหมายชั่วคราว"
                   );
-
-
-                  info.setTextColor(
-                      Color.LTGRAY);
-
-
+                  info.setTextColor(Color.LTGRAY);
                   info.setTextSize(17);
-
-
-                  info.setGravity(
-                      Gravity.CENTER);
-
-
-                  info.setPadding(
-                      0,
-                      30,
-                      0,
-                      30);
-
-
+                  info.setGravity(Gravity.CENTER);
+                  info.setPadding(0, 30, 0, 30);
                   root.addView(info);
 
+                  Button accessibility = new Button(this);
+                  accessibility.setText("OPEN ACCESSIBILITY");
+                  root.addView(accessibility);
 
-                  Button accessibility =
-                      new Button(this);
+                  Button start = new Button(this);
+                  start.setText("START BOT");
+                  root.addView(start);
 
+                  Button stop = new Button(this);
+                  stop.setText("STOP BOT");
+                  root.addView(stop);
 
-                  accessibility.setText(
-                      "OPEN ACCESSIBILITY");
-
-
-                  root.addView(
-                      accessibility);
-
-
-                  Button start =
-                      new Button(this);
-
-
-                  start.setText(
-                      "START BOT");
-
-
-                  root.addView(
-                      start);
-
-
-                  status =
-                      new TextView(this);
-
-
-                  status.setTextColor(
-                      Color.WHITE);
-
-
+                  status = new TextView(this);
+                  status.setTextColor(Color.WHITE);
                   status.setTextSize(16);
-
-
-                  status.setGravity(
-                      Gravity.CENTER);
-
-
-                  status.setPadding(
-                      0,
-                      30,
-                      0,
-                      0);
-
-
+                  status.setGravity(Gravity.CENTER);
+                  status.setPadding(0, 25, 0, 0);
                   root.addView(status);
 
+                  accessibility.setOnClickListener(v -> {
+                      startActivity(
+                          new Intent(
+                              "android.settings.ACCESSIBILITY_SETTINGS"
+                          )
+                      );
+                  });
 
-                  accessibility.setOnClickListener(
-                      v -> {
+                  start.setOnClickListener(v -> {
+                      if (BotAccessibility.instance == null) {
+                          status.setText("กรุณาเปิด Accessibility ก่อน");
+                          return;
+                      }
 
-                          Intent intent =
-                              new Intent(
-                                  "android.settings.ACCESSIBILITY_SETTINGS"
-                              );
+                      BotAccessibility.instance.startBot();
+                      status.setText("V8 STARTED");
+                  });
 
-
-                          startActivity(intent);
-                      });
-
-
-                  start.setOnClickListener(
-                      v -> {
-
-                          if (
-                              BotAccessibility.instance
-                              == null) {
-
-                              status.setText(
-                                  "กรุณาเปิด Accessibility ก่อน");
-
-                              return;
-                          }
-
-
-                          BotAccessibility.instance
-                              .startBot();
-
-
-                          status.setText(
-                              "BOT STARTED");
-                      });
-
+                  stop.setOnClickListener(v -> {
+                      if (BotAccessibility.instance != null) {
+                          BotAccessibility.instance.stopBot();
+                      }
+                      status.setText("V8 STOPPED");
+                  });
 
                   setContentView(root);
               }
           }
           EOF
 
-
-          # ======================================================
-          # CREATE GRADLE WRAPPER
-          # ======================================================
-
-          gradle wrapper \
-            --gradle-version 8.10.2 \
-            --distribution-type bin
-
-
+          gradle wrapper --gradle-version 8.10.2 --distribution-type bin
           chmod +x gradlew
-
-
-          # ======================================================
-          # BUILD APK
-          # ======================================================
-
           ./gradlew assembleDebug --stacktrace
 
-
-      # ==========================================================
-      # UPLOAD APK
-      # ==========================================================
-
-      - name: Upload APK
+      - name: Upload V8 APK
         uses: actions/upload-artifact@v4
-
         with:
-          name: DustinBot-AUTO-START-V73
+          name: DustinBot-V8-HYBRID
           path: app/build/outputs/apk/debug/app-debug.apk
