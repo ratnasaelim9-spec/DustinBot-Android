@@ -1,4 +1,4 @@
-name: Dustin Bot V11 - Smart Move
+name: Dustin Bot V11.1 - Accessibility Overlay
 
 on:
   workflow_dispatch:
@@ -40,13 +40,15 @@ jobs:
 
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
               repositories {
                   google()
                   mavenCentral()
               }
           }
 
-          rootProject.name = "DustinBotV11"
+          rootProject.name = "DustinBotV11_1"
+
           include(":app")
           EOF
 
@@ -62,39 +64,60 @@ jobs:
           }
 
           android {
+
               namespace 'com.dustinbot.v11'
+
               compileSdk 35
 
               defaultConfig {
+
                   applicationId 'com.dustinbot.v11'
+
                   minSdk 30
+
                   targetSdk 35
-                  versionCode 11
-                  versionName '11.0'
+
+                  versionCode 111
+
+                  versionName '11.1'
               }
           }
           EOF
 
           cat > app/src/main/res/values/strings.xml <<'EOF'
           <resources>
-              <string name="app_name">Dustin Bot V11</string>
-              <string name="accessibility_description">
-                  Dustin Bot V11 screen automation
+
+              <string name="app_name">
+                  Dustin Bot V11.1
               </string>
+
+              <string name="accessibility_description">
+                  Dustin Bot V11.1 screen automation
+              </string>
+
           </resources>
           EOF
 
           cat > app/src/main/res/values/styles.xml <<'EOF'
           <resources>
 
-              <style name="AppTheme"
+              <style
+                  name="AppTheme"
                   parent="@android:style/Theme.Material.NoActionBar">
 
                   <item name="android:fontFamily">sans</item>
-                  <item name="android:windowLightStatusBar">false</item>
-                  <item name="android:statusBarColor">#101010</item>
-                  <item name="android:navigationBarColor">#101010</item>
-                  <item name="android:colorAccent">#00E676</item>
+
+                  <item name="android:statusBarColor">
+                      #101010
+                  </item>
+
+                  <item name="android:navigationBarColor">
+                      #101010
+                  </item>
+
+                  <item name="android:colorAccent">
+                      #00E676
+                  </item>
 
               </style>
 
@@ -106,12 +129,19 @@ jobs:
 
           <accessibility-service
               xmlns:android="http://schemas.android.com/apk/res/android"
+
               android:accessibilityEventTypes="typeAllMask"
+
               android:accessibilityFeedbackType="feedbackGeneric"
+
               android:notificationTimeout="100"
+
               android:canRetrieveWindowContent="true"
+
               android:canPerformGestures="true"
+
               android:canTakeScreenshot="true"
+
               android:description="@string/accessibility_description" />
           EOF
 
@@ -121,37 +151,57 @@ jobs:
           <manifest
               xmlns:android="http://schemas.android.com/apk/res/android">
 
-              <uses-permission
-                  android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-
               <application
+
                   android:allowBackup="false"
+
                   android:label="@string/app_name"
-                  android:theme="@style/AppTheme">
+
+                  android:theme="@style/AppTheme"
+
+                  android:supportsRtl="true">
 
                   <activity
                       android:name=".MainActivity"
                       android:exported="true">
 
                       <intent-filter>
-                          <action android:name="android.intent.action.MAIN" />
-                          <category android:name="android.intent.category.LAUNCHER" />
+
+                          <action
+                              android:name="android.intent.action.MAIN" />
+
+                          <category
+                              android:name="android.intent.category.LAUNCHER" />
+
                       </intent-filter>
 
                   </activity>
 
+
                   <service
+
                       android:name=".BotAccessibility"
-                      android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+
+                      android:permission=
+                          "android.permission.BIND_ACCESSIBILITY_SERVICE"
+
                       android:exported="false">
 
                       <intent-filter>
-                          <action android:name="android.accessibilityservice.AccessibilityService" />
+
+                          <action
+                              android:name=
+                              "android.accessibilityservice.AccessibilityService" />
+
                       </intent-filter>
 
                       <meta-data
-                          android:name="android.accessibilityservice"
-                          android:resource="@xml/accessibility_service_config" />
+
+                          android:name=
+                              "android.accessibilityservice"
+
+                          android:resource=
+                              "@xml/accessibility_service_config" />
 
                   </service>
 
@@ -176,57 +226,129 @@ jobs:
           public class MainActivity extends Activity {
 
               @Override
-              protected void onCreate(Bundle b) {
-                  super.onCreate(b);
+              protected void onCreate(Bundle savedInstanceState) {
 
-                  LinearLayout root = new LinearLayout(this);
-                  root.setOrientation(LinearLayout.VERTICAL);
-                  root.setPadding(30, 40, 30, 30);
-                  root.setGravity(Gravity.CENTER_HORIZONTAL);
-                  root.setBackgroundColor(Color.rgb(15,15,15));
+                  super.onCreate(savedInstanceState);
 
-                  TextView title = new TextView(this);
-                  title.setText("DUSTIN BOT V11");
-                  title.setTextColor(Color.WHITE);
+                  LinearLayout root =
+                      new LinearLayout(this);
+
+                  root.setOrientation(
+                      LinearLayout.VERTICAL
+                  );
+
+                  root.setGravity(
+                      Gravity.CENTER_HORIZONTAL
+                  );
+
+                  root.setPadding(
+                      30,
+                      40,
+                      30,
+                      30
+                  );
+
+                  root.setBackgroundColor(
+                      Color.rgb(15, 15, 15)
+                  );
+
+
+                  TextView title =
+                      new TextView(this);
+
+                  title.setText(
+                      "DUSTIN BOT V11.1"
+                  );
+
+                  title.setTextColor(
+                      Color.WHITE
+                  );
+
                   title.setTextSize(26);
-                  title.setGravity(Gravity.CENTER);
+
+                  title.setGravity(
+                      Gravity.CENTER
+                  );
 
                   root.addView(title);
 
-                  TextView info = new TextView(this);
+
+                  TextView info =
+                      new TextView(this);
+
                   info.setText(
-                      "\nSMART AUTO BOT\n\n" +
+                      "\nSMART SCREEN BOT\n\n" +
+
                       "AUTO LOCK\n" +
+
                       "TARGET CONFIRM\n" +
+
                       "SMART MOVE\n" +
+
                       "STUCK RECOVERY\n" +
-                      "AUTO ATTACK\n" +
-                      "AUTO SEARCH\n"
+
+                      "AUTO ATTACK\n\n" +
+
+                      "เมื่อเปิด Accessibility แล้ว\n" +
+
+                      "แผง BOT จะขึ้นเอง"
                   );
 
-                  info.setTextColor(Color.LTGRAY);
+                  info.setTextColor(
+                      Color.LTGRAY
+                  );
+
                   info.setTextSize(16);
+
                   root.addView(info);
 
-                  Button accessibility = new Button(this);
-                  accessibility.setText("เปิด Accessibility");
-                  root.addView(accessibility);
 
-                  accessibility.setOnClickListener(v -> {
-                      startActivity(
-                          new Intent(
-                              Settings.ACTION_ACCESSIBILITY_SETTINGS
-                          )
-                      );
-                  });
+                  Button accessibility =
+                      new Button(this);
 
-                  Button panel = new Button(this);
-                  panel.setText("เปิดแผง BOT");
-                  root.addView(panel);
+                  accessibility.setText(
+                      "เปิด Accessibility"
+                  );
 
-                  panel.setOnClickListener(v -> {
-                      BotAccessibility.showPanel();
-                  });
+                  root.addView(
+                      accessibility
+                  );
+
+
+                  accessibility.setOnClickListener(
+                      v -> {
+
+                          Intent intent =
+                              new Intent(
+                                  Settings
+                                      .ACTION_ACCESSIBILITY_SETTINGS
+                              );
+
+                          startActivity(intent);
+                      }
+                  );
+
+
+                  TextView note =
+                      new TextView(this);
+
+                  note.setText(
+                      "\nไม่ต้องเปิดสิทธิ์\n" +
+                      "แสดงทับแอปอื่น"
+                  );
+
+                  note.setTextColor(
+                      Color.GREEN
+                  );
+
+                  note.setTextSize(15);
+
+                  note.setGravity(
+                      Gravity.CENTER
+                  );
+
+                  root.addView(note);
+
 
                   setContentView(root);
               }
@@ -250,22 +372,28 @@ jobs:
           import android.widget.LinearLayout;
           import android.widget.TextView;
 
-          public class BotAccessibility extends AccessibilityService {
+          public class BotAccessibility
+              extends AccessibilityService {
 
               private static BotAccessibility instance;
 
-              private WindowManager wm;
+              private WindowManager windowManager;
+
               private LinearLayout panel;
+
               private TextView status;
 
               private BotEngine engine;
 
+
               public static void showPanel() {
 
                   if (instance != null) {
+
                       instance.createPanel();
                   }
               }
+
 
               @Override
               protected void onServiceConnected() {
@@ -273,102 +401,187 @@ jobs:
                   super.onServiceConnected();
 
                   instance = this;
-                  engine = new BotEngine(this);
+
+                  engine =
+                      new BotEngine(this);
+
+                  /*
+                   * สำคัญ:
+                   *
+                   * เมื่อ Accessibility ON
+                   * ให้เปิดแผง BOT เอง
+                   */
+
+                  new Handler(
+                      Looper.getMainLooper()
+                  ).postDelayed(
+                      this::createPanel,
+                      500
+                  );
               }
+
 
               @Override
               public void onAccessibilityEvent(
                       android.view.accessibility.AccessibilityEvent event) {
               }
 
+
               @Override
               public void onInterrupt() {
 
                   if (engine != null) {
+
                       engine.stop();
                   }
               }
+
 
               @Override
               public void onDestroy() {
 
                   if (engine != null) {
+
                       engine.stop();
                   }
 
-                  if (panel != null && wm != null) {
-
-                      try {
-                          wm.removeView(panel);
-                      } catch (Exception ignored) {
-                      }
-                  }
+                  removePanel();
 
                   instance = null;
 
                   super.onDestroy();
               }
 
+
               private void createPanel() {
 
                   if (panel != null) {
+
                       return;
                   }
 
-                  wm = (WindowManager)
-                      getSystemService(WINDOW_SERVICE);
 
-                  panel = new LinearLayout(this);
-                  panel.setOrientation(LinearLayout.VERTICAL);
-                  panel.setPadding(14, 10, 14, 10);
-                  panel.setBackgroundColor(0xDD111111);
+                  windowManager =
+                      (WindowManager)
+                      getSystemService(
+                          WINDOW_SERVICE
+                      );
 
-                  status = new TextView(this);
-                  status.setText("DUSTIN BOT V11\nSTOP");
-                  status.setTextColor(0xFFFFFFFF);
+
+                  panel =
+                      new LinearLayout(this);
+
+                  panel.setOrientation(
+                      LinearLayout.VERTICAL
+                  );
+
+                  panel.setPadding(
+                      14,
+                      10,
+                      14,
+                      10
+                  );
+
+                  panel.setBackgroundColor(
+                      0xEE111111
+                  );
+
+
+                  status =
+                      new TextView(this);
+
+                  status.setText(
+                      "DUSTIN BOT V11.1\nREADY"
+                  );
+
+                  status.setTextColor(
+                      0xFFFFFFFF
+                  );
+
                   status.setTextSize(12);
 
-                  panel.addView(status);
+                  status.setPadding(
+                      5,
+                      3,
+                      5,
+                      3
+                  );
+
+                  panel.addView(
+                      status
+                  );
+
 
                   LinearLayout row =
                       new LinearLayout(this);
 
-                  Button start = new Button(this);
-                  start.setText("START");
+                  row.setOrientation(
+                      LinearLayout.HORIZONTAL
+                  );
 
-                  Button stop = new Button(this);
-                  stop.setText("STOP");
 
-                  Button hide = new Button(this);
-                  hide.setText("HIDE");
+                  Button start =
+                      new Button(this);
+
+                  start.setText(
+                      "START"
+                  );
+
+
+                  Button stop =
+                      new Button(this);
+
+                  stop.setText(
+                      "STOP"
+                  );
+
+
+                  Button close =
+                      new Button(this);
+
+                  close.setText(
+                      "×"
+                  );
+
 
                   row.addView(start);
+
                   row.addView(stop);
-                  row.addView(hide);
+
+                  row.addView(close);
 
                   panel.addView(row);
 
-                  start.setOnClickListener(v -> {
-                      if (engine != null) {
-                          engine.start();
+
+                  start.setOnClickListener(
+                      v -> {
+
+                          if (engine != null) {
+
+                              engine.start();
+                          }
                       }
-                  });
+                  );
 
-                  stop.setOnClickListener(v -> {
-                      if (engine != null) {
-                          engine.stop();
+
+                  stop.setOnClickListener(
+                      v -> {
+
+                          if (engine != null) {
+
+                              engine.stop();
+                          }
                       }
-                  });
+                  );
 
-                  hide.setOnClickListener(v -> {
 
-                      try {
-                          wm.removeView(panel);
-                      } catch (Exception ignored) {
+                  close.setOnClickListener(
+                      v -> {
+
+                          removePanel();
                       }
+                  );
 
-                      panel = null;
-                  });
 
                   WindowManager.LayoutParams lp =
                       new WindowManager.LayoutParams();
@@ -380,53 +593,126 @@ jobs:
                       WindowManager.LayoutParams.WRAP_CONTENT;
 
                   lp.gravity =
-                      Gravity.TOP | Gravity.RIGHT;
+                      Gravity.TOP |
+                      Gravity.RIGHT;
 
                   lp.x = 10;
+
                   lp.y = 70;
 
+
+                  /*
+                   * สำคัญที่สุดของ V11.1
+                   *
+                   * ใช้ Accessibility Overlay
+                   * ไม่ใช้ Application Overlay
+                   */
+
                   lp.type =
-                      WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                      WindowManager.LayoutParams
+                          .TYPE_ACCESSIBILITY_OVERLAY;
+
 
                   lp.flags =
-                      WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+                      WindowManager.LayoutParams
+                          .FLAG_NOT_FOCUSABLE;
+
 
                   lp.format =
                       PixelFormat.TRANSLUCENT;
 
-                  wm.addView(panel, lp);
+
+                  try {
+
+                      windowManager.addView(
+                          panel,
+                          lp
+                      );
+
+                  } catch (Exception e) {
+
+                      panel = null;
+
+                      /*
+                       * ถ้าเพิ่มไม่ได้ให้ลองใหม่
+                       */
+
+                      new Handler(
+                          Looper.getMainLooper()
+                      ).postDelayed(
+                          this::createPanel,
+                          1000
+                      );
+                  }
               }
 
-              public void state(String s) {
+
+              private void removePanel() {
+
+                  if (
+                      panel != null &&
+                      windowManager != null
+                  ) {
+
+                      try {
+
+                          windowManager.removeView(
+                              panel
+                          );
+
+                      } catch (Exception ignored) {
+                      }
+                  }
+
+                  panel = null;
+              }
+
+
+              public void state(
+                      String text) {
 
                   new Handler(
                       Looper.getMainLooper()
-                  ).post(() -> {
+                  ).post(
+                      () -> {
 
-                      if (status != null) {
-                          status.setText(
-                              "DUSTIN BOT V11\n" + s
-                          );
+                          if (status != null) {
+
+                              status.setText(
+                                  "DUSTIN BOT V11.1\n"
+                                  + text
+                              );
+                          }
                       }
-
-                  });
+                  );
               }
 
-              public void tap(float x, float y) {
 
-                  Path path = new Path();
-                  path.moveTo(x, y);
+              public void tap(
+                      float x,
+                      float y) {
+
+                  Path path =
+                      new Path();
+
+                  path.moveTo(
+                      x,
+                      y
+                  );
+
 
                   GestureDescription gesture =
                       new GestureDescription.Builder()
                           .addStroke(
-                              new GestureDescription.StrokeDescription(
-                                  path,
-                                  0,
-                                  70
-                              )
+                              new GestureDescription
+                                  .StrokeDescription(
+                                      path,
+                                      0,
+                                      70
+                                  )
                           )
                           .build();
+
 
                   dispatchGesture(
                       gesture,
@@ -434,6 +720,7 @@ jobs:
                       null
                   );
               }
+
 
               public void swipe(
                       float x1,
@@ -442,21 +729,32 @@ jobs:
                       float y2,
                       long duration) {
 
-                  Path path = new Path();
+                  Path path =
+                      new Path();
 
-                  path.moveTo(x1, y1);
-                  path.lineTo(x2, y2);
+                  path.moveTo(
+                      x1,
+                      y1
+                  );
+
+                  path.lineTo(
+                      x2,
+                      y2
+                  );
+
 
                   GestureDescription gesture =
                       new GestureDescription.Builder()
                           .addStroke(
-                              new GestureDescription.StrokeDescription(
-                                  path,
-                                  0,
-                                  duration
-                              )
+                              new GestureDescription
+                                  .StrokeDescription(
+                                      path,
+                                      0,
+                                      duration
+                                  )
                           )
                           .build();
+
 
                   dispatchGesture(
                       gesture,
@@ -465,12 +763,16 @@ jobs:
                   );
               }
 
+
               public void screenshot(
                       BotEngine.ScreenCallback callback) {
 
                   takeScreenshot(
+
                       android.view.Display.DEFAULT_DISPLAY,
+
                       getMainExecutor(),
+
                       new TakeScreenshotCallback() {
 
                           @Override
@@ -481,39 +783,54 @@ jobs:
                                   result.getHardwareBuffer();
 
                               if (buffer == null) {
-                                  callback.onBitmap(null);
+
+                                  callback.onBitmap(
+                                      null
+                                  );
+
                                   return;
                               }
 
-                              Bitmap b =
+
+                              Bitmap bitmap =
                                   Bitmap.wrapHardwareBuffer(
                                       buffer,
                                       result.getColorSpace()
                                   );
 
+
                               Bitmap copy = null;
 
-                              if (b != null) {
+
+                              if (bitmap != null) {
 
                                   copy =
-                                      b.copy(
-                                          Bitmap.Config.ARGB_8888,
+                                      bitmap.copy(
+                                          Bitmap.Config
+                                              .ARGB_8888,
                                           false
                                       );
 
-                                  b.recycle();
+                                  bitmap.recycle();
                               }
+
 
                               buffer.close();
 
-                              callback.onBitmap(copy);
+
+                              callback.onBitmap(
+                                  copy
+                              );
                           }
+
 
                           @Override
                           public void onFailure(
                                   int errorCode) {
 
-                              callback.onBitmap(null);
+                              callback.onBitmap(
+                                  null
+                              );
                           }
                       }
                   );
@@ -532,8 +849,11 @@ jobs:
               public static class Target {
 
                   public float x;
+
                   public float y;
+
                   public float confidence;
+
 
                   public Target(
                           float x,
@@ -541,38 +861,48 @@ jobs:
                           float confidence) {
 
                       this.x = x;
+
                       this.y = y;
-                      this.confidence = confidence;
+
+                      this.confidence =
+                          confidence;
                   }
               }
 
-              /*
-               * IMPORTANT:
-               *
-               * V10 accepted almost any bright area.
-               *
-               * V11 requires a small compact marker AND
-               * local contrast AND a stable position.
-               */
 
-              public static Target findMarker(Bitmap b) {
+              public static Target findMarker(
+                      Bitmap b) {
 
                   if (b == null) {
+
                       return null;
                   }
 
-                  int w = b.getWidth();
-                  int h = b.getHeight();
 
-                  int left = (int)(w * 0.25f);
-                  int right = (int)(w * 0.82f);
+                  int w =
+                      b.getWidth();
 
-                  int top = (int)(h * 0.12f);
-                  int bottom = (int)(h * 0.67f);
+                  int h =
+                      b.getHeight();
+
+
+                  int left =
+                      (int)(w * 0.25f);
+
+                  int right =
+                      (int)(w * 0.82f);
+
+                  int top =
+                      (int)(h * 0.12f);
+
+                  int bottom =
+                      (int)(h * 0.67f);
+
 
                   Target best = null;
 
                   double bestScore = 0;
+
 
                   for (
                       int y = top;
@@ -587,8 +917,11 @@ jobs:
                       ) {
 
                           int bright = 0;
+
                           int dark = 0;
+
                           int total = 0;
+
 
                           for (
                               int yy = -8;
@@ -602,8 +935,12 @@ jobs:
                                   xx += 2
                               ) {
 
-                                  int px = x + xx;
-                                  int py = y + yy;
+                                  int px =
+                                      x + xx;
+
+                                  int py =
+                                      y + yy;
+
 
                                   if (
                                       px < 0 ||
@@ -611,11 +948,17 @@ jobs:
                                       px >= w ||
                                       py >= h
                                   ) {
+
                                       continue;
                                   }
 
+
                                   int c =
-                                      b.getPixel(px, py);
+                                      b.getPixel(
+                                          px,
+                                          py
+                                      );
+
 
                                   int r =
                                       Color.red(c);
@@ -626,68 +969,83 @@ jobs:
                                   int bl =
                                       Color.blue(c);
 
+
                                   int max =
                                       Math.max(
                                           r,
-                                          Math.max(g, bl)
+                                          Math.max(
+                                              g,
+                                              bl
+                                          )
                                       );
+
 
                                   int min =
                                       Math.min(
                                           r,
-                                          Math.min(g, bl)
+                                          Math.min(
+                                              g,
+                                              bl
+                                          )
                                       );
+
 
                                   if (
                                       min > 185 &&
                                       max - min < 45
                                   ) {
+
                                       bright++;
                                   }
 
-                                  if (max < 90) {
+
+                                  if (
+                                      max < 90
+                                  ) {
+
                                       dark++;
                                   }
+
 
                                   total++;
                               }
                           }
 
+
                           if (total == 0) {
+
                               continue;
                           }
 
+
                           float br =
-                              (float)bright / total;
+                              (float)bright /
+                              total;
 
                           float dr =
-                              (float)dark / total;
+                              (float)dark /
+                              total;
 
-                          /*
-                           * Reject huge bright terrain.
-                           */
 
                           if (
                               br < 0.18f ||
                               br > 0.68f
                           ) {
+
                               continue;
                           }
 
-                          /*
-                           * A marker should have some
-                           * contrast around it.
-                           */
 
-                          if (dr < 0.04f) {
+                          if (
+                              dr < 0.04f
+                          ) {
+
                               continue;
                           }
 
-                          /*
-                           * Look below marker.
-                           */
 
-                          int lowerColorChanges = 0;
+                          int changes = 0;
+
 
                           for (
                               int yy = 10;
@@ -695,7 +1053,9 @@ jobs:
                               yy += 4
                           ) {
 
-                              int previous = -1;
+                              int previous =
+                                  -1;
+
 
                               for (
                                   int xx = -12;
@@ -703,8 +1063,12 @@ jobs:
                                   xx += 4
                               ) {
 
-                                  int px = x + xx;
-                                  int py = y + yy;
+                                  int px =
+                                      x + xx;
+
+                                  int py =
+                                      y + yy;
+
 
                                   if (
                                       px < 0 ||
@@ -712,11 +1076,17 @@ jobs:
                                       px >= w ||
                                       py >= h
                                   ) {
+
                                       continue;
                                   }
 
+
                                   int c =
-                                      b.getPixel(px, py);
+                                      b.getPixel(
+                                          px,
+                                          py
+                                      );
+
 
                                   int v =
                                       (
@@ -727,35 +1097,46 @@ jobs:
                                           Color.blue(c)
                                       ) / 3;
 
+
                                   if (
                                       previous >= 0 &&
-                                      Math.abs(v - previous) > 35
+                                      Math.abs(
+                                          v - previous
+                                      ) > 35
                                   ) {
-                                      lowerColorChanges++;
+
+                                      changes++;
                                   }
+
 
                                   previous = v;
                               }
                           }
 
-                          if (lowerColorChanges < 2) {
+
+                          if (
+                              changes < 2
+                          ) {
+
                               continue;
                           }
+
 
                           double score =
                               br * 50
                               +
                               dr * 80
                               +
-                              lowerColorChanges * 2;
+                              changes * 2;
 
-                          if (score > bestScore) {
 
-                              bestScore = score;
+                          if (
+                              score > bestScore
+                          ) {
 
-                              /*
-                               * Monster is below marker.
-                               */
+                              bestScore =
+                                  score;
+
 
                               best =
                                   new Target(
@@ -770,23 +1151,32 @@ jobs:
                       }
                   }
 
+
                   if (
                       best == null ||
                       best.confidence < 20
                   ) {
+
                       return null;
                   }
 
+
                   return best;
               }
+
 
               public static double difference(
                       Bitmap a,
                       Bitmap b) {
 
-                  if (a == null || b == null) {
+                  if (
+                      a == null ||
+                      b == null
+                  ) {
+
                       return 0;
                   }
+
 
                   int w =
                       Math.min(
@@ -800,26 +1190,44 @@ jobs:
                           b.getHeight()
                       );
 
+
                   long total = 0;
+
                   long count = 0;
 
+
                   for (
-                      int y = (int)(h * 0.18f);
-                      y < (int)(h * 0.75f);
+                      int y =
+                          (int)(h * 0.18f);
+
+                      y <
+                          (int)(h * 0.75f);
+
                       y += 16
                   ) {
 
                       for (
-                          int x = (int)(w * 0.10f);
-                          x < (int)(w * 0.90f);
+                          int x =
+                              (int)(w * 0.10f);
+
+                          x <
+                              (int)(w * 0.90f);
+
                           x += 16
                       ) {
 
                           int ca =
-                              a.getPixel(x, y);
+                              a.getPixel(
+                                  x,
+                                  y
+                              );
 
                           int cb =
-                              b.getPixel(x, y);
+                              b.getPixel(
+                                  x,
+                                  y
+                              );
+
 
                           total +=
                               Math.abs(
@@ -828,12 +1236,14 @@ jobs:
                                   Color.red(cb)
                               );
 
+
                           total +=
                               Math.abs(
                                   Color.green(ca)
                                   -
                                   Color.green(cb)
                               );
+
 
                           total +=
                               Math.abs(
@@ -842,15 +1252,21 @@ jobs:
                                   Color.blue(cb)
                               );
 
+
                           count += 3;
                       }
                   }
 
+
                   if (count == 0) {
+
                       return 0;
                   }
 
-                  return (double)total / count;
+
+                  return
+                      (double)total /
+                      count;
               }
           }
           EOF
@@ -868,131 +1284,121 @@ jobs:
                   void onBitmap(Bitmap bitmap);
               }
 
+
               private final BotAccessibility service;
 
+
               private final Handler handler =
-                  new Handler(Looper.getMainLooper());
+                  new Handler(
+                      Looper.getMainLooper()
+                  );
 
-              private boolean running = false;
 
-              /*
-               * Game screenshot coordinates are treated
-               * as 1842 x 832 landscape.
-               */
+              private boolean running =
+                  false;
 
-              private static final int W = 1842;
-              private static final int H = 832;
 
-              /*
-               * Joystick.
-               */
+              private static final int W =
+                  1842;
 
-              private static final float JOY_X = 0.138f;
-              private static final float JOY_Y = 0.785f;
+              private static final int H =
+                  832;
 
-              /*
-               * Attack.
-               */
 
-              private static final float ATTACK_X = 0.850f;
-              private static final float ATTACK_Y = 0.815f;
+              private static final float JOY_X =
+                  0.138f;
 
-              /*
-               * Loot.
-               */
+              private static final float JOY_Y =
+                  0.785f;
 
-              private static final float LOOT_X = 0.965f;
-              private static final float LOOT_Y = 0.840f;
 
-              /*
-               * Camera/player center.
-               */
+              private static final float ATTACK_X =
+                  0.850f;
 
-              private static final float PLAYER_X = 0.50f;
-              private static final float PLAYER_Y = 0.47f;
+              private static final float ATTACK_Y =
+                  0.815f;
 
-              /*
-               * State.
-               */
+
+              private static final float PLAYER_X =
+                  0.50f;
+
+              private static final float PLAYER_Y =
+                  0.47f;
+
 
               private enum State {
 
                   SEARCH,
+
                   CONFIRM,
+
                   MOVE,
+
                   ATTACK,
+
                   RECOVER
               }
+
 
               private State state =
                   State.SEARCH;
 
-              /*
-               * Target confirmation.
-               */
 
-              private Vision.Target confirmedTarget;
+              private Vision.Target target;
 
-              private int confirmCount = 0;
 
-              /*
-               * Search direction.
-               *
-               * 0 = right
-               * 1 = down-right
-               * 2 = down
-               * 3 = down-left
-               * 4 = left
-               * 5 = up-left
-               * 6 = up
-               * 7 = up-right
-               */
+              private int confirmCount =
+                  0;
 
-              private int searchDirection = 0;
 
-              private int searchStep = 0;
+              private int stuckCount =
+                  0;
 
-              /*
-               * Stuck protection.
-               */
 
-              private int stuckCount = 0;
+              private int moveCount =
+                  0;
 
-              private int moveCount = 0;
 
-              private long lastMoveTime = 0;
+              private int attackTry =
+                  0;
 
-              private Bitmap beforeMove = null;
 
-              /*
-               * Attack.
-               */
+              private int searchDirection =
+                  0;
 
-              private int attackTry = 0;
 
-              private Bitmap beforeAttack = null;
+              private int searchStep =
+                  0;
+
+
+              private Bitmap beforeMove;
+
+
+              private Bitmap beforeAttack;
+
 
               public BotEngine(
                       BotAccessibility service) {
 
-                  this.service = service;
+                  this.service =
+                      service;
               }
+
 
               public void start() {
 
                   if (running) {
+
                       return;
                   }
 
+
                   running = true;
 
-                  state = State.SEARCH;
 
-                  confirmedTarget = null;
+                  target = null;
 
                   confirmCount = 0;
-
-                  searchStep = 0;
 
                   stuckCount = 0;
 
@@ -1000,70 +1406,93 @@ jobs:
 
                   attackTry = 0;
 
+                  searchStep = 0;
+
+
                   service.state(
-                      "START\nSEARCH"
+                      "START\nAUTO LOCK"
                   );
 
-                  handler.postDelayed(
+
+                  later(
                       this::autoLock,
                       500
                   );
               }
 
+
               public void stop() {
 
                   running = false;
+
 
                   handler.removeCallbacksAndMessages(
                       null
                   );
 
-                  recycle(beforeMove);
-                  recycle(beforeAttack);
+
+                  recycle(
+                      beforeMove
+                  );
+
+                  recycle(
+                      beforeAttack
+                  );
+
 
                   beforeMove = null;
+
                   beforeAttack = null;
 
-                  service.state("STOP");
+
+                  service.state(
+                      "STOP"
+                  );
               }
 
-              /*
-               * Open the target menu.
-               */
 
               private void autoLock() {
 
                   if (!running) {
+
                       return;
                   }
 
-                  state = State.SEARCH;
 
                   service.state(
                       "AUTO LOCK"
                   );
+
+
+                  /*
+                   * เปิดเมนูล็อคเป้า
+                   */
 
                   service.tap(
                       W * 0.755f,
                       H * 0.075f
                   );
 
-                  handler.postDelayed(
-                      this::selectAutoLock,
-                      300
+
+                  later(
+                      this::lock,
+                      350
                   );
               }
 
-              private void selectAutoLock() {
+
+              private void lock() {
 
                   if (!running) {
+
                       return;
                   }
 
+
                   /*
-                   * Only AUTO LOCK.
+                   * ล็อคเป้าอัตโนมัติ
                    *
-                   * Never use FOLLOW.
+                   * ไม่กด "ติดตาม"
                    */
 
                   service.tap(
@@ -1071,27 +1500,37 @@ jobs:
                       H * 0.155f
                   );
 
-                  handler.postDelayed(
+
+                  later(
                       this::scan,
                       700
                   );
               }
 
+
               private void scan() {
 
                   if (!running) {
+
                       return;
                   }
 
-                  state = State.SEARCH;
+
+                  service.state(
+                      "SEARCH"
+                  );
+
 
                   service.screenshot(
                       bitmap -> {
 
                           if (!running) {
+
                               recycle(bitmap);
+
                               return;
                           }
+
 
                           if (bitmap == null) {
 
@@ -1103,12 +1542,19 @@ jobs:
                               return;
                           }
 
-                          Vision.Target t =
-                              Vision.findMarker(bitmap);
+
+                          Vision.Target found =
+                              Vision.findMarker(
+                                  bitmap
+                              );
+
 
                           recycle(bitmap);
 
-                          if (t == null) {
+
+                          if (found == null) {
+
+                              target = null;
 
                               confirmCount = 0;
 
@@ -1117,94 +1563,86 @@ jobs:
                               return;
                           }
 
-                          /*
-                           * Do NOT immediately move.
-                           *
-                           * Require stable target.
-                           */
 
-                          confirmTarget(t);
+                          confirm(found);
                       }
                   );
               }
 
-              private void confirmTarget(
-                      Vision.Target t) {
+
+              private void confirm(
+                      Vision.Target found) {
 
                   if (!running) {
+
                       return;
                   }
 
-                  state = State.CONFIRM;
 
-                  if (confirmedTarget == null) {
+                  state =
+                      State.CONFIRM;
 
-                      confirmedTarget = t;
+
+                  if (target == null) {
+
+                      target = found;
+
                       confirmCount = 1;
 
                   } else {
 
                       float dx =
                           Math.abs(
-                              confirmedTarget.x - t.x
+                              target.x -
+                              found.x
                           );
 
                       float dy =
                           Math.abs(
-                              confirmedTarget.y - t.y
+                              target.y -
+                              found.y
                           );
 
-                      /*
-                       * Same target must remain near
-                       * previous position.
-                       */
 
                       if (
                           dx < W * 0.055f &&
                           dy < H * 0.055f
                       ) {
 
-                          confirmedTarget =
-                              new Vision.Target(
-                                  (
-                                      confirmedTarget.x
-                                      + t.x
-                                  ) / 2,
-                                  (
-                                      confirmedTarget.y
-                                      + t.y
-                                  ) / 2,
-                                  Math.max(
-                                      confirmedTarget.confidence,
-                                      t.confidence
-                                  )
-                              );
+                          target =
+                              found;
 
                           confirmCount++;
 
                       } else {
 
-                          confirmedTarget = t;
+                          target =
+                              found;
+
                           confirmCount = 1;
                       }
                   }
 
+
                   service.state(
-                      "TARGET CONFIRM "
+                      "TARGET "
                       + confirmCount
                   );
 
-                  if (confirmCount >= 3) {
+
+                  if (
+                      confirmCount >= 3
+                  ) {
 
                       moveCount = 0;
+
                       stuckCount = 0;
 
-                      moveToTarget(
-                          confirmedTarget
-                      );
+                      moveToTarget();
 
                       return;
                   }
+
 
                   later(
                       this::scan,
@@ -1212,52 +1650,322 @@ jobs:
                   );
               }
 
-              /*
-               * Search mode.
-               *
-               * Short movement pulses only.
-               */
+
+              private void moveToTarget() {
+
+                  if (
+                      !running ||
+                      target == null
+                  ) {
+
+                      return;
+                  }
+
+
+                  float tx =
+                      target.x / W;
+
+                  float ty =
+                      target.y / H;
+
+
+                  float dx =
+                      tx -
+                      PLAYER_X;
+
+                  float dy =
+                      ty -
+                      PLAYER_Y;
+
+
+                  double distance =
+                      Math.sqrt(
+                          dx * dx +
+                          dy * dy
+                      );
+
+
+                  /*
+                   * เข้าใกล้พอแล้ว
+                   */
+
+                  if (
+                      distance < 0.115
+                  ) {
+
+                      attackTry = 0;
+
+                      attack();
+
+                      return;
+                  }
+
+
+                  moveCount++;
+
+
+                  /*
+                   * ห้ามเดินตลอดไป
+                   */
+
+                  if (
+                      moveCount >= 20
+                  ) {
+
+                      recover();
+
+                      return;
+                  }
+
+
+                  float length =
+                      (float)Math.sqrt(
+                          dx * dx +
+                          dy * dy
+                      );
+
+
+                  if (
+                      length < 0.001f
+                  ) {
+
+                      later(
+                          this::scan,
+                          200
+                      );
+
+                      return;
+                  }
+
+
+                  dx /= length;
+
+                  dy /= length;
+
+
+                  service.state(
+                      "MOVE "
+                      + moveCount
+                  );
+
+
+                  recycle(
+                      beforeMove
+                  );
+
+
+                  beforeMove = null;
+
+
+                  service.screenshot(
+                      bitmap -> {
+
+                          if (!running) {
+
+                              recycle(bitmap);
+
+                              return;
+                          }
+
+
+                          beforeMove =
+                              bitmap;
+
+
+                          joystick(
+                              dx,
+                              dy,
+                              280
+                          );
+
+
+                          later(
+                              this::checkMove,
+                              430
+                          );
+                      }
+                  );
+              }
+
+
+              private void checkMove() {
+
+                  if (!running) {
+
+                      return;
+                  }
+
+
+                  service.screenshot(
+                      after -> {
+
+                          if (!running) {
+
+                              recycle(after);
+
+                              return;
+                          }
+
+
+                          double d =
+                              Vision.difference(
+                                  beforeMove,
+                                  after
+                              );
+
+
+                          recycle(
+                              beforeMove
+                          );
+
+                          beforeMove = null;
+
+
+                          if (d > 7.0) {
+
+                              stuckCount = 0;
+
+                              later(
+                                  this::scan,
+                                  180
+                              );
+
+                              return;
+                          }
+
+
+                          stuckCount++;
+
+
+                          service.state(
+                              "STUCK "
+                              + stuckCount
+                          );
+
+
+                          if (
+                              stuckCount >= 2
+                          ) {
+
+                              recover();
+
+                              return;
+                          }
+
+
+                          later(
+                              this::scan,
+                              250
+                          );
+                      }
+                  );
+              }
+
+
+              private void recover() {
+
+                  if (!running) {
+
+                      return;
+                  }
+
+
+                  service.state(
+                      "RECOVER"
+                  );
+
+
+                  target = null;
+
+                  confirmCount = 0;
+
+                  stuckCount = 0;
+
+                  moveCount = 0;
+
+
+                  /*
+                   * เปลี่ยนทิศตรงข้าม
+                   */
+
+                  searchDirection =
+                      (
+                          searchDirection +
+                          4
+                      ) % 8;
+
+
+                  float[] d =
+                      direction(
+                          searchDirection
+                      );
+
+
+                  joystick(
+                      d[0],
+                      d[1],
+                      450
+                  );
+
+
+                  later(
+                      this::autoLock,
+                      700
+                  );
+              }
+
 
               private void search() {
 
                   if (!running) {
+
                       return;
                   }
+
+
+                  searchStep++;
+
 
                   service.state(
                       "SEARCH MOVE "
                       + searchDirection
                   );
 
-                  float[] dir =
-                      direction(searchDirection);
 
-                  joystickPulse(
-                      dir[0],
-                      dir[1],
-                      260
+                  float[] d =
+                      direction(
+                          searchDirection
+                      );
+
+
+                  joystick(
+                      d[0],
+                      d[1],
+                      250
                   );
 
-                  searchStep++;
 
-                  /*
-                   * After every few pulses,
-                   * try auto lock again.
-                   */
-
-                  if (searchStep >= 3) {
+                  if (
+                      searchStep >= 3
+                  ) {
 
                       searchStep = 0;
 
+
                       searchDirection++;
 
-                      if (searchDirection >= 8) {
+
+                      if (
+                          searchDirection >= 8
+                      ) {
+
                           searchDirection = 0;
                       }
 
+
                       later(
                           this::autoLock,
-                          350
+                          450
                       );
 
                   } else {
@@ -1269,300 +1977,52 @@ jobs:
                   }
               }
 
-              /*
-               * Move toward confirmed target.
-               */
-
-              private void moveToTarget(
-                      Vision.Target t) {
-
-                  if (!running) {
-                      return;
-                  }
-
-                  float tx =
-                      t.x / W;
-
-                  float ty =
-                      t.y / H;
-
-                  float dx =
-                      tx - PLAYER_X;
-
-                  float dy =
-                      ty - PLAYER_Y;
-
-                  double distance =
-                      Math.sqrt(
-                          dx * dx
-                          +
-                          dy * dy
-                      );
-
-                  /*
-                   * Close enough.
-                   */
-
-                  if (distance < 0.115) {
-
-                      state =
-                          State.ATTACK;
-
-                      attackTry = 0;
-
-                      attack();
-
-                      return;
-                  }
-
-                  /*
-                   * Target is not close.
-                   */
-
-                  float length =
-                      (float)Math.sqrt(
-                          dx * dx
-                          +
-                          dy * dy
-                      );
-
-                  if (length < 0.001f) {
-
-                      later(
-                          this::scan,
-                          200
-                      );
-
-                      return;
-                  }
-
-                  dx /= length;
-                  dy /= length;
-
-                  moveCount++;
-
-                  if (moveCount > 20) {
-
-                      /*
-                       * Never allow infinite walking.
-                       */
-
-                      recover();
-
-                      return;
-                  }
-
-                  state =
-                      State.MOVE;
-
-                  service.state(
-                      "MOVE "
-                      + moveCount
-                  );
-
-                  moveAndCheck(
-                      dx,
-                      dy
-                  );
-              }
-
-              /*
-               * Move with joystick and then verify
-               * that the screen actually changed.
-               */
-
-              private void moveAndCheck(
-                      float dx,
-                      float dy) {
-
-                  recycle(beforeMove);
-
-                  beforeMove = null;
-
-                  service.screenshot(
-                      bitmap -> {
-
-                          if (!running) {
-                              recycle(bitmap);
-                              return;
-                          }
-
-                          beforeMove = bitmap;
-
-                          joystickPulse(
-                              dx,
-                              dy,
-                              280
-                          );
-
-                          later(
-                              this::checkMovement,
-                              420
-                          );
-                      }
-                  );
-              }
-
-              private void checkMovement() {
-
-                  if (!running) {
-                      return;
-                  }
-
-                  service.screenshot(
-                      after -> {
-
-                          if (!running) {
-                              recycle(after);
-                              return;
-                          }
-
-                          double diff =
-                              Vision.difference(
-                                  beforeMove,
-                                  after
-                              );
-
-                          recycle(beforeMove);
-                          beforeMove = null;
-
-                          /*
-                           * Screen changed enough.
-                           *
-                           * Character is probably moving.
-                           */
-
-                          if (diff > 7.0) {
-
-                              stuckCount = 0;
-
-                              /*
-                               * Re-scan because camera and
-                               * target position changed.
-                               */
-
-                              later(
-                                  this::scan,
-                                  180
-                              );
-
-                              return;
-                          }
-
-                          /*
-                           * No movement.
-                           */
-
-                          stuckCount++;
-
-                          service.state(
-                              "STUCK "
-                              + stuckCount
-                          );
-
-                          if (stuckCount >= 2) {
-
-                              recover();
-
-                              return;
-                          }
-
-                          /*
-                           * One more short attempt.
-                           */
-
-                          later(
-                              this::scan,
-                              250
-                          );
-                      }
-                  );
-              }
-
-              /*
-               * Stuck recovery.
-               *
-               * Stop repeating the same direction.
-               */
-
-              private void recover() {
-
-                  if (!running) {
-                      return;
-                  }
-
-                  state =
-                      State.RECOVER;
-
-                  service.state(
-                      "RECOVER"
-                  );
-
-                  stuckCount = 0;
-                  moveCount = 0;
-                  confirmCount = 0;
-                  confirmedTarget = null;
-
-                  /*
-                   * Change direction by 180 degrees.
-                   */
-
-                  searchDirection =
-                      (searchDirection + 4) % 8;
-
-                  float[] d =
-                      direction(searchDirection);
-
-                  joystickPulse(
-                      d[0],
-                      d[1],
-                      450
-                  );
-
-                  later(
-                      this::autoLock,
-                      650
-                  );
-              }
-
-              /*
-               * Attack.
-               */
 
               private void attack() {
 
                   if (!running) {
+
                       return;
                   }
 
-                  state =
-                      State.ATTACK;
 
                   attackTry++;
+
 
                   service.state(
                       "ATTACK "
                       + attackTry
                   );
 
-                  recycle(beforeAttack);
+
+                  recycle(
+                      beforeAttack
+                  );
+
 
                   beforeAttack = null;
+
 
                   service.screenshot(
                       bitmap -> {
 
                           if (!running) {
+
                               recycle(bitmap);
+
                               return;
                           }
 
-                          beforeAttack = bitmap;
+
+                          beforeAttack =
+                              bitmap;
+
 
                           service.tap(
                               W * ATTACK_X,
                               H * ATTACK_Y
                           );
+
 
                           later(
                               this::checkAttack,
@@ -1572,55 +2032,63 @@ jobs:
                   );
               }
 
+
               private void checkAttack() {
 
                   if (!running) {
+
                       return;
                   }
+
 
                   service.screenshot(
                       after -> {
 
                           if (!running) {
+
                               recycle(after);
+
                               return;
                           }
 
-                          double diff =
+
+                          double d =
                               Vision.difference(
                                   beforeAttack,
                                   after
                               );
 
-                          recycle(beforeAttack);
+
+                          recycle(
+                              beforeAttack
+                          );
+
                           beforeAttack = null;
 
-                          /*
-                           * Combat animation/damage/
-                           * target movement.
-                           */
 
-                          if (diff > 5.5) {
+                          if (d > 5.5) {
 
                               attackTry = 0;
+
 
                               service.state(
                                   "COMBAT"
                               );
+
 
                               later(
                                   this::attack,
                                   600
                               );
 
+
                               return;
                           }
 
-                          /*
-                           * No combat response.
-                           */
 
-                          if (attackTry < 2) {
+                          if (
+                              attackTry < 2
+                          ) {
 
                               later(
                                   this::attack,
@@ -1630,15 +2098,14 @@ jobs:
                               return;
                           }
 
-                          /*
-                           * Probably out of range.
-                           */
 
                           attackTry = 0;
+
 
                           service.state(
                               "OUT OF RANGE"
                           );
+
 
                           later(
                               this::scan,
@@ -1648,11 +2115,8 @@ jobs:
                   );
               }
 
-              /*
-               * Joystick movement.
-               */
 
-              private void joystickPulse(
+              private void joystick(
                       float dx,
                       float dy,
                       long duration) {
@@ -1663,14 +2127,22 @@ jobs:
                   float cy =
                       H * JOY_Y;
 
+
                   float radius =
-                      Math.min(W, H) * 0.105f;
+                      Math.min(
+                          W,
+                          H
+                      ) * 0.105f;
+
 
                   float ex =
-                      cx + dx * radius;
+                      cx +
+                      dx * radius;
 
                   float ey =
-                      cy + dy * radius;
+                      cy +
+                      dy * radius;
+
 
                   ex =
                       clamp(
@@ -1679,12 +2151,14 @@ jobs:
                           cx + radius
                       );
 
+
                   ey =
                       clamp(
                           ey,
                           cy - radius,
                           cy + radius
                       );
+
 
                   service.swipe(
                       cx,
@@ -1694,19 +2168,16 @@ jobs:
                       duration
                   );
 
-                  /*
-                   * Release joystick.
-                   */
 
                   later(
-                      () -> service.tap(cx, cy),
+                      () -> service.tap(
+                          cx,
+                          cy
+                      ),
                       duration + 30
                   );
               }
 
-              /*
-               * Search directions.
-               */
 
               private float[] direction(
                       int n) {
@@ -1715,45 +2186,69 @@ jobs:
 
                       case 0:
                           return new float[]{
-                              1f, 0f
+                              1f,
+                              0f
                           };
 
                       case 1:
                           return new float[]{
-                              0.7f, 0.7f
+                              0.7f,
+                              0.7f
                           };
 
                       case 2:
                           return new float[]{
-                              0f, 1f
+                              0f,
+                              1f
                           };
 
                       case 3:
                           return new float[]{
-                              -0.7f, 0.7f
+                              -0.7f,
+                              0.7f
                           };
 
                       case 4:
                           return new float[]{
-                              -1f, 0f
+                              -1f,
+                              0f
                           };
 
                       case 5:
                           return new float[]{
-                              -0.7f, -0.7f
+                              -0.7f,
+                              -0.7f
                           };
 
                       case 6:
                           return new float[]{
-                              0f, -1f
+                              0f,
+                              -1f
                           };
 
                       default:
                           return new float[]{
-                              0.7f, -0.7f
+                              0.7f,
+                              -0.7f
                           };
                   }
               }
+
+
+              private float clamp(
+                      float v,
+                      float min,
+                      float max) {
+
+                  return Math.max(
+                      min,
+                      Math.min(
+                          max,
+                          v
+                      )
+                  );
+              }
+
 
               private void later(
                       Runnable r,
@@ -1765,23 +2260,15 @@ jobs:
                   );
               }
 
-              private float clamp(
-                      float v,
-                      float min,
-                      float max) {
 
-                  return Math.max(
-                      min,
-                      Math.min(max, v)
-                  );
-              }
-
-              private void recycle(Bitmap b) {
+              private void recycle(
+                      Bitmap b) {
 
                   if (
                       b != null &&
                       !b.isRecycled()
                   ) {
+
                       b.recycle();
                   }
               }
@@ -1805,12 +2292,12 @@ jobs:
 
           cp \
             app/build/outputs/apk/debug/app-debug.apk \
-            output/DustinBotV11.apk
+            output/DustinBotV11.1.apk
 
-          ls -lh output/DustinBotV11.apk
+          ls -lh output/DustinBotV11.1.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DustinBotV11
-          path: output/DustinBotV11.apk
+          name: DustinBotV11.1
+          path: output/DustinBotV11.1.apk
