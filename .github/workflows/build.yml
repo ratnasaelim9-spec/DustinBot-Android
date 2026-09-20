@@ -1,4 +1,4 @@
-name: Dustin Bot V12 - Smart Target Move
+name: DUSTIN BOT V12.1 - FULL AUTO
 
 on:
   workflow_dispatch:
@@ -8,7 +8,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -24,8 +23,9 @@ jobs:
           set -e
 
           rm -rf app
+          rm -f build.gradle settings.gradle gradle.properties
 
-          mkdir -p app/src/main/java/com/dustinbot/v12
+          mkdir -p app/src/main/java/com/dustinbot/v121
           mkdir -p app/src/main/res/xml
           mkdir -p app/src/main/res/values
 
@@ -40,15 +40,13 @@ jobs:
 
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-
               repositories {
                   google()
                   mavenCentral()
               }
           }
 
-          rootProject.name = "DustinBotV12"
-
+          rootProject.name = "DustinBotV121"
           include(":app")
           EOF
 
@@ -58,155 +56,118 @@ jobs:
           }
           EOF
 
+          cat > gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          android.useAndroidX=false
+          android.nonTransitiveRClass=true
+          EOF
+
           cat > app/build.gradle <<'EOF'
           plugins {
               id 'com.android.application'
           }
 
           android {
-
-              namespace 'com.dustinbot.v12'
-
+              namespace 'com.dustinbot.v121'
               compileSdk 35
 
               defaultConfig {
-
-                  applicationId 'com.dustinbot.v12'
-
+                  applicationId 'com.dustinbot.v121'
                   minSdk 30
-
                   targetSdk 35
+                  versionCode 121
+                  versionName '12.1.0'
+              }
 
-                  versionCode 12
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
 
-                  versionName '12.0'
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                      shrinkResources false
+                  }
               }
           }
           EOF
 
-          cat > app/src/main/res/values/strings.xml <<'EOF'
+          cat > app/src/main/res/values/colors.xml <<'EOF'
           <resources>
-
-              <string name="app_name">
-                  Dustin Bot V12
-              </string>
-
-              <string name="accessibility_description">
-                  Dustin Bot V12 screen automation
-              </string>
-
+              <color name="black">#000000</color>
+              <color name="white">#FFFFFF</color>
           </resources>
           EOF
 
           cat > app/src/main/res/values/styles.xml <<'EOF'
           <resources>
-
-              <style
-                  name="AppTheme"
-                  parent="@android:style/Theme.Material.NoActionBar">
-
-                  <item name="android:fontFamily">
-                      sans
-                  </item>
-
-                  <item name="android:statusBarColor">
-                      #101010
-                  </item>
-
-                  <item name="android:navigationBarColor">
-                      #101010
-                  </item>
-
-                  <item name="android:colorAccent">
-                      #00E676
-                  </item>
-
+              <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
+                  <item name="android:fontFamily">sans</item>
+                  <item name="android:colorAccent">#00FF88</item>
+                  <item name="android:windowLightStatusBar">false</item>
+                  <item name="android:statusBarColor">#000000</item>
+                  <item name="android:navigationBarColor">#000000</item>
               </style>
-
           </resources>
           EOF
 
           cat > app/src/main/res/xml/accessibility_service_config.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
-
           <accessibility-service
               xmlns:android="http://schemas.android.com/apk/res/android"
-
+              android:description="@string/accessibility_description"
               android:accessibilityEventTypes="typeAllMask"
-
               android:accessibilityFeedbackType="feedbackGeneric"
-
               android:notificationTimeout="100"
-
               android:canRetrieveWindowContent="true"
-
               android:canPerformGestures="true"
-
               android:canTakeScreenshot="true"
+              android:accessibilityFlags="flagDefault|flagReportViewIds|flagRetrieveInteractiveWindows" />
+          EOF
 
-              android:description="@string/accessibility_description" />
-
+          cat > app/src/main/res/values/strings.xml <<'EOF'
+          <resources>
+              <string name="app_name">DUSTIN BOT V12.1</string>
+              <string name="accessibility_description">DUSTIN BOT screen automation service</string>
+          </resources>
           EOF
 
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-          <manifest
-              xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET" />
 
               <application
-
                   android:allowBackup="false"
-
-                  android:label="@string/app_name"
-
+                  android:label="DUSTIN BOT V12.1"
                   android:theme="@style/AppTheme"
-
                   android:supportsRtl="true">
 
                   <activity
-
                       android:name=".MainActivity"
-
                       android:exported="true">
 
                       <intent-filter>
-
-                          <action
-                              android:name="android.intent.action.MAIN" />
-
-                          <category
-                              android:name="android.intent.category.LAUNCHER" />
-
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
                       </intent-filter>
 
                   </activity>
 
-
                   <service
-
                       android:name=".BotAccessibility"
-
-                      android:permission=
-                          "android.permission.BIND_ACCESSIBILITY_SERVICE"
-
+                      android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
                       android:exported="false">
 
                       <intent-filter>
-
-                          <action
-                              android:name=
-                              "android.accessibilityservice.AccessibilityService" />
-
+                          <action android:name="android.accessibilityservice.AccessibilityService" />
                       </intent-filter>
 
                       <meta-data
-
-                          android:name=
-                              "android.accessibilityservice"
-
-                          android:resource=
-                              "@xml/accessibility_service_config" />
+                          android:name="android.accessibilityservice"
+                          android:resource="@xml/accessibility_service_config" />
 
                   </service>
 
@@ -215,15 +176,16 @@ jobs:
           </manifest>
           EOF
 
-          cat > app/src/main/java/com/dustinbot/v12/MainActivity.java <<'EOF'
-          package com.dustinbot.v12;
+          cat > app/src/main/java/com/dustinbot/v121/MainActivity.java <<'EOF'
+          package com.dustinbot.v121;
 
           import android.app.Activity;
-          import android.content.Intent;
-          import android.graphics.Color;
           import android.os.Bundle;
+          import android.content.Intent;
           import android.provider.Settings;
+          import android.graphics.Color;
           import android.view.Gravity;
+          import android.view.View;
           import android.widget.Button;
           import android.widget.LinearLayout;
           import android.widget.TextView;
@@ -232,1210 +194,506 @@ jobs:
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
-
                   super.onCreate(savedInstanceState);
 
-                  LinearLayout root =
-                      new LinearLayout(this);
+                  LinearLayout root = new LinearLayout(this);
+                  root.setOrientation(LinearLayout.VERTICAL);
+                  root.setPadding(35, 50, 35, 35);
+                  root.setGravity(Gravity.CENTER);
 
-                  root.setOrientation(
-                      LinearLayout.VERTICAL
+                  TextView title = new TextView(this);
+                  title.setText("DUSTIN BOT V12.1");
+                  title.setTextSize(28);
+                  title.setTextColor(Color.WHITE);
+                  title.setGravity(Gravity.CENTER);
+                  title.setPadding(0, 0, 0, 25);
+
+                  TextView info = new TextView(this);
+                  info.setText(
+                      "AUTO LOCK\\n" +
+                      "AUTO MOVE\\n" +
+                      "AUTO ATTACK\\n" +
+                      "AUTO LOOT\\n\\n" +
+                      "ต้องเปิด Accessibility Service ก่อน"
                   );
+                  info.setTextSize(17);
+                  info.setTextColor(Color.WHITE);
+                  info.setGravity(Gravity.CENTER);
+                  info.setPadding(0, 0, 0, 30);
 
-                  root.setGravity(
-                      Gravity.CENTER_HORIZONTAL
-                  );
+                  Button accessibility = new Button(this);
+                  accessibility.setText("เปิด Accessibility");
 
-                  root.setPadding(
-                      30,
-                      40,
-                      30,
-                      30
-                  );
+                  Button game = new Button(this);
+                  game.setText("เปิด Dustin RO");
 
-                  root.setBackgroundColor(
-                      Color.rgb(15,15,15)
-                  );
+                  Button start = new Button(this);
+                  start.setText("START BOT");
 
+                  accessibility.setOnClickListener(v -> {
+                      try {
+                          startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                      } catch (Exception ignored) {}
+                  });
 
-                  TextView title =
-                      new TextView(this);
+                  game.setOnClickListener(v -> {
+                      BotAccessibility.openGame(this);
+                  });
 
-                  title.setText(
-                      "DUSTIN BOT V12"
-                  );
-
-                  title.setTextColor(
-                      Color.WHITE
-                  );
-
-                  title.setTextSize(27);
-
-                  title.setGravity(
-                      Gravity.CENTER
-                  );
+                  start.setOnClickListener(v -> {
+                      if (BotAccessibility.getInstance() != null) {
+                          BotAccessibility.getInstance().startBot();
+                      } else {
+                          try {
+                              startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                          } catch (Exception ignored) {}
+                      }
+                  });
 
                   root.addView(title);
-
-
-                  TextView info =
-                      new TextView(this);
-
-                  info.setText(
-                      "\nSMART TARGET BOT\n\n" +
-
-                      "AUTO LOCK\n" +
-
-                      "TARGET CONFIRM\n" +
-
-                      "REAL SCREEN SIZE\n" +
-
-                      "SMART MOVE\n" +
-
-                      "STUCK RECOVERY\n" +
-
-                      "AUTO ATTACK\n\n" +
-
-                      "เปิด Accessibility แล้ว\n" +
-
-                      "แผง BOT จะขึ้นเอง"
-                  );
-
-                  info.setTextColor(
-                      Color.LTGRAY
-                  );
-
-                  info.setTextSize(16);
-
                   root.addView(info);
 
+                  root.addView(accessibility,
+                      new LinearLayout.LayoutParams(
+                          LinearLayout.LayoutParams.MATCH_PARENT,
+                          LinearLayout.LayoutParams.WRAP_CONTENT));
 
-                  Button accessibility =
-                      new Button(this);
+                  root.addView(game,
+                      new LinearLayout.LayoutParams(
+                          LinearLayout.LayoutParams.MATCH_PARENT,
+                          LinearLayout.LayoutParams.WRAP_CONTENT));
 
-                  accessibility.setText(
-                      "เปิด Accessibility"
-                  );
+                  root.addView(start,
+                      new LinearLayout.LayoutParams(
+                          LinearLayout.LayoutParams.MATCH_PARENT,
+                          LinearLayout.LayoutParams.WRAP_CONTENT));
 
-                  root.addView(
-                      accessibility
-                  );
-
-
-                  accessibility.setOnClickListener(
-                      v -> {
-
-                          Intent i =
-                              new Intent(
-                                  Settings
-                                      .ACTION_ACCESSIBILITY_SETTINGS
-                              );
-
-                          startActivity(i);
-                      }
-                  );
-
-
-                  TextView note =
-                      new TextView(this);
-
-                  note.setText(
-                      "\nใช้ Accessibility Overlay\n" +
-                      "ไม่ใช้ Application Overlay"
-                  );
-
-                  note.setTextColor(
-                      Color.GREEN
-                  );
-
-                  note.setGravity(
-                      Gravity.CENTER
-                  );
-
-                  root.addView(note);
-
+                  root.setBackgroundColor(Color.rgb(18, 18, 18));
 
                   setContentView(root);
               }
           }
           EOF
 
-          cat > app/src/main/java/com/dustinbot/v12/BotAccessibility.java <<'EOF'
-          package com.dustinbot.v12;
+          cat > app/src/main/java/com/dustinbot/v121/BotAccessibility.java <<'EOF'
+          package com.dustinbot.v121;
 
           import android.accessibilityservice.AccessibilityService;
           import android.accessibilityservice.GestureDescription;
+          import android.accessibilityservice.AccessibilityService.ScreenshotResult;
           import android.graphics.Bitmap;
+          import android.graphics.ColorSpace;
           import android.graphics.Path;
           import android.graphics.PixelFormat;
           import android.hardware.HardwareBuffer;
+          import android.os.Build;
           import android.os.Handler;
           import android.os.Looper;
+          import android.content.Context;
+          import android.content.Intent;
+          import android.net.Uri;
+          import android.view.Display;
           import android.view.Gravity;
           import android.view.WindowManager;
-          import android.widget.Button;
+          import android.view.View;
           import android.widget.LinearLayout;
           import android.widget.TextView;
+          import android.widget.Button;
+          import android.graphics.Color;
+          import android.graphics.drawable.GradientDrawable;
+          import android.view.accessibility.AccessibilityEvent;
 
-          public class BotAccessibility
-              extends AccessibilityService {
+          import java.util.concurrent.Executor;
+          import java.util.concurrent.Executors;
+
+          public class BotAccessibility extends AccessibilityService {
 
               private static BotAccessibility instance;
 
-              private WindowManager wm;
+              private final Handler handler = new Handler(Looper.getMainLooper());
+              private final Executor screenshotExecutor = Executors.newSingleThreadExecutor();
 
+              private WindowManager windowManager;
               private LinearLayout panel;
-
-              private TextView status;
+              private TextView statusText;
 
               private BotEngine engine;
 
-
-              public static void showPanel() {
-
-                  if (instance != null) {
-                      instance.createPanel();
-                  }
+              public static BotAccessibility getInstance() {
+                  return instance;
               }
-
 
               @Override
               protected void onServiceConnected() {
-
                   super.onServiceConnected();
 
                   instance = this;
 
-                  engine =
-                      new BotEngine(this);
+                  windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
-                  new Handler(
-                      Looper.getMainLooper()
-                  ).postDelayed(
-                      this::createPanel,
-                      500
-                  );
+                  createOverlay();
+
+                  engine = new BotEngine(this);
+
+                  setStatus("READY");
               }
 
+              private void createOverlay() {
 
-              @Override
-              public void onAccessibilityEvent(
-                      android.view.accessibility.AccessibilityEvent event) {
+                  if (panel != null) {
+                      try {
+                          windowManager.removeView(panel);
+                      } catch (Exception ignored) {}
+                  }
+
+                  panel = new LinearLayout(this);
+                  panel.setOrientation(LinearLayout.VERTICAL);
+                  panel.setPadding(12, 10, 12, 10);
+
+                  GradientDrawable bg = new GradientDrawable();
+                  bg.setColor(Color.argb(225, 0, 0, 0));
+                  bg.setCornerRadius(18);
+                  panel.setBackground(bg);
+
+                  statusText = new TextView(this);
+                  statusText.setText("DUSTIN BOT V12.1\\nREADY");
+                  statusText.setTextColor(Color.WHITE);
+                  statusText.setTextSize(11);
+                  statusText.setGravity(Gravity.CENTER);
+                  statusText.setPadding(8, 4, 8, 7);
+
+                  LinearLayout buttons = new LinearLayout(this);
+                  buttons.setOrientation(LinearLayout.HORIZONTAL);
+
+                  Button start = new Button(this);
+                  start.setText("START");
+                  start.setTextSize(9);
+
+                  Button stop = new Button(this);
+                  stop.setText("STOP");
+                  stop.setTextSize(9);
+
+                  Button game = new Button(this);
+                  game.setText("GAME");
+                  game.setTextSize(9);
+
+                  Button hide = new Button(this);
+                  hide.setText("×");
+                  hide.setTextSize(12);
+
+                  start.setOnClickListener(v -> startBot());
+
+                  stop.setOnClickListener(v -> stopBot());
+
+                  game.setOnClickListener(v -> openGame(this));
+
+                  hide.setOnClickListener(v -> {
+                      try {
+                          windowManager.removeView(panel);
+                      } catch (Exception ignored) {}
+                  });
+
+                  buttons.addView(start);
+                  buttons.addView(stop);
+                  buttons.addView(game);
+                  buttons.addView(hide);
+
+                  panel.addView(statusText);
+                  panel.addView(buttons);
+
+                  WindowManager.LayoutParams lp =
+                      new WindowManager.LayoutParams(
+                          WindowManager.LayoutParams.WRAP_CONTENT,
+                          WindowManager.LayoutParams.WRAP_CONTENT,
+                          WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+                          WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                          WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                          PixelFormat.TRANSLUCENT
+                      );
+
+                  lp.gravity = Gravity.TOP | Gravity.RIGHT;
+                  lp.x = 8;
+                  lp.y = 35;
+
+                  try {
+                      windowManager.addView(panel, lp);
+                  } catch (Exception ignored) {}
               }
 
+              public void setStatus(String text) {
 
-              @Override
-              public void onInterrupt() {
+                  handler.post(() -> {
+                      if (statusText != null) {
+                          statusText.setText("DUSTIN BOT V12.1\\n" + text);
+                      }
+                  });
+              }
+
+              public void startBot() {
+
+                  if (engine == null) {
+                      engine = new BotEngine(this);
+                  }
+
+                  engine.start();
+              }
+
+              public void stopBot() {
 
                   if (engine != null) {
                       engine.stop();
                   }
+
+                  setStatus("STOPPED");
               }
 
+              public void screenshot() {
+
+                  if (Build.VERSION.SDK_INT < 30) {
+                      return;
+                  }
+
+                  takeScreenshot(
+                      Display.DEFAULT_DISPLAY,
+                      screenshotExecutor,
+                      new TakeScreenshotCallback() {
+
+                          @Override
+                          public void onSuccess(ScreenshotResult result) {
+
+                              try {
+
+                                  HardwareBuffer buffer = result.getHardwareBuffer();
+
+                                  if (buffer == null) {
+                                      return;
+                                  }
+
+                                  Bitmap wrapped =
+                                      Bitmap.wrapHardwareBuffer(
+                                          buffer,
+                                          ColorSpace.get(ColorSpace.Named.SRGB)
+                                      );
+
+                                  if (wrapped == null) {
+                                      buffer.close();
+                                      return;
+                                  }
+
+                                  Bitmap bitmap =
+                                      wrapped.copy(
+                                          Bitmap.Config.ARGB_8888,
+                                          false
+                                      );
+
+                                  wrapped.recycle();
+                                  buffer.close();
+
+                                  if (bitmap != null) {
+                                      if (engine != null) {
+                                          engine.processScreenshot(bitmap);
+                                      } else {
+                                          bitmap.recycle();
+                                      }
+                                  }
+
+                              } catch (Throwable ignored) {}
+                          }
+
+                          @Override
+                          public void onFailure(int errorCode) {
+                              if (engine != null) {
+                                  engine.screenshotFailed();
+                              }
+                          }
+                      }
+                  );
+              }
+
+              public void tap(float x, float y) {
+
+                  Path path = new Path();
+                  path.moveTo(x, y);
+
+                  GestureDescription.StrokeDescription stroke =
+                      new GestureDescription.StrokeDescription(
+                          path,
+                          0,
+                          60
+                      );
+
+                  GestureDescription gesture =
+                      new GestureDescription.Builder()
+                          .addStroke(stroke)
+                          .build();
+
+                  dispatchGesture(
+                      gesture,
+                      null,
+                      null
+                  );
+              }
+
+              public void swipe(
+                  float startX,
+                  float startY,
+                  float endX,
+                  float endY,
+                  long duration
+              ) {
+
+                  Path path = new Path();
+                  path.moveTo(startX, startY);
+                  path.lineTo(endX, endY);
+
+                  GestureDescription.StrokeDescription stroke =
+                      new GestureDescription.StrokeDescription(
+                          path,
+                          0,
+                          duration
+                      );
+
+                  GestureDescription gesture =
+                      new GestureDescription.Builder()
+                          .addStroke(stroke)
+                          .build();
+
+                  dispatchGesture(
+                      gesture,
+                      null,
+                      null
+                  );
+              }
+
+              public void holdSwipe(
+                  float startX,
+                  float startY,
+                  float endX,
+                  float endY,
+                  long duration
+              ) {
+
+                  Path path = new Path();
+
+                  path.moveTo(startX, startY);
+                  path.lineTo(endX, endY);
+
+                  GestureDescription.StrokeDescription stroke =
+                      new GestureDescription.StrokeDescription(
+                          path,
+                          0,
+                          duration
+                      );
+
+                  GestureDescription gesture =
+                      new GestureDescription.Builder()
+                          .addStroke(stroke)
+                          .build();
+
+                  dispatchGesture(
+                      gesture,
+                      new GestureResultCallback() {
+                          @Override
+                          public void onCompleted(
+                              GestureDescription gestureDescription
+                          ) {}
+
+                          @Override
+                          public void onCancelled(
+                              GestureDescription gestureDescription
+                          ) {}
+                      },
+                      null
+                  );
+              }
+
+              public static void openGame(Context context) {
+
+                  try {
+
+                      Intent intent =
+                          new Intent(
+                              Intent.ACTION_VIEW,
+                              Uri.parse("https://dustin-ro.com/")
+                          );
+
+                      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                      context.startActivity(intent);
+
+                  } catch (Exception ignored) {}
+              }
+
+              @Override
+              public void onAccessibilityEvent(
+                  AccessibilityEvent event
+              ) {}
+
+              @Override
+              public void onInterrupt() {}
 
               @Override
               public void onDestroy() {
 
+                  try {
+                      if (panel != null && windowManager != null) {
+                          windowManager.removeView(panel);
+                      }
+                  } catch (Exception ignored) {}
+
                   if (engine != null) {
                       engine.stop();
                   }
-
-                  removePanel();
 
                   instance = null;
 
                   super.onDestroy();
               }
-
-
-              private void createPanel() {
-
-                  if (panel != null) {
-                      return;
-                  }
-
-
-                  wm =
-                      (WindowManager)
-                      getSystemService(
-                          WINDOW_SERVICE
-                      );
-
-
-                  panel =
-                      new LinearLayout(this);
-
-                  panel.setOrientation(
-                      LinearLayout.VERTICAL
-                  );
-
-                  panel.setPadding(
-                      12,
-                      8,
-                      12,
-                      8
-                  );
-
-                  panel.setBackgroundColor(
-                      0xEE111111
-                  );
-
-
-                  status =
-                      new TextView(this);
-
-                  status.setText(
-                      "DUSTIN BOT V12\nREADY"
-                  );
-
-                  status.setTextColor(
-                      0xFFFFFFFF
-                  );
-
-                  status.setTextSize(11);
-
-                  panel.addView(status);
-
-
-                  LinearLayout row =
-                      new LinearLayout(this);
-
-                  Button start =
-                      new Button(this);
-
-                  start.setText(
-                      "START"
-                  );
-
-
-                  Button stop =
-                      new Button(this);
-
-                  stop.setText(
-                      "STOP"
-                  );
-
-
-                  Button close =
-                      new Button(this);
-
-                  close.setText(
-                      "×"
-                  );
-
-
-                  row.addView(start);
-
-                  row.addView(stop);
-
-                  row.addView(close);
-
-                  panel.addView(row);
-
-
-                  start.setOnClickListener(
-                      v -> {
-
-                          if (engine != null) {
-                              engine.start();
-                          }
-                      }
-                  );
-
-
-                  stop.setOnClickListener(
-                      v -> {
-
-                          if (engine != null) {
-                              engine.stop();
-                          }
-                      }
-                  );
-
-
-                  close.setOnClickListener(
-                      v -> removePanel()
-                  );
-
-
-                  WindowManager.LayoutParams lp =
-                      new WindowManager.LayoutParams();
-
-                  lp.width =
-                      WindowManager.LayoutParams.WRAP_CONTENT;
-
-                  lp.height =
-                      WindowManager.LayoutParams.WRAP_CONTENT;
-
-                  lp.gravity =
-                      Gravity.TOP |
-                      Gravity.RIGHT;
-
-                  lp.x = 10;
-
-                  lp.y = 70;
-
-
-                  lp.type =
-                      WindowManager.LayoutParams
-                          .TYPE_ACCESSIBILITY_OVERLAY;
-
-
-                  lp.flags =
-                      WindowManager.LayoutParams
-                          .FLAG_NOT_FOCUSABLE;
-
-
-                  lp.format =
-                      PixelFormat.TRANSLUCENT;
-
-
-                  try {
-
-                      wm.addView(
-                          panel,
-                          lp
-                      );
-
-                  } catch (Exception e) {
-
-                      panel = null;
-
-                      new Handler(
-                          Looper.getMainLooper()
-                      ).postDelayed(
-                          this::createPanel,
-                          1000
-                      );
-                  }
-              }
-
-
-              private void removePanel() {
-
-                  if (
-                      panel != null &&
-                      wm != null
-                  ) {
-
-                      try {
-
-                          wm.removeView(
-                              panel
-                          );
-
-                      } catch (Exception ignored) {
-                      }
-                  }
-
-                  panel = null;
-              }
-
-
-              public void state(
-                      String s) {
-
-                  new Handler(
-                      Looper.getMainLooper()
-                  ).post(
-                      () -> {
-
-                          if (status != null) {
-
-                              status.setText(
-                                  "DUSTIN BOT V12\n" +
-                                  s
-                              );
-                          }
-                      }
-                  );
-              }
-
-
-              public void tap(
-                      float x,
-                      float y) {
-
-                  Path path =
-                      new Path();
-
-                  path.moveTo(
-                      x,
-                      y
-                  );
-
-
-                  GestureDescription gesture =
-                      new GestureDescription.Builder()
-                          .addStroke(
-                              new GestureDescription
-                                  .StrokeDescription(
-                                      path,
-                                      0,
-                                      70
-                                  )
-                          )
-                          .build();
-
-
-                  dispatchGesture(
-                      gesture,
-                      null,
-                      null
-                  );
-              }
-
-
-              public void swipe(
-                      float x1,
-                      float y1,
-                      float x2,
-                      float y2,
-                      long duration) {
-
-                  Path path =
-                      new Path();
-
-                  path.moveTo(
-                      x1,
-                      y1
-                  );
-
-                  path.lineTo(
-                      x2,
-                      y2
-                  );
-
-
-                  GestureDescription gesture =
-                      new GestureDescription.Builder()
-                          .addStroke(
-                              new GestureDescription
-                                  .StrokeDescription(
-                                      path,
-                                      0,
-                                      duration
-                                  )
-                          )
-                          .build();
-
-
-                  dispatchGesture(
-                      gesture,
-                      null,
-                      null
-                  );
-              }
-
-
-              public void screenshot(
-                      BotEngine.ScreenCallback callback) {
-
-                  takeScreenshot(
-
-                      android.view.Display.DEFAULT_DISPLAY,
-
-                      getMainExecutor(),
-
-                      new TakeScreenshotCallback() {
-
-                          @Override
-                          public void onSuccess(
-                                  ScreenshotResult result) {
-
-                              HardwareBuffer buffer =
-                                  result.getHardwareBuffer();
-
-                              if (buffer == null) {
-
-                                  callback.onBitmap(
-                                      null
-                                  );
-
-                                  return;
-                              }
-
-
-                              Bitmap bitmap =
-                                  Bitmap.wrapHardwareBuffer(
-                                      buffer,
-                                      result.getColorSpace()
-                                  );
-
-
-                              Bitmap copy = null;
-
-
-                              if (bitmap != null) {
-
-                                  copy =
-                                      bitmap.copy(
-                                          Bitmap.Config
-                                              .ARGB_8888,
-                                          false
-                                      );
-
-                                  bitmap.recycle();
-                              }
-
-
-                              buffer.close();
-
-
-                              callback.onBitmap(
-                                  copy
-                              );
-                          }
-
-
-                          @Override
-                          public void onFailure(
-                                  int errorCode) {
-
-                              callback.onBitmap(
-                                  null
-                              );
-                          }
-                      }
-                  );
-              }
           }
           EOF
 
-          cat > app/src/main/java/com/dustinbot/v12/Vision.java <<'EOF'
-          package com.dustinbot.v12;
+          cat > app/src/main/java/com/dustinbot/v121/BotEngine.java <<'EOF'
+          package com.dustinbot.v121;
 
           import android.graphics.Bitmap;
           import android.graphics.Color;
 
-          public class Vision {
-
-              public static class Target {
-
-                  public float x;
-
-                  public float y;
-
-                  public float confidence;
-
-
-                  public Target(
-                          float x,
-                          float y,
-                          float confidence) {
-
-                      this.x = x;
-
-                      this.y = y;
-
-                      this.confidence =
-                          confidence;
-                  }
-              }
-
-
-              /*
-               * V12:
-               *
-               * ไม่กำหนด W/H ตายตัว
-               *
-               * ใช้ขนาด screenshot จริง
-               */
-
-
-              public static Target findTarget(
-                      Bitmap b) {
-
-                  if (b == null) {
-                      return null;
-                  }
-
-
-                  int w =
-                      b.getWidth();
-
-                  int h =
-                      b.getHeight();
-
-
-                  /*
-                   * จำกัดเฉพาะพื้นที่เล่น
-                   *
-                   * ไม่ตรวจ joystick
-                   * ไม่ตรวจ attack button
-                   * ไม่ตรวจ UI
-                   */
-
-                  int left =
-                      (int)(w * 0.18f);
-
-                  int right =
-                      (int)(w * 0.84f);
-
-                  int top =
-                      (int)(h * 0.12f);
-
-                  int bottom =
-                      (int)(h * 0.72f);
-
-
-                  Target best = null;
-
-                  double bestScore = 0;
-
-
-                  /*
-                   * ค้นหา marker ขนาดเล็ก
-                   */
-
-                  for (
-                      int y = top;
-                      y < bottom;
-                      y += 4
-                  ) {
-
-                      for (
-                          int x = left;
-                          x < right;
-                          x += 4
-                      ) {
-
-                          int bright = 0;
-
-                          int dark = 0;
-
-                          int total = 0;
-
-
-                          for (
-                              int yy = -7;
-                              yy <= 7;
-                              yy += 2
-                          ) {
-
-                              for (
-                                  int xx = -9;
-                                  xx <= 9;
-                                  xx += 2
-                              ) {
-
-                                  int px =
-                                      x + xx;
-
-                                  int py =
-                                      y + yy;
-
-
-                                  if (
-                                      px < 0 ||
-                                      py < 0 ||
-                                      px >= w ||
-                                      py >= h
-                                  ) {
-                                      continue;
-                                  }
-
-
-                                  int c =
-                                      b.getPixel(
-                                          px,
-                                          py
-                                      );
-
-
-                                  int r =
-                                      Color.red(c);
-
-                                  int g =
-                                      Color.green(c);
-
-                                  int bl =
-                                      Color.blue(c);
-
-
-                                  int max =
-                                      Math.max(
-                                          r,
-                                          Math.max(
-                                              g,
-                                              bl
-                                          )
-                                      );
-
-
-                                  int min =
-                                      Math.min(
-                                          r,
-                                          Math.min(
-                                              g,
-                                              bl
-                                          )
-                                      );
-
-
-                                  /*
-                                   * สีขาว/เทา
-                                   */
-
-                                  if (
-                                      min > 190 &&
-                                      max - min < 35
-                                  ) {
-
-                                      bright++;
-                                  }
-
-
-                                  /*
-                                   * ขอบมืด
-                                   */
-
-                                  if (
-                                      max < 80
-                                  ) {
-
-                                      dark++;
-                                  }
-
-
-                                  total++;
-                              }
-                          }
-
-
-                          if (total == 0) {
-                              continue;
-                          }
-
-
-                          float brightRatio =
-                              (float)bright /
-                              total;
-
-                          float darkRatio =
-                              (float)dark /
-                              total;
-
-
-                          /*
-                           * ไม่เอาพื้นสว่างขนาดใหญ่
-                           */
-
-                          if (
-                              brightRatio < 0.20f ||
-                              brightRatio > 0.62f
-                          ) {
-                              continue;
-                          }
-
-
-                          /*
-                           * marker ต้องมี contrast
-                           */
-
-                          if (
-                              darkRatio < 0.035f
-                          ) {
-                              continue;
-                          }
-
-
-                          /*
-                           * ตรวจรูปทรงสามเหลี่ยม:
-                           *
-                           * ด้านบนแคบ
-                           * ด้านล่างกว้างขึ้น
-                           */
-
-                          int upper =
-                              whiteCount(
-                                  b,
-                                  x,
-                                  y - 5,
-                                  7,
-                                  2
-                              );
-
-
-                          int middle =
-                              whiteCount(
-                                  b,
-                                  x,
-                                  y,
-                                  11,
-                                  2
-                              );
-
-
-                          int lower =
-                              whiteCount(
-                                  b,
-                                  x,
-                                  y + 5,
-                                  15,
-                                  2
-                              );
-
-
-                          if (
-                              upper < 1 ||
-                              middle < upper ||
-                              lower < middle
-                          ) {
-                              continue;
-                          }
-
-
-                          double score =
-                              brightRatio * 60
-                              +
-                              darkRatio * 80
-                              +
-                              lower;
-
-
-                          if (
-                              score > bestScore
-                          ) {
-
-                              bestScore =
-                                  score;
-
-
-                              /*
-                               * จุดมอนสเตอร์อยู่
-                               * ใต้ marker
-                               */
-
-                              best =
-                                  new Target(
-                                      x,
-                                      y + 35,
-                                      (float)score
-                                  );
-                          }
-                      }
-                  }
-
-
-                  if (
-                      best == null ||
-                      best.confidence < 22
-                  ) {
-
-                      return null;
-                  }
-
-
-                  return best;
-              }
-
-
-              private static int whiteCount(
-                      Bitmap b,
-                      int cx,
-                      int cy,
-                      int width,
-                      int height) {
-
-                  int count = 0;
-
-
-                  for (
-                      int y =
-                          cy - height;
-
-                      y <=
-                          cy + height;
-
-                      y += 2
-                  ) {
-
-                      for (
-                          int x =
-                              cx - width;
-
-                          x <=
-                              cx + width;
-
-                          x += 2
-                      ) {
-
-                          if (
-                              x < 0 ||
-                              y < 0 ||
-                              x >= b.getWidth() ||
-                              y >= b.getHeight()
-                          ) {
-                              continue;
-                          }
-
-
-                          int c =
-                              b.getPixel(
-                                  x,
-                                  y
-                              );
-
-
-                          int r =
-                              Color.red(c);
-
-                          int g =
-                              Color.green(c);
-
-                          int bl =
-                              Color.blue(c);
-
-
-                          int max =
-                              Math.max(
-                                  r,
-                                  Math.max(
-                                      g,
-                                      bl
-                                  )
-                              );
-
-
-                          int min =
-                              Math.min(
-                                  r,
-                                  Math.min(
-                                      g,
-                                      bl
-                                  )
-                              );
-
-
-                          if (
-                              min > 190 &&
-                              max - min < 35
-                          ) {
-
-                              count++;
-                          }
-                      }
-                  }
-
-
-                  return count;
-              }
-
-
-              /*
-               * ตรวจว่าภาพเปลี่ยนหรือไม่
-               */
-
-              public static double difference(
-                      Bitmap a,
-                      Bitmap b) {
-
-                  if (
-                      a == null ||
-                      b == null
-                  ) {
-
-                      return 0;
-                  }
-
-
-                  int w =
-                      Math.min(
-                          a.getWidth(),
-                          b.getWidth()
-                      );
-
-
-                  int h =
-                      Math.min(
-                          a.getHeight(),
-                          b.getHeight()
-                      );
-
-
-                  long total = 0;
-
-                  long count = 0;
-
-
-                  for (
-                      int y =
-                          (int)(h * 0.15f);
-
-                      y <
-                          (int)(h * 0.75f);
-
-                      y += 12
-                  ) {
-
-                      for (
-                          int x =
-                              (int)(w * 0.08f);
-
-                          x <
-                              (int)(w * 0.90f);
-
-                          x += 12
-                      ) {
-
-                          int ca =
-                              a.getPixel(
-                                  x,
-                                  y
-                              );
-
-
-                          int cb =
-                              b.getPixel(
-                                  x,
-                                  y
-                              );
-
-
-                          total +=
-                              Math.abs(
-                                  Color.red(ca)
-                                  -
-                                  Color.red(cb)
-                              );
-
-
-                          total +=
-                              Math.abs(
-                                  Color.green(ca)
-                                  -
-                                  Color.green(cb)
-                              );
-
-
-                          total +=
-                              Math.abs(
-                                  Color.blue(ca)
-                                  -
-                                  Color.blue(cb)
-                              );
-
-
-                          count += 3;
-                      }
-                  }
-
-
-                  if (count == 0) {
-                      return 0;
-                  }
-
-
-                  return
-                      (double)total /
-                      count;
-              }
-          }
-          EOF
-
-          cat > app/src/main/java/com/dustinbot/v12/BotEngine.java <<'EOF'
-          package com.dustinbot.v12;
-
-          import android.graphics.Bitmap;
-          import android.os.Handler;
-          import android.os.Looper;
-          import android.util.DisplayMetrics;
+          import java.util.ArrayList;
+          import java.util.List;
 
           public class BotEngine {
 
-              public interface ScreenCallback {
-                  void onBitmap(Bitmap bitmap);
-              }
-
-
               private final BotAccessibility service;
-
-
-              private final Handler handler =
-                  new Handler(
-                      Looper.getMainLooper()
-                  );
-
 
               private boolean running = false;
 
+              private int screenW = 0;
+              private int screenH = 0;
 
-              /*
-               * พิกัดเหล่านี้เป็นสัดส่วน
-               * ไม่ใช่พิกเซลตายตัว
-               */
+              private long lastTargetTime = 0;
+              private long lastAttackTime = 0;
+              private long lastLootTime = 0;
+              private long lastAutoLockTime = 0;
+              private long lastSearchMove = 0;
 
-              private static final float JOY_X =
-                  0.138f;
-
-              private static final float JOY_Y =
-                  0.785f;
-
-
-              private static final float ATTACK_X =
-                  0.850f;
-
-              private static final float ATTACK_Y =
-                  0.815f;
-
-
-              /*
-               * ตัวละครโดยประมาณอยู่กลางจอ
-               */
-
-              private static final float PLAYER_X =
-                  0.50f;
-
-              private static final float PLAYER_Y =
-                  0.47f;
-
-
-              private enum State {
-
-                  SEARCH,
-
-                  CONFIRM,
-
-                  MOVE,
-
-                  ATTACK,
-
-                  RECOVER
-              }
-
-
-              private State state =
-                  State.SEARCH;
-
-
-              private Vision.Target target;
-
-
-              private int confirmCount = 0;
-
-              private int stuckCount = 0;
-
-              private int moveCount = 0;
-
-              private int attackTry = 0;
-
-              private int searchDirection = 0;
-
+              private int searchDirection = 1;
               private int searchStep = 0;
 
+              private int noTargetCount = 0;
+              private int attackCount = 0;
 
-              private Bitmap beforeMove;
+              private Point lastTarget = null;
 
-              private Bitmap beforeAttack;
+              private static final int STATE_SEARCH = 0;
+              private static final int STATE_MOVE = 1;
+              private static final int STATE_ATTACK = 2;
+              private static final int STATE_LOOT = 3;
 
+              private int state = STATE_SEARCH;
 
-              public BotEngine(
-                      BotAccessibility service) {
-
+              public BotEngine(BotAccessibility service) {
                   this.service = service;
               }
-
 
               public void start() {
 
@@ -1443,122 +701,58 @@ jobs:
                       return;
                   }
 
-
                   running = true;
 
-
-                  target = null;
-
-                  confirmCount = 0;
-
-                  stuckCount = 0;
-
-                  moveCount = 0;
-
-                  attackTry = 0;
-
-                  searchDirection = 0;
-
+                  state = STATE_SEARCH;
+                  noTargetCount = 0;
+                  attackCount = 0;
                   searchStep = 0;
+                  searchDirection = 1;
 
+                  service.setStatus("STARTING...");
 
-                  service.state(
-                      "START\nAUTO LOCK"
-                  );
-
-
-                  later(
-                      this::autoLock,
-                      500
-                  );
+                  service.handlerPost(() -> {
+                      openAutoLock();
+                  }, 700);
               }
-
 
               public void stop() {
 
                   running = false;
 
+                  lastTarget = null;
 
-                  handler.removeCallbacksAndMessages(
-                      null
-                  );
-
-
-                  recycle(
-                      beforeMove
-                  );
-
-
-                  recycle(
-                      beforeAttack
-                  );
-
-
-                  beforeMove = null;
-
-                  beforeAttack = null;
-
-
-                  service.state(
-                      "STOP"
-                  );
+                  service.setStatus("STOPPED");
               }
 
+              private void later(Runnable r, long delay) {
+                  service.handlerPost(r, delay);
+              }
 
-              private void autoLock() {
+              private void openAutoLock() {
 
                   if (!running) {
                       return;
                   }
 
+                  service.setStatus("AUTO LOCK");
 
-                  service.state(
-                      "AUTO LOCK"
-                  );
+                  tapRatio(0.755f, 0.075f);
 
+                  later(() -> {
 
-                  /*
-                   * เปิดเมนูล็อคเป้า
-                   */
+                      if (!running) {
+                          return;
+                      }
 
-                  tapRatio(
-                      0.755f,
-                      0.075f
-                  );
+                      tapRatio(0.755f, 0.155f);
 
+                      later(() -> {
+                          scan();
+                      }, 450);
 
-                  later(
-                      this::selectAutoLock,
-                      350
-                  );
+                  }, 250);
               }
-
-
-              private void selectAutoLock() {
-
-                  if (!running) {
-                      return;
-                  }
-
-
-                  /*
-                   * ล็อคเป้าอัตโนมัติ
-                   *
-                   * ไม่กดติดตาม
-                   */
-
-                  tapRatio(
-                      0.755f,
-                      0.155f
-                  );
-
-
-                  later(
-                      this::scan,
-                      700
-                  );
-              }
-
 
               private void scan() {
 
@@ -1566,624 +760,220 @@ jobs:
                       return;
                   }
 
+                  service.setStatus("SEARCH");
 
-                  service.state(
-                      "SEARCH"
-                  );
-
-
-                  service.screenshot(
-                      bitmap -> {
-
-                          if (!running) {
-
-                              recycle(bitmap);
-
-                              return;
-                          }
-
-
-                          if (bitmap == null) {
-
-                              later(
-                                  this::scan,
-                                  350
-                              );
-
-                              return;
-                          }
-
-
-                          Vision.Target found =
-                              Vision.findTarget(
-                                  bitmap
-                              );
-
-
-                          recycle(bitmap);
-
-
-                          if (found == null) {
-
-                              target = null;
-
-                              confirmCount = 0;
-
-                              search();
-
-                              return;
-                          }
-
-
-                          confirm(
-                              found
-                          );
-                      }
-                  );
+                  service.screenshot();
               }
 
+              public void processScreenshot(Bitmap bitmap) {
 
-              private void confirm(
-                      Vision.Target found) {
+                  if (!running) {
+                      bitmap.recycle();
+                      return;
+                  }
+
+                  screenW = bitmap.getWidth();
+                  screenH = bitmap.getHeight();
+
+                  Point target = Vision.findTarget(bitmap);
+
+                  bitmap.recycle();
 
                   if (!running) {
                       return;
                   }
 
+                  long now = System.currentTimeMillis();
 
-                  state =
-                      State.CONFIRM;
+                  if (target != null) {
 
-
-                  if (target == null) {
-
-                      target =
-                          found;
-
-                      confirmCount = 1;
-
-                  } else {
+                      lastTarget = target;
+                      lastTargetTime = now;
+                      noTargetCount = 0;
 
                       float dx =
-                          Math.abs(
-                              target.x -
-                              found.x
-                          );
-
+                          target.x - (screenW * 0.50f);
 
                       float dy =
-                          Math.abs(
-                              target.y -
-                              found.y
+                          target.y - (screenH * 0.47f);
+
+                      float distance =
+                          (float)Math.sqrt(
+                              dx * dx + dy * dy
                           );
 
+                      if (distance < screenW * 0.105f) {
 
-                      /*
-                       * ต้องเป็นเป้าเดิม
-                       */
+                          state = STATE_ATTACK;
 
-                      if (
-                          dx <
-                              foundXThreshold(
-                                  target
-                              )
-                          &&
-                          dy <
-                              foundYThreshold(
-                                  target
-                              )
-                      ) {
-
-                          target =
-                              found;
-
-                          confirmCount++;
+                          attack();
 
                       } else {
 
-                          target =
-                              found;
+                          state = STATE_MOVE;
 
-                          confirmCount = 1;
+                          moveToTarget(target);
+                      }
+
+                      return;
+                  }
+
+                  lastTarget = null;
+                  noTargetCount++;
+
+                  if (now - lastAutoLockTime > 1800) {
+
+                      lastAutoLockTime = now;
+
+                      openAutoLock();
+
+                      return;
+                  }
+
+                  if (state == STATE_ATTACK) {
+
+                      if (now - lastAttackTime > 2200) {
+
+                          attackCount++;
+
+                          if (attackCount >= 3) {
+
+                              attackCount = 0;
+
+                              state = STATE_LOOT;
+
+                              loot();
+
+                              return;
+                          }
+
+                          attack();
+
+                          return;
                       }
                   }
 
+                  if (noTargetCount >= 3) {
 
-                  service.state(
-                      "TARGET "
-                      + confirmCount
+                      state = STATE_SEARCH;
+
+                      searchMove();
+
+                      return;
+                  }
+
+                  later(() -> {
+                      scan();
+                  }, 250);
+              }
+
+              public void screenshotFailed() {
+
+                  if (!running) {
+                      return;
+                  }
+
+                  later(() -> {
+                      scan();
+                  }, 500);
+              }
+
+              private void moveToTarget(Point target) {
+
+                  if (!running) {
+                      return;
+                  }
+
+                  if (screenW <= 0 || screenH <= 0) {
+                      later(() -> scan(), 250);
+                      return;
+                  }
+
+                  float playerX = screenW * 0.50f;
+                  float playerY = screenH * 0.47f;
+
+                  float dx = target.x - playerX;
+                  float dy = target.y - playerY;
+
+                  float absX = Math.abs(dx);
+                  float absY = Math.abs(dy);
+
+                  service.setStatus(
+                      "MOVE  " +
+                      Math.round(target.x) +
+                      "," +
+                      Math.round(target.y)
                   );
 
+                  float joystickX = screenW * 0.135f;
+                  float joystickY = screenH * 0.785f;
 
-                  /*
-                   * ต้องเห็นเป้าต่อเนื่อง
-                   * อย่างน้อย 3 รอบ
-                   */
+                  float moveX = joystickX;
+                  float moveY = joystickY;
 
-                  if (
-                      confirmCount >= 3
-                  ) {
-
-                      moveCount = 0;
-
-                      stuckCount = 0;
-
-                      moveToTarget();
-
-                      return;
-                  }
-
-
-                  later(
-                      this::scan,
-                      180
-                  );
-              }
-
-
-              private float foundXThreshold(
-                      Vision.Target t) {
-
-                  return
-                      Math.max(
-                          20f,
-                          t.x * 0.06f
-                      );
-              }
-
-
-              private float foundYThreshold(
-                      Vision.Target t) {
-
-                  return
-                      Math.max(
-                          20f,
-                          t.y * 0.06f
-                      );
-              }
-
-
-              private void moveToTarget() {
-
-                  if (
-                      !running ||
-                      target == null
-                  ) {
-
-                      return;
-                  }
-
-
-                  /*
-                   * ใช้ขนาดภาพจริง
-                   */
-
-                  float targetX =
-                      target.x;
-
-                  float targetY =
-                      target.y;
-
-
-                  float screenW =
-                      targetScreenW;
-
-                  float screenH =
-                      targetScreenH;
-
-
-                  if (
-                      screenW <= 0 ||
-                      screenH <= 0
-                  ) {
-
-                      later(
-                          this::scan,
-                          150
-                      );
-
-                      return;
-                  }
-
-
-                  float tx =
-                      targetX /
-                      screenW;
-
-
-                  float ty =
-                      targetY /
-                      screenH;
-
-
-                  /*
-                   * สำคัญ:
-                   *
-                   * x บวก = ขวา
-                   * x ลบ = ซ้าย
-                   *
-                   * y บวก = ลง
-                   * y ลบ = ขึ้น
-                   */
-
-                  float dx =
-                      tx -
-                      PLAYER_X;
-
-
-                  float dy =
-                      ty -
-                      PLAYER_Y;
-
-
-                  double distance =
-                      Math.sqrt(
-                          dx * dx +
-                          dy * dy
-                      );
-
-
-                  /*
-                   * เข้าใกล้พอแล้ว
-                   */
-
-                  if (
-                      distance <
-                      0.105
-                  ) {
-
-                      attackTry = 0;
-
-                      attack();
-
-                      return;
-                  }
-
-
-                  /*
-                   * จำกัดจำนวนก้าว
-                   */
-
-                  moveCount++;
-
-
-                  if (
-                      moveCount >= 18
-                  ) {
-
-                      recover();
-
-                      return;
-                  }
-
-
-                  float len =
+                  float length =
                       (float)Math.sqrt(
                           dx * dx +
                           dy * dy
                       );
 
+                  if (length < 1) {
+                      later(() -> scan(), 200);
+                      return;
+                  }
 
-                  if (len < 0.001f) {
+                  float nx = dx / length;
+                  float ny = dy / length;
 
-                      later(
-                          this::scan,
-                          150
+                  float radius = Math.min(screenW, screenH) * 0.075f;
+
+                  if (absX > absY * 0.65f) {
+                      moveX += nx * radius;
+                  }
+
+                  if (absY > absX * 0.65f) {
+                      moveY += ny * radius;
+                  }
+
+                  moveX =
+                      Math.max(
+                          10,
+                          Math.min(screenW - 10, moveX)
                       );
 
-                      return;
-                  }
-
-
-                  dx /= len;
-
-                  dy /= len;
-
-
-                  final float finalDx =
-                      dx;
-
-                  final float finalDy =
-                      dy;
-
-
-                  service.state(
-                      "MOVE "
-                      + moveCount
-                      + "\n"
-                      + directionName(
-                          finalDx,
-                          finalDy
-                      )
-                  );
-
-
-                  recycle(
-                      beforeMove
-                  );
-
-
-                  beforeMove = null;
-
-
-                  service.screenshot(
-                      bitmap -> {
-
-                          if (!running) {
-
-                              recycle(bitmap);
-
-                              return;
-                          }
-
-
-                          beforeMove =
-                              bitmap;
-
-
-                          /*
-                           * เดินสั้น ๆ
-                           */
-
-                          joystick(
-                              finalDx,
-                              finalDy,
-                              240
-                          );
-
-
-                          later(
-                              this::checkMove,
-                              400
-                          );
-                      }
-                  );
-              }
-
-
-              /*
-               * ขนาด screenshot ล่าสุด
-               */
-
-              private float targetScreenW =
-                  0;
-
-              private float targetScreenH =
-                  0;
-
-
-              private void rememberScreen(
-                      Bitmap b) {
-
-                  if (b == null) {
-                      return;
-                  }
-
-
-                  targetScreenW =
-                      b.getWidth();
-
-                  targetScreenH =
-                      b.getHeight();
-              }
-
-
-              private void checkMove() {
-
-                  if (!running) {
-                      return;
-                  }
-
-
-                  service.screenshot(
-                      after -> {
-
-                          if (!running) {
-
-                              recycle(after);
-
-                              return;
-                          }
-
-
-                          if (
-                              beforeMove == null ||
-                              after == null
-                          ) {
-
-                              recycle(after);
-
-                              later(
-                                  this::scan,
-                                  200
-                              );
-
-                              return;
-                          }
-
-
-                          double diff =
-                              Vision.difference(
-                                  beforeMove,
-                                  after
-                              );
-
-
-                          recycle(
-                              beforeMove
-                          );
-
-
-                          beforeMove = null;
-
-
-                          /*
-                           * ภาพเปลี่ยน
-                           * = มีการเคลื่อนที่
-                           */
-
-                          if (
-                              diff > 5.0
-                          ) {
-
-                              stuckCount = 0;
-
-
-                              later(
-                                  this::scan,
-                                  160
-                              );
-
-
-                              return;
-                          }
-
-
-                          /*
-                           * ไม่เคลื่อน
-                           */
-
-                          stuckCount++;
-
-
-                          service.state(
-                              "STUCK "
-                              + stuckCount
-                          );
-
-
-                          if (
-                              stuckCount >= 2
-                          ) {
-
-                              recover();
-
-                              return;
-                          }
-
-
-                          later(
-                              this::scan,
-                              220
-                          );
-                      }
-                  );
-              }
-
-
-              private void recover() {
-
-                  if (!running) {
-                      return;
-                  }
-
-
-                  service.state(
-                      "RECOVER"
-                  );
-
-
-                  target = null;
-
-                  confirmCount = 0;
-
-                  stuckCount = 0;
-
-                  moveCount = 0;
-
-
-                  /*
-                   * เปลี่ยนทิศ
-                   */
-
-                  searchDirection =
-                      (
-                          searchDirection +
-                          4
-                      ) % 8;
-
-
-                  float[] d =
-                      direction(
-                          searchDirection
+                  moveY =
+                      Math.max(
+                          10,
+                          Math.min(screenH - 10, moveY)
                       );
 
+                  final float fx = moveX;
+                  final float fy = moveY;
 
-                  joystick(
-                      d[0],
-                      d[1],
-                      400
+                  service.holdSwipe(
+                      joystickX,
+                      joystickY,
+                      fx,
+                      fy,
+                      280
                   );
 
+                  later(() -> {
 
-                  later(
-                      this::autoLock,
-                      650
-                  );
-              }
-
-
-              private void search() {
-
-                  if (!running) {
-                      return;
-                  }
-
-
-                  searchStep++;
-
-
-                  float[] d =
-                      direction(
-                          searchDirection
-                      );
-
-
-                  service.state(
-                      "SEARCH MOVE "
-                      + searchDirection
-                  );
-
-
-                  joystick(
-                      d[0],
-                      d[1],
-                      220
-                  );
-
-
-                  if (
-                      searchStep >= 3
-                  ) {
-
-                      searchStep = 0;
-
-
-                      searchDirection++;
-
-
-                      if (
-                          searchDirection >= 8
-                      ) {
-
-                          searchDirection = 0;
+                      if (!running) {
+                          return;
                       }
 
+                      if (System.currentTimeMillis() -
+                          lastAttackTime > 900) {
 
-                      later(
-                          this::autoLock,
-                          450
-                      );
+                          attack();
+                      }
 
-                  } else {
+                      later(() -> scan(), 250);
 
-                      later(
-                          this::scan,
-                          350
-                      );
-                  }
+                  }, 330);
               }
-
 
               private void attack() {
 
@@ -2191,522 +981,754 @@ jobs:
                       return;
                   }
 
+                  state = STATE_ATTACK;
 
-                  attackTry++;
+                  lastAttackTime =
+                      System.currentTimeMillis();
 
+                  attackCount++;
 
-                  service.state(
-                      "ATTACK "
-                      + attackTry
+                  service.setStatus(
+                      "ATTACK #" + attackCount
                   );
 
-
-                  recycle(
-                      beforeAttack
+                  /*
+                   * ตำแหน่งปุ่มดาบจากหน้าจอจริงของเกม
+                   * ใช้ ratio เพื่อรองรับความละเอียดต่างกัน
+                   */
+                  tapRatio(
+                      0.850f,
+                      0.815f
                   );
 
+                  later(() -> {
 
-                  beforeAttack = null;
-
-
-                  service.screenshot(
-                      bitmap -> {
-
-                          if (!running) {
-
-                              recycle(bitmap);
-
-                              return;
-                          }
-
-
-                          beforeAttack =
-                              bitmap;
-
-
-                          tapRatio(
-                              ATTACK_X,
-                              ATTACK_Y
-                          );
-
-
-                          later(
-                              this::checkAttack,
-                              420
-                          );
+                      if (!running) {
+                          return;
                       }
-                  );
-              }
 
+                      if (attackCount >= 8) {
 
-              private void checkAttack() {
+                          attackCount = 0;
 
-                  if (!running) {
-                      return;
-                  }
+                          state = STATE_LOOT;
 
+                          loot();
 
-                  service.screenshot(
-                      after -> {
-
-                          if (!running) {
-
-                              recycle(after);
-
-                              return;
-                          }
-
-
-                          if (
-                              beforeAttack == null ||
-                              after == null
-                          ) {
-
-                              recycle(after);
-
-                              later(
-                                  this::scan,
-                                  200
-                              );
-
-                              return;
-                          }
-
-
-                          double diff =
-                              Vision.difference(
-                                  beforeAttack,
-                                  after
-                              );
-
-
-                          recycle(
-                              beforeAttack
-                          );
-
-
-                          beforeAttack = null;
-
-
-                          /*
-                           * มีการตอบสนอง
-                           */
-
-                          if (
-                              diff > 4.0
-                          ) {
-
-                              attackTry = 0;
-
-
-                              service.state(
-                                  "COMBAT"
-                              );
-
-
-                              later(
-                                  this::attack,
-                                  550
-                              );
-
-
-                              return;
-                          }
-
-
-                          /*
-                           * ยังไม่เกิดอะไร
-                           */
-
-                          if (
-                              attackTry < 2
-                          ) {
-
-                              later(
-                                  this::attack,
-                                  220
-                              );
-
-                              return;
-                          }
-
-
-                          /*
-                           * ไม่ได้อยู่ในระยะ
-                           */
-
-                          attackTry = 0;
-
-
-                          service.state(
-                              "MOVE TO TARGET"
-                          );
-
-
-                          later(
-                              this::moveOrScan,
-                              150
-                          );
+                          return;
                       }
-                  );
-              }
-
-
-              private void moveOrScan() {
-
-                  if (!running) {
-                      return;
-                  }
-
-
-                  if (target != null) {
-
-                      moveToTarget();
-
-                  } else {
 
                       scan();
+
+                  }, 700);
+              }
+
+              private void loot() {
+
+                  if (!running) {
+                      return;
                   }
-              }
 
+                  long now =
+                      System.currentTimeMillis();
 
-              private void joystick(
-                      float dx,
-                      float dy,
-                      long duration) {
+                  if (now - lastLootTime < 900) {
+                      scan();
+                      return;
+                  }
 
-                  /*
-                   * ใช้ขนาดหน้าจอจริง
-                   */
+                  lastLootTime = now;
 
-                  float w =
-                      screenWidth();
+                  state = STATE_LOOT;
 
-                  float h =
-                      screenHeight();
-
-
-                  float cx =
-                      w * JOY_X;
-
-                  float cy =
-                      h * JOY_Y;
-
+                  service.setStatus("LOOT");
 
                   /*
-                   * ระยะลาก joystick
+                   * ปุ่มเก็บของอยู่ด้านล่างใกล้ปุ่มดาบ
                    */
-
-                  float radius =
-                      Math.min(
-                          w,
-                          h
-                      ) * 0.105f;
-
-
-                  float ex =
-                      cx +
-                      dx * radius;
-
-
-                  float ey =
-                      cy +
-                      dy * radius;
-
-
-                  /*
-                   * จำกัดให้อยู่ใน joystick
-                   */
-
-                  ex =
-                      clamp(
-                          ex,
-                          cx - radius,
-                          cx + radius
-                      );
-
-
-                  ey =
-                      clamp(
-                          ey,
-                          cy - radius,
-                          cy + radius
-                      );
-
-
-                  service.swipe(
-                      cx,
-                      cy,
-                      ex,
-                      ey,
-                      duration
+                  tapRatio(
+                      0.795f,
+                      0.900f
                   );
 
+                  later(() -> {
 
-                  final float releaseX =
-                      cx;
+                      if (!running) {
+                          return;
+                      }
 
-                  final float releaseY =
-                      cy;
+                      attackCount = 0;
 
-                  final long releaseDelay =
-                      duration + 35;
+                      openAutoLock();
 
-
-                  /*
-                   * ปล่อย joystick
-                   */
-
-                  later(
-                      () ->
-                          service.tap(
-                              releaseX,
-                              releaseY
-                          ),
-                      releaseDelay
-                  );
+                  }, 700);
               }
 
+              private void searchMove() {
+
+                  if (!running) {
+                      return;
+                  }
+
+                  long now =
+                      System.currentTimeMillis();
+
+                  if (now - lastSearchMove < 900) {
+                      later(() -> scan(), 300);
+                      return;
+                  }
+
+                  lastSearchMove = now;
+
+                  searchStep++;
+
+                  /*
+                   * สำคัญ:
+                   * ไม่เดินซ้ายค้าง
+                   *
+                   * 1 = ขวา
+                   * -1 = ซ้าย
+                   *
+                   * สลับทิศทุกช่วง
+                   */
+                  if (searchStep % 2 == 0) {
+                      searchDirection *= -1;
+                  }
+
+                  float joystickX =
+                      screenW * 0.135f;
+
+                  float joystickY =
+                      screenH * 0.785f;
+
+                  float distance =
+                      Math.min(screenW, screenH) * 0.075f;
+
+                  float endX =
+                      joystickX +
+                      (distance * searchDirection);
+
+                  float endY =
+                      joystickY;
+
+                  service.setStatus(
+                      searchDirection > 0
+                      ? "SEARCH →"
+                      : "SEARCH ←"
+                  );
+
+                  service.holdSwipe(
+                      joystickX,
+                      joystickY,
+                      endX,
+                      endY,
+                      500
+                  );
+
+                  later(() -> {
+
+                      if (!running) {
+                          return;
+                      }
+
+                      openAutoLock();
+
+                  }, 650);
+              }
 
               private void tapRatio(
-                      float x,
-                      float y) {
+                  float xRatio,
+                  float yRatio
+              ) {
 
-                  float w =
-                      screenWidth();
-
-                  float h =
-                      screenHeight();
-
-
-                  service.tap(
-                      w * x,
-                      h * y
-                  );
-              }
-
-
-              private float screenWidth() {
-
-                  DisplayMetrics dm =
-                      getDisplayMetrics();
-
-                  return dm.widthPixels;
-              }
-
-
-              private float screenHeight() {
-
-                  DisplayMetrics dm =
-                      getDisplayMetrics();
-
-                  return dm.heightPixels;
-              }
-
-
-              private DisplayMetrics
-                      getDisplayMetrics() {
-
-                  return
-                      service
-                          .getResources()
-                          .getDisplayMetrics();
-              }
-
-
-              private String directionName(
-                      float dx,
-                      float dy) {
-
-                  if (
-                      Math.abs(dx) >
-                      Math.abs(dy) * 1.5f
-                  ) {
-
-                      return dx > 0
-                          ? "RIGHT"
-                          : "LEFT";
+                  if (screenW <= 0 || screenH <= 0) {
+                      return;
                   }
 
+                  float x =
+                      screenW * xRatio;
 
-                  if (
-                      Math.abs(dy) >
-                      Math.abs(dx) * 1.5f
-                  ) {
+                  float y =
+                      screenH * yRatio;
 
-                      return dy > 0
-                          ? "DOWN"
-                          : "UP";
-                  }
-
-
-                  if (
-                      dx > 0 &&
-                      dy > 0
-                  ) {
-
-                      return "DOWN-RIGHT";
-                  }
-
-
-                  if (
-                      dx < 0 &&
-                      dy > 0
-                  ) {
-
-                      return "DOWN-LEFT";
-                  }
-
-
-                  if (
-                      dx < 0 &&
-                      dy < 0
-                  ) {
-
-                      return "UP-LEFT";
-                  }
-
-
-                  return "UP-RIGHT";
+                  service.tap(x, y);
               }
 
+              private static class Point {
 
-              private float[] direction(
-                      int n) {
+                  final float x;
+                  final float y;
 
-                  switch (n) {
-
-                      case 0:
-
-                          return new float[]{
-                              1f,
-                              0f
-                          };
-
-
-                      case 1:
-
-                          return new float[]{
-                              0.7f,
-                              0.7f
-                          };
-
-
-                      case 2:
-
-                          return new float[]{
-                              0f,
-                              1f
-                          };
-
-
-                      case 3:
-
-                          return new float[]{
-                              -0.7f,
-                              0.7f
-                          };
-
-
-                      case 4:
-
-                          return new float[]{
-                              -1f,
-                              0f
-                          };
-
-
-                      case 5:
-
-                          return new float[]{
-                              -0.7f,
-                              -0.7f
-                          };
-
-
-                      case 6:
-
-                          return new float[]{
-                              0f,
-                              -1f
-                          };
-
-
-                      default:
-
-                          return new float[]{
-                              0.7f,
-                              -0.7f
-                          };
+                  Point(float x, float y) {
+                      this.x = x;
+                      this.y = y;
                   }
               }
 
+              private static class Vision {
 
-              private float clamp(
-                      float v,
-                      float min,
-                      float max) {
+                  static Point findTarget(Bitmap bmp) {
 
-                  return Math.max(
-                      min,
-                      Math.min(
-                          max,
-                          v
-                      )
-                  );
-              }
+                      int w = bmp.getWidth();
+                      int h = bmp.getHeight();
 
+                      if (w < 200 || h < 200) {
+                          return null;
+                      }
 
-              private void later(
-                      Runnable r,
-                      long ms) {
+                      /*
+                       * 1. หา marker ลูกศรสีขาว
+                       */
+                      Point arrow =
+                          findWhiteTargetMarker(
+                              bmp
+                          );
 
-                  handler.postDelayed(
-                      r,
-                      ms
-                  );
-              }
+                      if (arrow != null) {
+                          return arrow;
+                      }
 
+                      /*
+                       * 2. fallback:
+                       * หา object สีสดที่ไม่ใช่
+                       * ตัวละครตรงกลาง
+                       */
+                      return findColoredTarget(
+                          bmp
+                      );
+                  }
 
-              private void recycle(
-                      Bitmap b) {
-
-                  if (
-                      b != null &&
-                      !b.isRecycled()
+                  private static Point findWhiteTargetMarker(
+                      Bitmap bmp
                   ) {
 
-                      b.recycle();
+                      int w = bmp.getWidth();
+                      int h = bmp.getHeight();
+
+                      int step =
+                          Math.max(
+                              2,
+                              Math.min(w, h) / 420
+                          );
+
+                      boolean[][] visited =
+                          new boolean[
+                              (h + step - 1) / step
+                          ][
+                              (w + step - 1) / step
+                          ];
+
+                      ArrayList<Point> candidates =
+                          new ArrayList<>();
+
+                      for (int y = (int)(h * 0.18f);
+                           y < (int)(h * 0.82f);
+                           y += step) {
+
+                          for (int x = (int)(w * 0.05f);
+                               x < (int)(w * 0.95f);
+                               x += step) {
+
+                              int gx = x / step;
+                              int gy = y / step;
+
+                              if (gy >= visited.length ||
+                                  gx >= visited[0].length) {
+                                  continue;
+                              }
+
+                              if (visited[gy][gx]) {
+                                  continue;
+                              }
+
+                              int c =
+                                  bmp.getPixel(
+                                      x,
+                                      y
+                                  );
+
+                              if (!isBrightNeutral(c)) {
+                                  visited[gy][gx] = true;
+                                  continue;
+                              }
+
+                              Component comp =
+                                  floodWhite(
+                                      bmp,
+                                      x,
+                                      y,
+                                      step,
+                                      visited
+                                  );
+
+                              if (comp == null) {
+                                  continue;
+                              }
+
+                              if (comp.area < 5 ||
+                                  comp.area > 900) {
+                                  continue;
+                              }
+
+                              int cw =
+                                  comp.maxX -
+                                  comp.minX + 1;
+
+                              int ch =
+                                  comp.maxY -
+                                  comp.minY + 1;
+
+                              if (cw < 3 ||
+                                  cw > 70 ||
+                                  ch < 3 ||
+                                  ch > 55) {
+                                  continue;
+                              }
+
+                              float ratio =
+                                  cw /
+                                  (float)ch;
+
+                              if (ratio < 0.15f ||
+                                  ratio > 4.0f) {
+                                  continue;
+                              }
+
+                              if (comp.cx <
+                                  w * 0.10f ||
+                                  comp.cx >
+                                  w * 0.90f) {
+                                  continue;
+                              }
+
+                              if (comp.cy <
+                                  h * 0.20f ||
+                                  comp.cy >
+                                  h * 0.78f) {
+                                  continue;
+                              }
+
+                              /*
+                               * ลูกศรเหนือ monster
+                               * มักมีขนาดเล็กและหนาแน่น
+                               */
+                              float density =
+                                  comp.area /
+                                  (float)(cw * ch);
+
+                              if (density < 0.12f) {
+                                  continue;
+                              }
+
+                              candidates.add(
+                                  new Point(
+                                      comp.cx,
+                                      comp.cy + ch * 1.2f
+                                  )
+                              );
+                          }
+                      }
+
+                      if (candidates.isEmpty()) {
+                          return null;
+                      }
+
+                      /*
+                       * เลือก candidate ที่อยู่ใกล้
+                       * บริเวณตัวละครมากที่สุด
+                       */
+                      float px = w * 0.50f;
+                      float py = h * 0.47f;
+
+                      Point best = null;
+                      float bestDistance =
+                          Float.MAX_VALUE;
+
+                      for (Point p : candidates) {
+
+                          float dx =
+                              p.x - px;
+
+                          float dy =
+                              p.y - py;
+
+                          float d =
+                              dx * dx +
+                              dy * dy;
+
+                          /*
+                           * ไม่เลือกตัวหนังสือ UI
+                           * ที่อยู่ใกล้ขอบบน
+                           */
+                          if (p.y < h * 0.25f) {
+                              continue;
+                          }
+
+                          if (d < bestDistance) {
+                              bestDistance = d;
+                              best = p;
+                          }
+                      }
+
+                      return best;
+                  }
+
+                  private static Component floodWhite(
+                      Bitmap bmp,
+                      int sx,
+                      int sy,
+                      int step,
+                      boolean[][] visited
+                  ) {
+
+                      int w = bmp.getWidth();
+                      int h = bmp.getHeight();
+
+                      ArrayList<int[]> queue =
+                          new ArrayList<>();
+
+                      queue.add(
+                          new int[]{sx, sy}
+                      );
+
+                      int head = 0;
+
+                      int area = 0;
+
+                      int minX = sx;
+                      int maxX = sx;
+                      int minY = sy;
+                      int maxY = sy;
+
+                      float sumX = 0;
+                      float sumY = 0;
+
+                      while (
+                          head < queue.size() &&
+                          area < 1200
+                      ) {
+
+                          int[] p =
+                              queue.get(head++);
+
+                          int x = p[0];
+                          int y = p[1];
+
+                          int gx = x / step;
+                          int gy = y / step;
+
+                          if (gy < 0 ||
+                              gy >= visited.length ||
+                              gx < 0 ||
+                              gx >= visited[0].length) {
+                              continue;
+                          }
+
+                          if (visited[gy][gx]) {
+                              continue;
+                          }
+
+                          visited[gy][gx] = true;
+
+                          int c =
+                              bmp.getPixel(
+                                  Math.min(w - 1, x),
+                                  Math.min(h - 1, y)
+                              );
+
+                          if (!isBrightNeutral(c)) {
+                              continue;
+                          }
+
+                          area++;
+
+                          sumX += x;
+                          sumY += y;
+
+                          minX =
+                              Math.min(minX, x);
+
+                          maxX =
+                              Math.max(maxX, x);
+
+                          minY =
+                              Math.min(minY, y);
+
+                          maxY =
+                              Math.max(maxY, y);
+
+                          queue.add(
+                              new int[]{
+                                  x + step,
+                                  y
+                              }
+                          );
+
+                          queue.add(
+                              new int[]{
+                                  x - step,
+                                  y
+                              }
+                          );
+
+                          queue.add(
+                              new int[]{
+                                  x,
+                                  y + step
+                              }
+                          );
+
+                          queue.add(
+                              new int[]{
+                                  x,
+                                  y - step
+                              }
+                          );
+                      }
+
+                      if (area == 0) {
+                          return null;
+                      }
+
+                      Component c =
+                          new Component();
+
+                      c.area = area;
+                      c.minX = minX;
+                      c.maxX = maxX;
+                      c.minY = minY;
+                      c.maxY = maxY;
+                      c.cx = sumX / area;
+                      c.cy = sumY / area;
+
+                      return c;
+                  }
+
+                  private static boolean isBrightNeutral(
+                      int color
+                  ) {
+
+                      int r =
+                          Color.red(color);
+
+                      int g =
+                          Color.green(color);
+
+                      int b =
+                          Color.blue(color);
+
+                      int max =
+                          Math.max(
+                              r,
+                              Math.max(g, b)
+                          );
+
+                      int min =
+                          Math.min(
+                              r,
+                              Math.min(g, b)
+                          );
+
+                      return
+                          max >= 215 &&
+                          (max - min) <= 45;
+                  }
+
+                  private static Point findColoredTarget(
+                      Bitmap bmp
+                  ) {
+
+                      int w = bmp.getWidth();
+                      int h = bmp.getHeight();
+
+                      int step =
+                          Math.max(
+                              3,
+                              Math.min(w, h) / 260
+                          );
+
+                      float px =
+                          w * 0.50f;
+
+                      float py =
+                          h * 0.47f;
+
+                      Point best = null;
+
+                      float bestScore =
+                          Float.MAX_VALUE;
+
+                      for (
+                          int y = (int)(h * 0.25f);
+                          y < (int)(h * 0.80f);
+                          y += step
+                      ) {
+
+                          for (
+                              int x = (int)(w * 0.08f);
+                              x < (int)(w * 0.92f);
+                              x += step
+                          ) {
+
+                              /*
+                               * ไม่เลือกบริเวณตัวละคร
+                               */
+                              if (
+                                  Math.abs(x - px) <
+                                  w * 0.08f &&
+                                  Math.abs(y - py) <
+                                  h * 0.12f
+                              ) {
+                                  continue;
+                              }
+
+                              int c =
+                                  bmp.getPixel(
+                                      x,
+                                      y
+                                  );
+
+                              int r =
+                                  Color.red(c);
+
+                              int g =
+                                  Color.green(c);
+
+                              int b =
+                                  Color.blue(c);
+
+                              int max =
+                                  Math.max(
+                                      r,
+                                      Math.max(g, b)
+                                  );
+
+                              int min =
+                                  Math.min(
+                                      r,
+                                      Math.min(g, b)
+                                  );
+
+                              int saturation =
+                                  max - min;
+
+                              if (saturation < 65) {
+                                  continue;
+                              }
+
+                              if (max < 95) {
+                                  continue;
+                              }
+
+                              /*
+                               * ให้ความสำคัญกับ
+                               * object ขนาดเล็กที่อยู่
+                               * ในสนาม
+                               */
+                              float dx =
+                                  x - px;
+
+                              float dy =
+                                  y - py;
+
+                              float distance =
+                                  (float)Math.sqrt(
+                                      dx * dx +
+                                      dy * dy
+                                  );
+
+                              if (
+                                  distance <
+                                  w * 0.09f
+                              ) {
+                                  continue;
+                              }
+
+                              /*
+                               * ไม่ให้ติดขอบ UI
+                               */
+                              if (
+                                  y < h * 0.28f ||
+                                  y > h * 0.78f
+                              ) {
+                                  continue;
+                              }
+
+                              float score =
+                                  distance;
+
+                              if (score <
+                                  bestScore) {
+
+                                  bestScore =
+                                      score;
+
+                                  best =
+                                      new Point(
+                                          x,
+                                          y
+                                      );
+                              }
+                          }
+                      }
+
+                      return best;
+                  }
+
+                  private static class Component {
+
+                      int area;
+
+                      int minX;
+                      int maxX;
+
+                      int minY;
+                      int maxY;
+
+                      float cx;
+                      float cy;
                   }
               }
           }
           EOF
 
+          # เพิ่ม helper สำหรับ Handler ให้ BotEngine เรียกได้
+          python3 - <<'PY'
+          p = "app/src/main/java/com/dustinbot/v121/BotAccessibility.java"
+          s = open(p, "r", encoding="utf-8").read()
+
+          marker = "public void screenshot() {"
+
+          helper = r'''
+              public void handlerPost(Runnable runnable, long delay) {
+                  handler.postDelayed(runnable, delay);
+              }
+
+          '''
+
+          s = s.replace(marker, helper + marker)
+
+          open(p, "w", encoding="utf-8").write(s)
+          PY
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Build APK
-        shell: bash
         run: |
           set -e
 
-          gradle \
-            --no-daemon \
-            --stacktrace \
-            :app:assembleDebug
+          gradle wrapper --gradle-version 8.7
 
-      - name: Prepare APK
-        shell: bash
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Show APK
         run: |
-          set -e
-
-          mkdir -p output
-
-          cp \
-            app/build/outputs/apk/debug/app-debug.apk \
-            output/DustinBotV12.apk
-
-          ls -lh output/DustinBotV12.apk
+          find app/build/outputs -type f -name "*.apk" -print
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DustinBotV12
-          path: output/DustinBotV12.apk
+          name: DUSTIN-BOT-V12.1
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
