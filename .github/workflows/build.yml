@@ -9,33 +9,18 @@ jobs:
 
     steps:
 
-      # =========================================================
-      # CHECKOUT
-      # =========================================================
-
       - name: Checkout
         uses: actions/checkout@v4
-
-
-      # =========================================================
-      # JAVA
-      # =========================================================
 
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
 
-
-      # =========================================================
-      # CLEAN OLD PROJECT
-      # =========================================================
-
-      - name: Prepare project
+      - name: Create Android Project
         shell: bash
         run: |
-
           set -e
 
           rm -rf app
@@ -47,17 +32,11 @@ jobs:
           mkdir -p app/src/main/res/xml
           mkdir -p app/src/main/res/values
 
-
-      # =========================================================
-      # SETTINGS.GRADLE
-      # =========================================================
-
-      - name: Create settings.gradle
-        shell: bash
-        run: |
+          # =====================================================
+          # settings.gradle
+          # =====================================================
 
           cat > settings.gradle <<'EOF'
-
           pluginManagement {
               repositories {
                   google()
@@ -68,7 +47,6 @@ jobs:
 
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-
               repositories {
                   google()
                   mavenCentral()
@@ -76,1004 +54,486 @@ jobs:
           }
 
           rootProject.name = "DustinBotV122"
-
           include(":app")
-
           EOF
 
-
-      # =========================================================
-      # ROOT BUILD
-      # =========================================================
-
-      - name: Create root build.gradle
-        shell: bash
-        run: |
+          # =====================================================
+          # build.gradle
+          # =====================================================
 
           cat > build.gradle <<'EOF'
-
           plugins {
               id 'com.android.application' version '8.6.1' apply false
           }
-
           EOF
 
-
-      # =========================================================
-      # GRADLE PROPERTIES
-      # =========================================================
-
-      - name: Create gradle.properties
-        shell: bash
-        run: |
+          # =====================================================
+          # gradle.properties
+          # =====================================================
 
           cat > gradle.properties <<'EOF'
-
           org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
-
           android.useAndroidX=false
-
           android.nonTransitiveRClass=true
-
           EOF
 
-
-      # =========================================================
-      # APP BUILD
-      # =========================================================
-
-      - name: Create app build.gradle
-        shell: bash
-        run: |
+          # =====================================================
+          # app/build.gradle
+          # =====================================================
 
           cat > app/build.gradle <<'EOF'
-
           plugins {
               id 'com.android.application'
           }
 
           android {
-
               namespace 'com.dustinbot.v122'
-
               compileSdk 35
 
               defaultConfig {
-
                   applicationId 'com.dustinbot.v122'
-
                   minSdk 30
-
                   targetSdk 35
-
                   versionCode 122
-
                   versionName '12.2.0'
               }
 
               compileOptions {
-
                   sourceCompatibility JavaVersion.VERSION_17
-
                   targetCompatibility JavaVersion.VERSION_17
               }
 
               buildTypes {
-
                   release {
-
                       minifyEnabled false
-
                       shrinkResources false
                   }
               }
           }
-
           EOF
 
-
-      # =========================================================
-      # STRINGS
-      # =========================================================
-
-      - name: Create strings.xml
-        shell: bash
-        run: |
+          # =====================================================
+          # strings.xml
+          # =====================================================
 
           cat > app/src/main/res/values/strings.xml <<'EOF'
-
           <resources>
-
               <string name="app_name">DUSTIN BOT V12.2</string>
-
-              <string name="accessibility_description">
-                  DUSTIN RO screen automation bot
-              </string>
-
+              <string name="accessibility_description">DUSTIN RO screen automation bot</string>
           </resources>
-
           EOF
 
-
-      # =========================================================
-      # STYLES
-      # =========================================================
-
-      - name: Create styles.xml
-        shell: bash
-        run: |
+          # =====================================================
+          # styles.xml
+          # =====================================================
 
           cat > app/src/main/res/values/styles.xml <<'EOF'
-
           <resources>
-
-              <style
-                  name="AppTheme"
-                  parent="@android:style/Theme.Material.NoActionBar">
-
+              <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
                   <item name="android:fontFamily">sans</item>
-
-                  <item name="android:windowActionModeOverlay">true</item>
-
                   <item name="android:colorAccent">#00FF88</item>
-
                   <item name="android:statusBarColor">#000000</item>
-
                   <item name="android:navigationBarColor">#000000</item>
-
                   <item name="android:windowLightStatusBar">false</item>
-
               </style>
-
           </resources>
-
           EOF
 
-
-      # =========================================================
-      # ACCESSIBILITY CONFIG
-      # =========================================================
-
-      - name: Create accessibility config
-        shell: bash
-        run: |
+          # =====================================================
+          # ACCESSIBILITY XML
+          # IMPORTANT:
+          # <?xml MUST be the FIRST CHARACTER
+          # =====================================================
 
           cat > app/src/main/res/xml/accessibility_service_config.xml <<'EOF'
-
           <?xml version="1.0" encoding="utf-8"?>
-
-          <accessibility-service
-              xmlns:android="http://schemas.android.com/apk/res/android"
-
+          <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
               android:description="@string/accessibility_description"
-
               android:accessibilityEventTypes="typeAllMask"
-
               android:accessibilityFeedbackType="feedbackGeneric"
-
               android:notificationTimeout="100"
-
               android:canRetrieveWindowContent="true"
-
               android:canPerformGestures="true"
-
               android:canTakeScreenshot="true"
-
-              android:accessibilityFlags="
-                  flagDefault|
-                  flagReportViewIds|
-                  flagRetrieveInteractiveWindows" />
-
+              android:accessibilityFlags="flagDefault|flagReportViewIds|flagRetrieveInteractiveWindows" />
           EOF
 
-
-      # =========================================================
-      # MANIFEST
-      # =========================================================
-
-      - name: Create AndroidManifest.xml
-        shell: bash
-        run: |
+          # =====================================================
+          # AndroidManifest.xml
+          # =====================================================
 
           cat > app/src/main/AndroidManifest.xml <<'EOF'
-
           <?xml version="1.0" encoding="utf-8"?>
-
-          <manifest
-              xmlns:android="http://schemas.android.com/apk/res/android">
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
               <application
-
                   android:allowBackup="false"
-
                   android:label="DUSTIN BOT V12.2"
-
                   android:theme="@style/AppTheme"
-
                   android:supportsRtl="true">
 
                   <activity
-
                       android:name=".MainActivity"
-
                       android:exported="true">
 
                       <intent-filter>
-
-                          <action
-                              android:name="android.intent.action.MAIN" />
-
-                          <category
-                              android:name="android.intent.category.LAUNCHER" />
-
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
                       </intent-filter>
 
                   </activity>
 
-
                   <service
-
                       android:name=".BotAccessibility"
-
-                      android:permission="
-                          android.permission.BIND_ACCESSIBILITY_SERVICE"
-
+                      android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
                       android:exported="false">
 
                       <intent-filter>
-
-                          <action
-                              android:name="
-                              android.accessibilityservice.AccessibilityService" />
-
+                          <action android:name="android.accessibilityservice.AccessibilityService" />
                       </intent-filter>
 
                       <meta-data
-
-                          android:name="
-                          android.accessibilityservice"
-
-                          android:resource="
-                              @xml/accessibility_service_config" />
+                          android:name="android.accessibilityservice"
+                          android:resource="@xml/accessibility_service_config" />
 
                   </service>
 
               </application>
 
           </manifest>
-
           EOF
 
-
-      # =========================================================
-      # MAIN ACTIVITY
-      # =========================================================
-
-      - name: Create MainActivity.java
-        shell: bash
-        run: |
+          # =====================================================
+          # MainActivity.java
+          # =====================================================
 
           cat > app/src/main/java/com/dustinbot/v122/MainActivity.java <<'EOF'
-
           package com.dustinbot.v122;
 
-
           import android.app.Activity;
-
           import android.os.Bundle;
-
           import android.content.Intent;
-
           import android.provider.Settings;
-
           import android.graphics.Color;
-
           import android.view.Gravity;
-
           import android.widget.Button;
-
           import android.widget.LinearLayout;
-
           import android.widget.TextView;
-
 
           public class MainActivity extends Activity {
 
-
               @Override
-
               protected void onCreate(Bundle savedInstanceState) {
-
                   super.onCreate(savedInstanceState);
 
+                  LinearLayout root = new LinearLayout(this);
+                  root.setOrientation(LinearLayout.VERTICAL);
+                  root.setGravity(Gravity.CENTER);
+                  root.setPadding(30, 40, 30, 30);
+                  root.setBackgroundColor(Color.rgb(18, 18, 18));
 
-                  LinearLayout root =
-                      new LinearLayout(this);
+                  TextView title = new TextView(this);
+                  title.setText("DUSTIN BOT V12.2");
+                  title.setTextColor(Color.WHITE);
+                  title.setTextSize(28);
+                  title.setGravity(Gravity.CENTER);
 
-                  root.setOrientation(
-                      LinearLayout.VERTICAL
-                  );
-
-                  root.setGravity(
-                      Gravity.CENTER
-                  );
-
-                  root.setPadding(
-                      30,
-                      40,
-                      30,
-                      30
-                  );
-
-                  root.setBackgroundColor(
-                      Color.rgb(
-                          18,
-                          18,
-                          18
-                      )
-                  );
-
-
-                  TextView title =
-                      new TextView(this);
-
-                  title.setText(
-                      "DUSTIN BOT V12.2"
-                  );
-
-                  title.setTextColor(
-                      Color.WHITE
-                  );
-
-                  title.setTextSize(
-                      28
-                  );
-
-                  title.setGravity(
-                      Gravity.CENTER
-                  );
-
-
-                  TextView info =
-                      new TextView(this);
-
+                  TextView info = new TextView(this);
                   info.setText(
-                      "FULL AUTO BOT\\n\\n" +
-
-                      "AUTO TARGET\\n" +
-
-                      "AUTO MOVE\\n" +
-
-                      "AUTO ATTACK\\n" +
-
-                      "AUTO LOOT\\n\\n" +
-
+                      "FULL AUTO BOT\n\n" +
+                      "AUTO TARGET\n" +
+                      "AUTO MOVE\n" +
+                      "AUTO ATTACK\n" +
+                      "AUTO LOOT\n\n" +
                       "ฆ่าตัวหนึ่งแล้วหาเป้าหมายต่ออัตโนมัติ"
                   );
+                  info.setTextColor(Color.WHITE);
+                  info.setTextSize(16);
+                  info.setGravity(Gravity.CENTER);
+                  info.setPadding(0, 30, 0, 30);
 
-                  info.setTextColor(
-                      Color.WHITE
-                  );
+                  Button accessibility = new Button(this);
+                  accessibility.setText("เปิด Accessibility");
 
-                  info.setTextSize(
-                      16
-                  );
+                  Button game = new Button(this);
+                  game.setText("เปิด Dustin RO");
 
-                  info.setGravity(
-                      Gravity.CENTER
-                  );
+                  Button start = new Button(this);
+                  start.setText("START BOT");
 
-                  info.setPadding(
-                      0,
-                      30,
-                      0,
-                      30
-                  );
+                  accessibility.setOnClickListener(v -> {
+                      try {
+                          startActivity(
+                              new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                          );
+                      } catch (Exception ignored) {
+                      }
+                  });
 
+                  game.setOnClickListener(v -> {
+                      BotAccessibility.openGame(this);
+                  });
 
-                  Button accessibility =
-                      new Button(this);
+                  start.setOnClickListener(v -> {
+                      BotAccessibility bot =
+                          BotAccessibility.getInstance();
 
-                  accessibility.setText(
-                      "เปิด Accessibility"
-                  );
-
-
-                  Button game =
-                      new Button(this);
-
-                  game.setText(
-                      "เปิด Dustin RO"
-                  );
-
-
-                  Button start =
-                      new Button(this);
-
-                  start.setText(
-                      "START BOT"
-                  );
-
-
-                  accessibility.setOnClickListener(
-                      v -> {
-
+                      if (bot != null) {
+                          bot.startBot();
+                      } else {
                           try {
-
                               startActivity(
-                                  new Intent(
-                                      Settings.ACTION_ACCESSIBILITY_SETTINGS
-                                  )
+                                  new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                               );
-
                           } catch (Exception ignored) {
                           }
-
                       }
-                  );
-
-
-                  game.setOnClickListener(
-                      v -> {
-
-                          BotAccessibility.openGame(
-                              this
-                          );
-
-                      }
-                  );
-
-
-                  start.setOnClickListener(
-                      v -> {
-
-                          BotAccessibility bot =
-                              BotAccessibility.getInstance();
-
-                          if (bot != null) {
-
-                              bot.startBot();
-
-                          } else {
-
-                              try {
-
-                                  startActivity(
-                                      new Intent(
-                                          Settings.ACTION_ACCESSIBILITY_SETTINGS
-                                      )
-                                  );
-
-                              } catch (Exception ignored) {
-                              }
-                          }
-
-                      }
-                  );
-
+                  });
 
                   root.addView(title);
 
                   root.addView(info);
 
-
                   root.addView(
                       accessibility,
-                      new LinearLayout.LayoutParams(
-                          -1,
-                          -2
-                      )
+                      new LinearLayout.LayoutParams(-1, -2)
                   );
-
 
                   root.addView(
                       game,
-                      new LinearLayout.LayoutParams(
-                          -1,
-                          -2
-                      )
+                      new LinearLayout.LayoutParams(-1, -2)
                   );
-
 
                   root.addView(
                       start,
-                      new LinearLayout.LayoutParams(
-                          -1,
-                          -2
-                      )
+                      new LinearLayout.LayoutParams(-1, -2)
                   );
 
-
                   setContentView(root);
-
               }
-
           }
-
           EOF
 
-
-      # =========================================================
-      # ACCESSIBILITY SERVICE
-      # =========================================================
-
-      - name: Create BotAccessibility.java
-        shell: bash
-        run: |
+          # =====================================================
+          # BotAccessibility.java
+          # =====================================================
 
           cat > app/src/main/java/com/dustinbot/v122/BotAccessibility.java <<'EOF'
-
           package com.dustinbot.v122;
 
-
           import android.accessibilityservice.AccessibilityService;
-
           import android.accessibilityservice.GestureDescription;
-
           import android.accessibilityservice.AccessibilityService.ScreenshotResult;
-
           import android.graphics.Bitmap;
-
           import android.graphics.ColorSpace;
-
           import android.graphics.Path;
-
           import android.graphics.PixelFormat;
-
           import android.hardware.HardwareBuffer;
-
           import android.os.Build;
-
           import android.os.Handler;
-
           import android.os.Looper;
-
           import android.content.Context;
-
           import android.content.Intent;
-
           import android.net.Uri;
-
           import android.view.Display;
-
           import android.view.Gravity;
-
           import android.view.WindowManager;
-
           import android.widget.LinearLayout;
-
           import android.widget.TextView;
-
           import android.widget.Button;
-
           import android.graphics.Color;
-
           import android.graphics.drawable.GradientDrawable;
-
           import android.view.accessibility.AccessibilityEvent;
 
-
           import java.util.concurrent.Executor;
-
           import java.util.concurrent.Executors;
 
-
-          public class BotAccessibility
-              extends AccessibilityService {
-
+          public class BotAccessibility extends AccessibilityService {
 
               private static BotAccessibility instance;
 
-
               private final Handler handler =
-                  new Handler(
-                      Looper.getMainLooper()
-                  );
-
+                  new Handler(Looper.getMainLooper());
 
               private final Executor screenshotExecutor =
                   Executors.newSingleThreadExecutor();
 
-
               private WindowManager windowManager;
-
-
               private LinearLayout panel;
-
-
               private TextView statusText;
-
-
               private BotEngine engine;
 
-
               public static BotAccessibility getInstance() {
-
                   return instance;
-
               }
 
-
               @Override
-
               protected void onServiceConnected() {
-
                   super.onServiceConnected();
-
 
                   instance = this;
 
-
                   windowManager =
-                      (WindowManager)
-                      getSystemService(
-                          WINDOW_SERVICE
-                      );
-
+                      (WindowManager) getSystemService(WINDOW_SERVICE);
 
                   createOverlay();
 
+                  engine = new BotEngine(this);
 
-                  engine =
-                      new BotEngine(
-                          this
-                      );
-
-
-                  setStatus(
-                      "READY"
-                  );
-
+                  setStatus("READY");
               }
-
 
               private void createOverlay() {
 
-
                   if (panel != null) {
-
                       try {
-
-                          windowManager.removeView(
-                              panel
-                          );
-
+                          windowManager.removeView(panel);
                       } catch (Exception ignored) {
                       }
                   }
 
+                  panel = new LinearLayout(this);
+                  panel.setOrientation(LinearLayout.VERTICAL);
+                  panel.setPadding(12, 8, 12, 8);
 
-                  panel =
-                      new LinearLayout(
-                          this
-                      );
+                  GradientDrawable bg = new GradientDrawable();
+                  bg.setColor(Color.argb(225, 0, 0, 0));
+                  bg.setCornerRadius(18);
 
+                  panel.setBackground(bg);
 
-                  panel.setOrientation(
-                      LinearLayout.VERTICAL
-                  );
-
-
-                  panel.setPadding(
-                      12,
-                      8,
-                      12,
-                      8
-                  );
-
-
-                  GradientDrawable bg =
-                      new GradientDrawable();
-
-                  bg.setColor(
-                      Color.argb(
-                          225,
-                          0,
-                          0,
-                          0
-                      )
-                  );
-
-                  bg.setCornerRadius(
-                      18
-                  );
-
-
-                  panel.setBackground(
-                      bg
-                  );
-
-
-                  statusText =
-                      new TextView(
-                          this
-                      );
-
-
-                  statusText.setText(
-                      "DUSTIN BOT V12.2\\nREADY"
-                  );
-
-
-                  statusText.setTextColor(
-                      Color.WHITE
-                  );
-
-
-                  statusText.setTextSize(
-                      11
-                  );
-
-
-                  statusText.setGravity(
-                      Gravity.CENTER
-                  );
-
+                  statusText = new TextView(this);
+                  statusText.setText("DUSTIN BOT V12.2\nREADY");
+                  statusText.setTextColor(Color.WHITE);
+                  statusText.setTextSize(11);
+                  statusText.setGravity(Gravity.CENTER);
 
                   LinearLayout buttons =
-                      new LinearLayout(
-                          this
-                      );
-
+                      new LinearLayout(this);
 
                   buttons.setOrientation(
                       LinearLayout.HORIZONTAL
                   );
 
+                  Button start = new Button(this);
+                  start.setText("START");
+                  start.setTextSize(9);
 
-                  Button start =
-                      new Button(
-                          this
-                      );
+                  Button stop = new Button(this);
+                  stop.setText("STOP");
+                  stop.setTextSize(9);
 
-                  start.setText(
-                      "START"
-                  );
+                  Button game = new Button(this);
+                  game.setText("GAME");
+                  game.setTextSize(9);
 
-                  start.setTextSize(
-                      9
-                  );
+                  Button hide = new Button(this);
+                  hide.setText("×");
+                  hide.setTextSize(11);
 
+                  start.setOnClickListener(v -> startBot());
 
-                  Button stop =
-                      new Button(
-                          this
-                      );
-
-                  stop.setText(
-                      "STOP"
-                  );
-
-                  stop.setTextSize(
-                      9
-                  );
-
-
-                  Button game =
-                      new Button(
-                          this
-                      );
-
-                  game.setText(
-                      "GAME"
-                  );
-
-                  game.setTextSize(
-                      9
-                  );
-
-
-                  Button hide =
-                      new Button(
-                          this
-                      );
-
-                  hide.setText(
-                      "×"
-                  );
-
-
-                  hide.setTextSize(
-                      11
-                  );
-
-
-                  start.setOnClickListener(
-                      v -> startBot()
-                  );
-
-
-                  stop.setOnClickListener(
-                      v -> stopBot()
-                  );
-
+                  stop.setOnClickListener(v -> stopBot());
 
                   game.setOnClickListener(
-                      v ->
-                          openGame(
-                              this
-                          )
+                      v -> openGame(this)
                   );
 
-
-                  hide.setOnClickListener(
-                      v -> {
-
-                          try {
-
-                              windowManager.removeView(
-                                  panel
-                              );
-
-                          } catch (Exception ignored) {
-                          }
-
+                  hide.setOnClickListener(v -> {
+                      try {
+                          windowManager.removeView(panel);
+                      } catch (Exception ignored) {
                       }
-                  );
-
+                  });
 
                   buttons.addView(start);
-
                   buttons.addView(stop);
-
                   buttons.addView(game);
-
                   buttons.addView(hide);
 
-
-                  panel.addView(
-                      statusText
-                  );
-
-                  panel.addView(
-                      buttons
-                  );
-
+                  panel.addView(statusText);
+                  panel.addView(buttons);
 
                   WindowManager.LayoutParams lp =
                       new WindowManager.LayoutParams(
-
                           WindowManager.LayoutParams.WRAP_CONTENT,
-
                           WindowManager.LayoutParams.WRAP_CONTENT,
-
                           WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
-
                           WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
-
                           WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-
                           PixelFormat.TRANSLUCENT
                       );
 
-
                   lp.gravity =
-                      Gravity.TOP |
-                      Gravity.RIGHT;
-
+                      Gravity.TOP | Gravity.RIGHT;
 
                   lp.x = 8;
-
                   lp.y = 35;
 
-
                   try {
-
-                      windowManager.addView(
-                          panel,
-                          lp
-                      );
-
+                      windowManager.addView(panel, lp);
                   } catch (Exception ignored) {
                   }
-
               }
 
+              public void setStatus(String text) {
 
-              public void setStatus(
-                  String text
-              ) {
-
-                  handler.post(
-                      () -> {
-
-                          if (statusText != null) {
-
-                              statusText.setText(
-                                  "DUSTIN BOT V12.2\\n" +
-                                  text
-                              );
-                          }
-
+                  handler.post(() -> {
+                      if (statusText != null) {
+                          statusText.setText(
+                              "DUSTIN BOT V12.2\n" + text
+                          );
                       }
-                  );
-
+                  });
               }
-
 
               public void handlerPost(
                   Runnable runnable,
                   long delay
               ) {
-
-                  if (runnable == null) {
-                      return;
+                  if (runnable != null) {
+                      handler.postDelayed(runnable, delay);
                   }
-
-                  handler.postDelayed(
-                      runnable,
-                      delay
-                  );
-
               }
-
 
               public void startBot() {
 
                   if (engine == null) {
-
-                      engine =
-                          new BotEngine(
-                              this
-                          );
+                      engine = new BotEngine(this);
                   }
 
                   engine.start();
-
               }
-
 
               public void stopBot() {
 
                   if (engine != null) {
-
                       engine.stop();
-
                   }
 
-                  setStatus(
-                      "STOPPED"
-                  );
-
+                  setStatus("STOPPED");
               }
-
 
               public void screenshot() {
 
-                  if (!runningService()) {
-                      return;
-                  }
-
-
                   if (Build.VERSION.SDK_INT < 30) {
-
-                      setStatus(
-                          "ANDROID < 11"
-                      );
-
+                      setStatus("ANDROID < 11");
                       return;
                   }
-
 
                   try {
 
                       takeScreenshot(
-
                           Display.DEFAULT_DISPLAY,
-
                           screenshotExecutor,
-
                           new TakeScreenshotCallback() {
 
-
                               @Override
-
                               public void onSuccess(
                                   ScreenshotResult result
                               ) {
 
                                   Bitmap bitmap = null;
-
                                   HardwareBuffer buffer = null;
 
                                   try {
@@ -1081,11 +541,9 @@ jobs:
                                       buffer =
                                           result.getHardwareBuffer();
 
-
                                       if (buffer == null) {
                                           return;
                                       }
-
 
                                       Bitmap wrapped =
                                           Bitmap.wrapHardwareBuffer(
@@ -1095,11 +553,9 @@ jobs:
                                               )
                                           );
 
-
                                       if (wrapped == null) {
                                           return;
                                       }
-
 
                                       bitmap =
                                           wrapped.copy(
@@ -1107,127 +563,70 @@ jobs:
                                               false
                                           );
 
-
                                       wrapped.recycle();
 
-
                                   } catch (Throwable ignored) {
-
                                   } finally {
 
                                       if (buffer != null) {
-
                                           try {
-
                                               buffer.close();
-
                                           } catch (Exception ignored) {
                                           }
-
                                       }
                                   }
-
 
                                   if (bitmap != null) {
 
                                       if (engine != null) {
-
-                                          engine.processScreenshot(
-                                              bitmap
-                                          );
-
+                                          engine.processScreenshot(bitmap);
                                       } else {
-
                                           try {
                                               bitmap.recycle();
                                           } catch (Exception ignored) {
                                           }
                                       }
-
                                   }
-
                               }
 
-
                               @Override
-
                               public void onFailure(
                                   int errorCode
                               ) {
 
                                   if (engine != null) {
-
                                       engine.screenshotFailed();
-
                                   }
-
                               }
-
                           }
-
                       );
 
                   } catch (Throwable ignored) {
 
                       if (engine != null) {
-
                           engine.screenshotFailed();
-
                       }
                   }
-
               }
 
-
-              private boolean runningService() {
-
-                  return instance == this;
-
-              }
-
-
-              public void tap(
-                  float x,
-                  float y
-              ) {
-
-                  if (!runningService()) {
-                      return;
-                  }
-
+              public void tap(float x, float y) {
 
                   try {
 
-                      Path path =
-                          new Path();
-
-                      path.moveTo(
-                          x,
-                          y
-                      );
-
+                      Path path = new Path();
+                      path.moveTo(x, y);
 
                       GestureDescription.StrokeDescription stroke =
                           new GestureDescription.StrokeDescription(
-
                               path,
-
                               0,
-
                               60
-
                           );
-
 
                       GestureDescription gesture =
                           new GestureDescription.Builder()
-
-                              .addStroke(
-                                  stroke
-                              )
-
+                              .addStroke(stroke)
                               .build();
-
 
                       dispatchGesture(
                           gesture,
@@ -1237,9 +636,7 @@ jobs:
 
                   } catch (Throwable ignored) {
                   }
-
               }
-
 
               public void holdSwipe(
                   float startX,
@@ -1249,15 +646,9 @@ jobs:
                   long duration
               ) {
 
-                  if (!runningService()) {
-                      return;
-                  }
-
-
                   try {
 
-                      Path path =
-                          new Path();
+                      Path path = new Path();
 
                       path.moveTo(
                           startX,
@@ -1269,28 +660,17 @@ jobs:
                           endY
                       );
 
-
                       GestureDescription.StrokeDescription stroke =
                           new GestureDescription.StrokeDescription(
-
                               path,
-
                               0,
-
                               duration
-
                           );
-
 
                       GestureDescription gesture =
                           new GestureDescription.Builder()
-
-                              .addStroke(
-                                  stroke
-                              )
-
+                              .addStroke(stroke)
                               .build();
-
 
                       dispatchGesture(
                           gesture,
@@ -1300,9 +680,7 @@ jobs:
 
                   } catch (Throwable ignored) {
                   }
-
               }
-
 
               public static void openGame(
                   Context context
@@ -1312,55 +690,38 @@ jobs:
 
                       Intent intent =
                           new Intent(
-
                               Intent.ACTION_VIEW,
-
                               Uri.parse(
                                   "https://dustin-ro.com/"
                               )
-
                           );
-
 
                       intent.addFlags(
                           Intent.FLAG_ACTIVITY_NEW_TASK
                       );
 
-
-                      context.startActivity(
-                          intent
-                      );
+                      context.startActivity(intent);
 
                   } catch (Exception ignored) {
                   }
-
               }
 
-
               @Override
-
               public void onAccessibilityEvent(
                   AccessibilityEvent event
               ) {
               }
 
-
               @Override
-
               public void onInterrupt() {
               }
 
-
               @Override
-
               public void onDestroy() {
 
                   if (engine != null) {
-
                       engine.stop();
-
                   }
-
 
                   try {
 
@@ -1368,266 +729,129 @@ jobs:
                           panel != null &&
                           windowManager != null
                       ) {
-
-                          windowManager.removeView(
-                              panel
-                          );
+                          windowManager.removeView(panel);
                       }
 
                   } catch (Exception ignored) {
                   }
 
-
                   instance = null;
 
-
                   super.onDestroy();
-
               }
-
           }
-
           EOF
 
-
-      # =========================================================
-      # BOT ENGINE V12.2
-      # =========================================================
-
-      - name: Create BotEngine.java
-        shell: bash
-        run: |
+          # =====================================================
+          # BotEngine.java
+          # =====================================================
 
           cat > app/src/main/java/com/dustinbot/v122/BotEngine.java <<'EOF'
-
           package com.dustinbot.v122;
 
-
           import android.graphics.Bitmap;
-
           import android.graphics.Color;
-
 
           import java.util.ArrayList;
 
-
           public class BotEngine {
-
 
               private final BotAccessibility service;
 
+              private boolean running = false;
 
-              private boolean running =
-                  false;
+              private int screenW = 0;
+              private int screenH = 0;
 
+              private Point lastTarget = null;
 
-              private int screenW =
-                  0;
+              private long lastAction = 0;
+              private long lastTargetSeen = 0;
+              private long lastLock = 0;
+              private long lastLoot = 0;
+              private long lastSearch = 0;
 
+              private int attackAttempts = 0;
+              private int noTarget = 0;
 
-              private int screenH =
-                  0;
+              private int searchDirection = 1;
+              private int searchCount = 0;
 
+              private boolean waitingForDeath = false;
+              private boolean moving = false;
+              private boolean attacking = false;
+              private boolean looting = false;
 
-              private Point lastTarget =
-                  null;
+              private static final int SEARCH = 0;
+              private static final int MOVE = 1;
+              private static final int ATTACK = 2;
+              private static final int WAIT_DEATH = 3;
+              private static final int LOOT = 4;
 
-
-              private long lastAction =
-                  0;
-
-
-              private long lastTargetSeen =
-                  0;
-
-
-              private long lastLock =
-                  0;
-
-
-              private long lastLoot =
-                  0;
-
-
-              private long lastSearch =
-                  0;
-
-
-              private int attackAttempts =
-                  0;
-
-
-              private int noTarget =
-                  0;
-
-
-              private int searchDirection =
-                  1;
-
-
-              private int searchCount =
-                  0;
-
-
-              private boolean waitingForDeath =
-                  false;
-
-
-              private boolean moving =
-                  false;
-
-
-              private boolean attacking =
-                  false;
-
-
-              private boolean looting =
-                  false;
-
-
-              private static final int SEARCH =
-                  0;
-
-
-              private static final int MOVE =
-                  1;
-
-
-              private static final int ATTACK =
-                  2;
-
-
-              private static final int WAIT_DEATH =
-                  3;
-
-
-              private static final int LOOT =
-                  4;
-
-
-              private int state =
-                  SEARCH;
-
+              private int state = SEARCH;
 
               public BotEngine(
                   BotAccessibility service
               ) {
-
-                  this.service =
-                      service;
-
+                  this.service = service;
               }
-
 
               public void start() {
 
-
                   if (running) {
-
                       return;
-
                   }
 
+                  running = true;
 
-                  running =
-                      true;
+                  state = SEARCH;
 
+                  lastTarget = null;
 
-                  state =
-                      SEARCH;
+                  noTarget = 0;
 
+                  attackAttempts = 0;
 
-                  lastTarget =
-                      null;
+                  searchCount = 0;
 
+                  searchDirection = 1;
 
-                  noTarget =
-                      0;
+                  waitingForDeath = false;
 
+                  moving = false;
 
-                  attackAttempts =
-                      0;
+                  attacking = false;
 
+                  looting = false;
 
-                  searchCount =
-                      0;
-
-
-                  searchDirection =
-                      1;
-
-
-                  waitingForDeath =
-                      false;
-
-
-                  moving =
-                      false;
-
-
-                  attacking =
-                      false;
-
-
-                  looting =
-                      false;
-
-
-                  service.setStatus(
-                      "START"
-                  );
-
+                  service.setStatus("START");
 
                   later(
                       () -> {
-
-                          if (!running) {
-                              return;
+                          if (running) {
+                              autoLock();
                           }
-
-                          autoLock();
-
                       },
-
                       600
-
                   );
-
               }
-
 
               public void stop() {
 
-                  running =
-                      false;
+                  running = false;
 
+                  lastTarget = null;
 
-                  lastTarget =
-                      null;
+                  moving = false;
 
+                  attacking = false;
 
-                  moving =
-                      false;
+                  waitingForDeath = false;
 
+                  looting = false;
 
-                  attacking =
-                      false;
-
-
-                  waitingForDeath =
-                      false;
-
-
-                  looting =
-                      false;
-
-
-                  service.setStatus(
-                      "STOPPED"
-                  );
-
+                  service.setStatus("STOPPED");
               }
-
 
               private void later(
                   Runnable runnable,
@@ -1638,57 +862,40 @@ jobs:
                       return;
                   }
 
-
                   service.handlerPost(
                       runnable,
                       delay
                   );
-
               }
 
-
               private void autoLock() {
-
 
                   if (!running) {
                       return;
                   }
 
-
                   long now =
                       System.currentTimeMillis();
 
-
                   if (
-                      now - lastLock <
-                      800
+                      now - lastLock < 800
                   ) {
-
                       scanLater(250);
-
                       return;
-
                   }
 
+                  lastLock = now;
 
-                  lastLock =
-                      now;
-
-
-                  state =
-                      SEARCH;
-
+                  state = SEARCH;
 
                   service.setStatus(
                       "AUTO LOCK"
                   );
 
-
                   tap(
                       0.755f,
                       0.075f
                   );
-
 
                   later(
                       () -> {
@@ -1697,23 +904,17 @@ jobs:
                               return;
                           }
 
-
                           tap(
                               0.755f,
                               0.155f
                           );
 
-
                           scanLater(450);
 
                       },
-
                       220
-
                   );
-
               }
-
 
               private void scanLater(
                   long delay
@@ -1722,54 +923,36 @@ jobs:
                   later(
                       () -> {
 
-                          if (!running) {
-                              return;
+                          if (running) {
+                              service.screenshot();
                           }
 
-                          service.screenshot();
-
                       },
-
                       delay
-
                   );
-
               }
 
-
               public void screenshotFailed() {
-
 
                   if (!running) {
                       return;
                   }
-
 
                   service.setStatus(
                       "SCREEN RETRY"
                   );
 
-
                   scanLater(500);
-
               }
-
 
               public void processScreenshot(
                   Bitmap bitmap
               ) {
 
-
                   if (!running) {
-
-                      safeRecycle(
-                          bitmap
-                      );
-
+                      safeRecycle(bitmap);
                       return;
-
                   }
-
 
                   try {
 
@@ -1779,344 +962,226 @@ jobs:
                       screenH =
                           bitmap.getHeight();
 
-
                       Point target =
                           Vision.findTarget(
                               bitmap
                           );
 
-
-                      safeRecycle(
-                          bitmap
-                      );
-
+                      safeRecycle(bitmap);
 
                       if (!running) {
                           return;
                       }
 
-
-                      handleTarget(
-                          target
-                      );
-
+                      handleTarget(target);
 
                   } catch (Throwable error) {
 
-                      safeRecycle(
-                          bitmap
-                      );
+                      safeRecycle(bitmap);
 
-
-                      /*
-                       * AI ผิดพลาดห้ามหยุด BOT
-                       */
                       service.setStatus(
                           "RECOVER"
                       );
 
-
                       scanLater(700);
-
                   }
-
               }
-
 
               private void handleTarget(
                   Point target
               ) {
 
-
                   long now =
                       System.currentTimeMillis();
 
-
                   /*
-                   * ==================================================
+                   * ==============================================
                    * เจอเป้าหมาย
-                   * ==================================================
+                   * ==============================================
                    */
 
                   if (target != null) {
 
+                      lastTarget = target;
 
-                      lastTarget =
-                          target;
+                      lastTargetSeen = now;
 
+                      noTarget = 0;
 
-                      lastTargetSeen =
-                          now;
+                      waitingForDeath = false;
 
-
-                      noTarget =
-                          0;
-
-
-                      waitingForDeath =
-                          false;
-
-
-                      looting =
-                          false;
-
+                      looting = false;
 
                       float playerX =
                           screenW * 0.50f;
 
-
                       float playerY =
                           screenH * 0.47f;
 
-
                       float dx =
-                          target.x -
-                          playerX;
-
+                          target.x - playerX;
 
                       float dy =
-                          target.y -
-                          playerY;
-
+                          target.y - playerY;
 
                       float distance =
                           (float)Math.sqrt(
-                              dx * dx +
-                              dy * dy
+                              dx * dx + dy * dy
                           );
-
-
-                      /*
-                       * เข้าใกล้แล้ว
-                       */
 
                       if (
                           distance <
                           screenW * 0.105f
                       ) {
 
-                          moving =
-                              false;
-
+                          moving = false;
 
                           attack();
 
-                          return;
+                      } else {
 
+                          moveToTarget(target);
                       }
 
-
-                      /*
-                       * ยังไกล
-                       */
-
-                      moveToTarget(
-                          target
-                      );
-
-
                       return;
-
                   }
 
-
                   /*
-                   * ==================================================
+                   * ==============================================
                    * ไม่เจอเป้าหมาย
-                   * ==================================================
+                   * ==============================================
                    */
 
                   noTarget++;
 
-
                   /*
-                   * กำลังรอให้มอนสเตอร์ตาย
+                   * รอมอนสเตอร์ตาย
                    */
 
                   if (
-                      state ==
-                      WAIT_DEATH
+                      state == WAIT_DEATH
                   ) {
 
-
                       if (
-                          now -
-                          lastTargetSeen <
+                          now - lastTargetSeen <
                           1600
                       ) {
 
                           scanLater(250);
 
                           return;
-
                       }
 
+                      waitingForDeath = false;
 
-                      /*
-                       * เป้าหมายหายแล้ว
-                       * ไปเก็บของ
-                       */
-
-                      waitingForDeath =
-                          false;
-
-
-                      attackAttempts =
-                          0;
-
+                      attackAttempts = 0;
 
                       loot();
 
-
                       return;
-
                   }
 
-
                   /*
-                   * เพิ่งโจมตี
-                   * ให้เวลาภาพเปลี่ยน
+                   * เพิ่งตีไป
                    */
 
                   if (
                       attacking &&
-                      now -
-                      lastAction <
-                      1500
+                      now - lastAction < 1500
                   ) {
 
                       scanLater(250);
 
                       return;
-
                   }
 
-
-                  attacking =
-                      false;
-
+                  attacking = false;
 
                   /*
-                   * ไม่มีเป้าเป็นช่วงสั้น ๆ
+                   * ไม่เจอแค่ชั่วคราว
                    */
 
-                  if (
-                      noTarget <= 2
-                  ) {
+                  if (noTarget <= 2) {
 
                       scanLater(300);
 
                       return;
-
                   }
 
-
                   /*
-                   * ล็อคใหม่ก่อนค้นหา
+                   * ล็อคใหม่
                    */
 
                   if (
-                      now -
-                      lastLock >
-                      1800
+                      now - lastLock > 1800
                   ) {
 
                       autoLock();
 
                       return;
-
                   }
 
-
                   /*
-                   * ถ้ายังไม่มีเป้า
-                   * ให้ค้นหาพื้นที่
+                   * ค้นหามอนสเตอร์
                    */
 
                   search();
-
               }
-
 
               private void moveToTarget(
                   Point target
               ) {
 
-
                   if (!running) {
                       return;
                   }
 
-
                   if (moving) {
-
                       scanLater(300);
-
                       return;
-
                   }
 
+                  moving = true;
 
-                  moving =
-                      true;
-
-
-                  state =
-                      MOVE;
-
+                  state = MOVE;
 
                   float playerX =
                       screenW * 0.50f;
 
-
                   float playerY =
                       screenH * 0.47f;
 
-
                   float dx =
-                      target.x -
-                      playerX;
-
+                      target.x - playerX;
 
                   float dy =
-                      target.y -
-                      playerY;
-
+                      target.y - playerY;
 
                   float distance =
                       (float)Math.sqrt(
-                          dx * dx +
-                          dy * dy
+                          dx * dx + dy * dy
                       );
-
 
                   if (distance < 10) {
 
-                      moving =
-                          false;
+                      moving = false;
 
                       scanLater(200);
 
                       return;
-
                   }
-
 
                   float nx =
                       dx / distance;
 
-
                   float ny =
                       dy / distance;
-
 
                   float joystickX =
                       screenW * 0.135f;
 
-
                   float joystickY =
                       screenH * 0.785f;
-
 
                   float radius =
                       Math.min(
@@ -2124,41 +1189,25 @@ jobs:
                           screenH
                       ) * 0.075f;
 
-
-                  /*
-                   * จำกัดแกน
-                   * ป้องกันลากผิดทิศ
-                   */
-
                   float endX =
                       joystickX;
 
-
                   float endY =
                       joystickY;
-
 
                   if (
                       Math.abs(dx) >
                       Math.abs(dy) * 0.65f
                   ) {
-
-                      endX +=
-                          nx * radius;
-
+                      endX += nx * radius;
                   }
-
 
                   if (
                       Math.abs(dy) >
                       Math.abs(dx) * 0.65f
                   ) {
-
-                      endY +=
-                          ny * radius;
-
+                      endY += ny * radius;
                   }
-
 
                   endX =
                       clamp(
@@ -2167,7 +1216,6 @@ jobs:
                           screenW - 10
                       );
 
-
                   endY =
                       clamp(
                           endY,
@@ -2175,103 +1223,68 @@ jobs:
                           screenH - 10
                       );
 
-
                   service.setStatus(
                       "MOVE"
                   );
 
-
                   service.holdSwipe(
-
                       joystickX,
-
                       joystickY,
-
                       endX,
-
                       endY,
-
                       260
-
                   );
-
 
                   lastAction =
                       System.currentTimeMillis();
 
-
                   later(
                       () -> {
 
-                          moving =
-                              false;
+                          moving = false;
 
-
-                          if (!running) {
-                              return;
+                          if (running) {
+                              scanLater(180);
                           }
 
-
-                          scanLater(180);
-
                       },
-
                       330
-
                   );
-
               }
 
-
               private void attack() {
-
 
                   if (!running) {
                       return;
                   }
 
-
                   long now =
                       System.currentTimeMillis();
 
-
                   if (
-                      now -
-                      lastAction <
-                      500
+                      now - lastAction < 500
                   ) {
 
                       scanLater(250);
 
                       return;
-
                   }
 
+                  state = ATTACK;
 
-                  state =
-                      ATTACK;
+                  attacking = true;
 
-
-                  attacking =
-                      true;
-
-
-                  lastAction =
-                      now;
-
+                  lastAction = now;
 
                   attackAttempts++;
-
 
                   service.setStatus(
                       "ATTACK " +
                       attackAttempts
                   );
 
-
                   /*
                    * ปุ่มดาบ
-                   * พิกัดจากเกมจริง
                    */
 
                   tap(
@@ -2279,7 +1292,6 @@ jobs:
                       0.815f
                   );
 
-
                   later(
                       () -> {
 
@@ -2287,94 +1299,67 @@ jobs:
                               return;
                           }
 
-
                           /*
-                           * อย่าใช้จำนวนครั้งตี
-                           * เป็นตัวตัดสินว่ามอนสเตอร์ตาย
+                           * ไม่ใช้จำนวนครั้งตี
+                           * เป็นตัวบอกว่ามอนสเตอร์ตาย
+                           *
+                           * ถ้าตีหลายครั้งแล้ว
+                           * ให้รอการหายของเป้าหมาย
                            */
 
                           if (
                               attackAttempts >= 6
                           ) {
 
-                              /*
-                               * เข้าโหมดรอความตาย
-                               * แต่ BOT ยังทำงานต่อ
-                               */
-
                               state =
                                   WAIT_DEATH;
 
-
                               waitingForDeath =
                                   true;
-
 
                               service.setStatus(
                                   "WAIT MOB"
                               );
 
-
                               scanLater(350);
 
-
                               return;
-
                           }
-
 
                           scanLater(350);
 
                       },
-
                       600
-
                   );
-
               }
 
-
               private void loot() {
-
 
                   if (!running) {
                       return;
                   }
 
-
                   long now =
                       System.currentTimeMillis();
 
-
                   if (
-                      now -
-                      lastLoot <
-                      700
+                      now - lastLoot < 700
                   ) {
 
                       autoLock();
 
                       return;
-
                   }
 
+                  lastLoot = now;
 
-                  lastLoot =
-                      now;
+                  state = LOOT;
 
-
-                  state =
-                      LOOT;
-
-
-                  looting =
-                      true;
-
+                  looting = true;
 
                   service.setStatus(
                       "LOOT"
                   );
-
 
                   /*
                    * ปุ่มเก็บของ
@@ -2385,7 +1370,6 @@ jobs:
                       0.900f
                   );
 
-
                   later(
                       () -> {
 
@@ -2393,108 +1377,70 @@ jobs:
                               return;
                           }
 
+                          looting = false;
 
-                          looting =
-                              false;
+                          attackAttempts = 0;
 
+                          lastTarget = null;
 
-                          attackAttempts =
-                              0;
+                          noTarget = 0;
 
-
-                          lastTarget =
-                              null;
-
-
-                          noTarget =
-                              0;
-
-
-                          state =
-                              SEARCH;
-
-
-                          /*
-                           * สำคัญ:
-                           * ฆ่าตัวหนึ่งแล้ว
-                           * ไม่หยุด
-                           */
+                          state = SEARCH;
 
                           service.setStatus(
                               "NEXT TARGET"
                           );
 
+                          /*
+                           * หาเป้าหมายใหม่ทันที
+                           */
 
                           autoLock();
 
                       },
-
                       650
-
                   );
-
               }
 
-
               private void search() {
-
 
                   if (!running) {
                       return;
                   }
 
-
                   long now =
                       System.currentTimeMillis();
 
-
                   if (
-                      now -
-                      lastSearch <
-                      850
+                      now - lastSearch < 850
                   ) {
 
                       scanLater(300);
 
                       return;
-
                   }
 
+                  lastSearch = now;
 
-                  lastSearch =
-                      now;
-
-
-                  state =
-                      SEARCH;
-
+                  state = SEARCH;
 
                   searchCount++;
 
-
                   /*
-                   * สลับซ้าย / ขวา
-                   * ไม่เดินซ้ายตลอด
+                   * สลับทิศ
                    */
 
                   if (
-                      searchCount % 2 ==
-                      0
+                      searchCount % 2 == 0
                   ) {
-
-                      searchDirection *=
-                          -1;
-
+                      searchDirection *= -1;
                   }
-
 
                   float joystickX =
                       screenW * 0.135f;
 
-
                   float joystickY =
                       screenH * 0.785f;
-
 
                   float radius =
                       Math.min(
@@ -2502,91 +1448,60 @@ jobs:
                           screenH
                       ) * 0.075f;
 
-
                   float endX =
                       joystickX +
-                      (
-                          radius *
-                          searchDirection
-                      );
-
+                      radius *
+                      searchDirection;
 
                   service.setStatus(
-
                       searchDirection > 0
-
                       ? "SEARCH RIGHT"
-
                       : "SEARCH LEFT"
-
                   );
-
 
                   service.holdSwipe(
-
                       joystickX,
-
                       joystickY,
-
                       endX,
-
                       joystickY,
-
                       450
-
                   );
-
 
                   later(
                       () -> {
 
-                          if (!running) {
-                              return;
+                          if (running) {
+                              autoLock();
                           }
 
-
-                          autoLock();
-
                       },
-
                       600
-
                   );
-
               }
-
 
               private void tap(
                   float xr,
                   float yr
               ) {
 
-
                   if (
                       screenW <= 0 ||
                       screenH <= 0
                   ) {
-
                       return;
-
                   }
-
 
                   float x =
                       screenW * xr;
 
-
                   float y =
                       screenH * yr;
-
 
                   service.tap(
                       x,
                       y
                   );
-
               }
-
 
               private float clamp(
                   float value,
@@ -2601,9 +1516,7 @@ jobs:
                           value
                       )
                   );
-
               }
-
 
               private void safeRecycle(
                   Bitmap bitmap
@@ -2613,139 +1526,83 @@ jobs:
                       return;
                   }
 
-
                   try {
 
                       if (
                           !bitmap.isRecycled()
                       ) {
-
                           bitmap.recycle();
-
                       }
 
                   } catch (Exception ignored) {
                   }
-
               }
-
-
-              /*
-               * ======================================================
-               * POINT
-               * ======================================================
-               */
 
               private static class Point {
 
                   final float x;
-
                   final float y;
-
 
                   Point(
                       float x,
                       float y
                   ) {
-
-                      this.x =
-                          x;
-
-                      this.y =
-                          y;
-
+                      this.x = x;
+                      this.y = y;
                   }
-
               }
 
-
               /*
-               * ======================================================
+               * ==================================================
                * VISION
-               * ======================================================
+               * ==================================================
                */
 
               private static class Vision {
-
 
                   static Point findTarget(
                       Bitmap bmp
                   ) {
 
-
                       if (
                           bmp == null ||
                           bmp.isRecycled()
                       ) {
-
                           return null;
-
                       }
-
 
                       int w =
                           bmp.getWidth();
 
-
                       int h =
                           bmp.getHeight();
-
 
                       if (
                           w < 300 ||
                           h < 200
                       ) {
-
                           return null;
-
                       }
 
-
                       /*
-                       * อันดับแรก:
-                       * หา marker สีขาว
+                       * หา marker ลูกศร
+                       * เหนือมอนสเตอร์
                        */
 
-                      Point marker =
-                          findMarker(
-                              bmp
-                          );
-
-
-                      if (
-                          marker != null
-                      ) {
-
-                          return marker;
-
-                      }
-
-
-                      /*
-                       * ไม่ fallback ไปหา
-                       * สีทั่วหน้าจอแบบเดิม
-                       *
-                       * เพราะนั่นทำให้เกิด
-                       * false target ได้ง่าย
-                       */
-
-                      return null;
-
+                      return findMarker(
+                          bmp
+                      );
                   }
-
 
                   static Point findMarker(
                       Bitmap bmp
                   ) {
 
-
                       int w =
                           bmp.getWidth();
 
-
                       int h =
                           bmp.getHeight();
-
 
                       int step =
                           Math.max(
@@ -2756,57 +1613,28 @@ jobs:
                               ) / 300
                           );
 
-
                       ArrayList<Point> candidates =
                           new ArrayList<>();
 
-
-                      /*
-                       * หาเฉพาะพื้นที่เกม
-                       *
-                       * ไม่แตะ top UI
-                       * ไม่แตะ bottom controls
-                       */
-
                       int minY =
-                          (int)(
-                              h * 0.20f
-                          );
-
+                          (int)(h * 0.20f);
 
                       int maxY =
-                          (int)(
-                              h * 0.78f
-                          );
-
+                          (int)(h * 0.78f);
 
                       for (
-                          int y =
-                              minY;
-
-                          y <
-                              maxY;
-
-                          y +=
-                              step
+                          int y = minY;
+                          y < maxY;
+                          y += step
                       ) {
-
 
                           for (
                               int x =
-                                  (int)(
-                                      w * 0.08f
-                                  );
-
+                                  (int)(w * 0.08f);
                               x <
-                                  (int)(
-                                      w * 0.92f
-                                  );
-
-                              x +=
-                                  step
+                                  (int)(w * 0.92f);
+                              x += step
                           ) {
-
 
                               int c =
                                   bmp.getPixel(
@@ -2814,33 +1642,17 @@ jobs:
                                       y
                                   );
 
-
                               if (
-                                  !isMarkerPixel(
-                                      c
-                                  )
+                                  !isMarkerPixel(c)
                               ) {
-
                                   continue;
-
                               }
 
+                              int count = 0;
 
-                              /*
-                               * ตรวจรูปร่างรอบ ๆ
-                               */
+                              int width = 0;
 
-                              int count =
-                                  0;
-
-
-                              int width =
-                                  0;
-
-
-                              int height =
-                                  0;
-
+                              int height = 0;
 
                               for (
                                   int yy =
@@ -2855,14 +1667,10 @@ jobs:
                                           y + 13
                                       );
 
-                                  yy +=
-                                      step
+                                  yy += step
                               ) {
 
-
-                                  int row =
-                                      0;
-
+                                  int row = 0;
 
                                   for (
                                       int xx =
@@ -2877,17 +1685,14 @@ jobs:
                                               x + 26
                                           );
 
-                                      xx +=
-                                          step
+                                      xx += step
                                   ) {
-
 
                                       int cc =
                                           bmp.getPixel(
                                               xx,
                                               yy
                                           );
-
 
                                       if (
                                           isMarkerPixel(
@@ -2897,31 +1702,20 @@ jobs:
 
                                           count++;
 
-
                                           row++;
-
                                       }
-
                                   }
 
-
-                                  if (
-                                      row > 0
-                                  ) {
-
+                                  if (row > 0) {
                                       width =
                                           Math.max(
                                               width,
                                               row
                                           );
-
                                   }
 
-
                                   height++;
-
                               }
-
 
                               if (
                                   count >= 5 &&
@@ -2932,27 +1726,17 @@ jobs:
                                   height <= 25
                               ) {
 
-
-                                  /*
-                                   * ไม่เลือก
-                                   * บริเวณตัวละคร
-                                   */
-
                                   float px =
                                       w * 0.50f;
-
 
                                   float py =
                                       h * 0.47f;
 
-
                                   float dx =
                                       x - px;
 
-
                                   float dy =
                                       y - py;
-
 
                                   float d =
                                       (float)Math.sqrt(
@@ -2960,16 +1744,22 @@ jobs:
                                           dy * dy
                                       );
 
+                                  /*
+                                   * ไม่เลือก
+                                   * ตัวละครกลางจอ
+                                   */
 
                                   if (
                                       d <
                                       w * 0.07f
                                   ) {
-
                                       continue;
-
                                   }
 
+                                  /*
+                                   * จุดที่ได้คือ
+                                   * บริเวณใต้ลูกศร
+                                   */
 
                                   candidates.add(
                                       new Point(
@@ -2977,109 +1767,67 @@ jobs:
                                           y + 18
                                       )
                                   );
-
                               }
-
                           }
-
                       }
-
 
                       if (
                           candidates.isEmpty()
                       ) {
-
                           return null;
-
                       }
-
-
-                      /*
-                       * เลือก marker
-                       * ที่ใกล้ตัวละครที่สุด
-                       */
 
                       float px =
                           w * 0.50f;
 
-
                       float py =
                           h * 0.47f;
 
-
-                      Point best =
-                          null;
-
+                      Point best = null;
 
                       float bestD =
                           Float.MAX_VALUE;
-
 
                       for (
                           Point p :
                           candidates
                       ) {
 
-
                           float dx =
-                              p.x -
-                              px;
-
+                              p.x - px;
 
                           float dy =
-                              p.y -
-                              py;
-
+                              p.y - py;
 
                           float d =
                               dx * dx +
                               dy * dy;
 
-
                           if (
-                              d <
-                              bestD
+                              d < bestD
                           ) {
 
-                              bestD =
-                                  d;
+                              bestD = d;
 
-
-                              best =
-                                  p;
-
+                              best = p;
                           }
-
                       }
 
-
                       return best;
-
                   }
-
 
                   static boolean isMarkerPixel(
                       int c
                   ) {
 
-
                       int r =
-                          Color.red(
-                              c
-                          );
-
+                          Color.red(c);
 
                       int g =
-                          Color.green(
-                              c
-                          );
-
+                          Color.green(c);
 
                       int b =
-                          Color.blue(
-                              c
-                          );
-
+                          Color.blue(c);
 
                       int max =
                           Math.max(
@@ -3090,7 +1838,6 @@ jobs:
                               )
                           );
 
-
                       int min =
                           Math.min(
                               r,
@@ -3100,77 +1847,50 @@ jobs:
                               )
                           );
 
-
-                      /*
-                       * สีขาว/เทาอ่อน
-                       */
-
                       return
                           max >= 220 &&
                           max - min <= 35;
-
                   }
-
               }
-
           }
-
           EOF
 
-
-      # =========================================================
-      # GRADLE
-      # =========================================================
+      # =====================================================
+      # SETUP GRADLE
+      # =====================================================
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-
-      # =========================================================
+      # =====================================================
       # BUILD
-      # =========================================================
+      # =====================================================
 
       - name: Build APK
         shell: bash
         run: |
-
           set -e
 
-          gradle wrapper \
-            --gradle-version 8.7
+          gradle wrapper --gradle-version 8.7
 
-          ./gradlew \
-            assembleDebug \
-            --stacktrace
+          ./gradlew assembleDebug --stacktrace
 
-
-      # =========================================================
+      # =====================================================
       # SHOW APK
-      # =========================================================
+      # =====================================================
 
       - name: Show APK
         shell: bash
         run: |
+          find app/build/outputs -type f -name "*.apk" -print
 
-          find \
-            app/build/outputs \
-            -type f \
-            -name "*.apk" \
-            -print
-
-
-      # =========================================================
-      # ARTIFACT
-      # =========================================================
+      # =====================================================
+      # UPLOAD APK
+      # =====================================================
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
-
         with:
-
           name: DUSTIN-BOT-V12.2
-
-          path:
-            app/build/outputs/apk/debug/app-debug.apk
-
+          path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
