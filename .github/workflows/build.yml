@@ -1,4 +1,4 @@
-name: DUSTIN BOT V9.4 FULL AUTO
+name: DUSTIN BOT V9.5 FULL AUTO
 
 on:
   workflow_dispatch:
@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup JDK
+      - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -27,12 +27,11 @@ jobs:
       - name: Create Android Project
         shell: bash
         run: |
-
           set -e
 
           rm -rf app
 
-          mkdir -p app/src/main/java/com/dustinbot/v94
+          mkdir -p app/src/main/java/com/dustinbot/v95
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/xml
 
@@ -56,7 +55,7 @@ jobs:
               }
           }
 
-          rootProject.name = "DustinBotV94"
+          rootProject.name = "DustinBotV95"
 
           include(":app")
           EOF
@@ -79,16 +78,16 @@ jobs:
           }
 
           android {
-              namespace 'com.dustinbot.v94'
+              namespace 'com.dustinbot.v95'
 
               compileSdk 35
 
               defaultConfig {
-                  applicationId 'com.dustinbot.v94'
+                  applicationId 'com.dustinbot.v95'
                   minSdk 30
                   targetSdk 35
-                  versionCode 94
-                  versionName '9.4'
+                  versionCode 95
+                  versionName '9.5'
               }
 
               compileOptions {
@@ -101,8 +100,8 @@ jobs:
           cat > app/src/main/res/values/strings.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
-              <string name="app_name">DUSTIN BOT V9.4</string>
-              <string name="accessibility_description">DUSTIN BOT controls the visible game interface.</string>
+              <string name="app_name">DUSTIN BOT V9.5</string>
+              <string name="accessibility_description">DUSTIN BOT controls the visible game interface using Android Accessibility.</string>
           </resources>
           EOF
 
@@ -112,9 +111,11 @@ jobs:
               <style
                   name="AppTheme"
                   parent="@android:style/Theme.Material.Light.NoActionBar">
+
                   <item name="android:fontFamily">sans</item>
                   <item name="android:windowLightStatusBar">true</item>
                   <item name="android:colorAccent">#2196F3</item>
+
               </style>
           </resources>
           EOF
@@ -175,14 +176,14 @@ jobs:
           </manifest>
           EOF
 
-          cat > app/src/main/java/com/dustinbot/v94/MainActivity.java <<'EOF'
-          package com.dustinbot.v94;
+          cat > app/src/main/java/com/dustinbot/v95/MainActivity.java <<'EOF'
+          package com.dustinbot.v95;
 
           import android.app.Activity;
           import android.content.Intent;
+          import android.graphics.Color;
           import android.os.Bundle;
           import android.provider.Settings;
-          import android.graphics.Color;
           import android.view.Gravity;
           import android.widget.Button;
           import android.widget.LinearLayout;
@@ -231,7 +232,7 @@ jobs:
                       new TextView(this);
 
                   title.setText(
-                      "DUSTIN BOT V9.4"
+                      "DUSTIN BOT V9.5"
                   );
 
                   title.setTextColor(
@@ -248,11 +249,16 @@ jobs:
                       new TextView(this);
 
                   info.setText(
-                      "FULL AUTO\n\n" +
+                      "FULL AUTO BOT\n\n" +
                       "เปิด Dustin RO ก่อน\n" +
                       "เปิด Accessibility\n" +
                       "กลับเข้าเกม\n" +
-                      "กด START"
+                      "กด START\n\n" +
+                      "Random Walk\n" +
+                      "Auto Target\n" +
+                      "Attack\n" +
+                      "Loot\n" +
+                      "Repeat"
                   );
 
                   info.setTextColor(
@@ -316,8 +322,8 @@ jobs:
           }
           EOF
 
-          cat > app/src/main/java/com/dustinbot/v94/BotAccessibility.java <<'EOF'
-          package com.dustinbot.v94;
+          cat > app/src/main/java/com/dustinbot/v95/BotAccessibility.java <<'EOF'
+          package com.dustinbot.v95;
 
           import android.accessibilityservice.AccessibilityService;
           import android.accessibilityservice.GestureDescription;
@@ -426,7 +432,7 @@ jobs:
                       new TextView(this);
 
                   status.setText(
-                      "DUSTIN BOT V9.4\nSTOP"
+                      "DUSTIN BOT V9.5\nSTOP"
                   );
 
                   status.setTextColor(
@@ -447,11 +453,14 @@ jobs:
                   start.setOnClickListener(
                       v -> {
 
-                          engine.start();
+                          if (engine != null) {
 
-                          status.setText(
-                              "DUSTIN BOT V9.4\nRUNNING"
-                          );
+                              engine.start();
+
+                              status.setText(
+                                  "DUSTIN BOT V9.5\nRUNNING"
+                              );
+                          }
                       }
                   );
 
@@ -463,11 +472,14 @@ jobs:
                   stop.setOnClickListener(
                       v -> {
 
-                          engine.stop();
+                          if (engine != null) {
 
-                          status.setText(
-                              "DUSTIN BOT V9.4\nSTOP"
-                          );
+                              engine.stop();
+
+                              status.setText(
+                                  "DUSTIN BOT V9.5\nSTOP"
+                              );
+                          }
                       }
                   );
 
@@ -477,10 +489,15 @@ jobs:
                   hide.setText("HIDE");
 
                   hide.setOnClickListener(
-                      v ->
-                          panel.setVisibility(
-                              View.GONE
-                          )
+                      v -> {
+
+                          if (panel != null) {
+
+                              panel.setVisibility(
+                                  View.GONE
+                              );
+                          }
+                      }
                   );
 
                   panel.addView(
@@ -540,8 +557,11 @@ jobs:
                       Gravity.TOP |
                       Gravity.START;
 
-                  params.x = dp(8);
-                  params.y = dp(70);
+                  params.x =
+                      dp(8);
+
+                  params.y =
+                      dp(70);
 
                   windowManager.addView(
                       panel,
@@ -557,15 +577,18 @@ jobs:
                   Path path =
                       new Path();
 
-                  path.moveTo(x,y);
+                  path.moveTo(
+                      x,
+                      y
+                  );
 
-                  GestureDescription.StrokeDescription
-                      stroke =
+                  GestureDescription
+                      .StrokeDescription stroke =
                           new GestureDescription
                               .StrokeDescription(
                                   path,
                                   0,
-                                  60
+                                  70
                               );
 
                   GestureDescription gesture =
@@ -602,8 +625,8 @@ jobs:
                       y2
                   );
 
-                  GestureDescription.StrokeDescription
-                      stroke =
+                  GestureDescription
+                      .StrokeDescription stroke =
                           new GestureDescription
                               .StrokeDescription(
                                   path,
@@ -739,6 +762,7 @@ jobs:
               public void onDestroy() {
 
                   if (engine != null) {
+
                       engine.stop();
                   }
 
@@ -748,8 +772,14 @@ jobs:
                   ) {
 
                       try {
-                          windowManager.removeView(panel);
-                      } catch (Throwable ignored) {
+
+                          windowManager.removeView(
+                              panel
+                          );
+
+                      } catch (
+                          Throwable ignored
+                      ) {
                       }
                   }
 
@@ -760,8 +790,8 @@ jobs:
           }
           EOF
 
-          cat > app/src/main/java/com/dustinbot/v94/BotEngine.java <<'EOF'
-          package com.dustinbot.v94;
+          cat > app/src/main/java/com/dustinbot/v95/BotEngine.java <<'EOF'
+          package com.dustinbot.v95;
 
           import android.os.Handler;
           import android.os.Looper;
@@ -799,54 +829,67 @@ jobs:
                   0;
 
               /*
-               * ปุ่มเมนูเกม
+               * ==================================================
+               * GAME COORDINATES
+               * ==================================================
+               *
+               * ปรับจากคลิปที่ส่งมา
+               *
+               * ปุ่มดาบอยู่เกือบชิดขอบขวา
+               *
                */
 
-              private static final float MENU_X =
-                  0.755f;
+              private static final float
+                  ATTACK_X = 0.960f;
 
-              private static final float MENU_Y =
-                  0.075f;
-
-              /*
-               * ปุ่มล็อคเป้าอัตโนมัติ
-               */
-
-              private static final float AUTO_X =
-                  0.755f;
-
-              private static final float AUTO_Y =
-                  0.155f;
-
-              /*
-               * ปุ่มดาบ
-               */
-
-              private static final float ATTACK_X =
-                  0.850f;
-
-              private static final float ATTACK_Y =
-                  0.815f;
+              private static final float
+                  ATTACK_Y = 0.820f;
 
               /*
                * ปุ่มเก็บของ
                */
 
-              private static final float LOOT_X =
-                  0.850f;
+              private static final float
+                  LOOT_X = 0.960f;
 
-              private static final float LOOT_Y =
-                  0.915f;
+              private static final float
+                  LOOT_Y = 0.925f;
 
               /*
                * Joystick
+               *
+               * จากคลิปอยู่ประมาณ
+               * 20% จากซ้าย
                */
 
-              private static final float JOY_X =
-                  0.135f;
+              private static final float
+                  JOY_X = 0.205f;
 
-              private static final float JOY_Y =
-                  0.790f;
+              private static final float
+                  JOY_Y = 0.820f;
+
+              /*
+               * เมนูเป้าหมาย
+               *
+               * ใช้เฉพาะตอน refresh target
+               */
+
+              private static final float
+                  MENU_X = 0.860f;
+
+              private static final float
+                  MENU_Y = 0.150f;
+
+              /*
+               * ตัวเลือก Auto Lock
+               */
+
+              private static final float
+                  AUTO_X = 0.860f;
+
+              private static final float
+                  AUTO_Y = 0.245f;
+
 
               public BotEngine(
                   BotAccessibility service
@@ -855,6 +898,13 @@ jobs:
                   this.service =
                       service;
               }
+
+
+              /*
+               * ==================================================
+               * START
+               * ==================================================
+               */
 
               public void start() {
 
@@ -870,11 +920,22 @@ jobs:
 
                   lastDirection = -1;
 
+                  /*
+                   * เริ่มด้วยการหาเป้า
+                   */
+
                   later(
-                      this::openMenu,
-                      500
+                      this::enableAutoLock,
+                      600
                   );
               }
+
+
+              /*
+               * ==================================================
+               * STOP
+               * ==================================================
+               */
 
               public void stop() {
 
@@ -885,11 +946,22 @@ jobs:
                   );
               }
 
-              private void openMenu() {
+
+              /*
+               * ==================================================
+               * AUTO LOCK
+               * ==================================================
+               */
+
+              private void enableAutoLock() {
 
                   if (!running) {
                       return;
                   }
+
+                  /*
+                   * เปิดเมนู
+                   */
 
                   service.tap(
                       W * MENU_X,
@@ -897,48 +969,49 @@ jobs:
                   );
 
                   later(
-                      this::autoLock,
+                      () -> {
+
+                          if (!running) {
+                              return;
+                          }
+
+                          /*
+                           * เลือก Auto Lock
+                           */
+
+                          service.tap(
+                              W * AUTO_X,
+                              H * AUTO_Y
+                          );
+
+                          later(
+                              this::randomSearch,
+                              500
+                          );
+
+                      },
                       350
                   );
               }
 
-              private void autoLock() {
-
-                  if (!running) {
-                      return;
-                  }
-
-                  service.tap(
-                      W * AUTO_X,
-                      H * AUTO_Y
-                  );
-
-                  later(
-                      this::search,
-                      700
-                  );
-              }
 
               /*
-               * เดินสุ่ม
+               * ==================================================
+               * RANDOM SEARCH
+               * ==================================================
                */
 
-              private void search() {
-
-                  if (!running) {
-                      return;
-                  }
-
-                  randomWalk();
-              }
-
-              private void randomWalk() {
+              private void randomSearch() {
 
                   if (!running) {
                       return;
                   }
 
                   int direction;
+
+                  /*
+                   * ไม่เดินทิศเดิมติดกัน
+                   */
 
                   do {
 
@@ -948,12 +1021,14 @@ jobs:
                   } while (
                       direction ==
                           lastDirection
-                      &&
-                      random.nextBoolean()
                   );
 
                   lastDirection =
                       direction;
+
+                  /*
+                   * 8 ทิศ
+                   */
 
                   float[][] dirs = {
 
@@ -982,8 +1057,10 @@ jobs:
                       dirs[direction][1];
 
                   long duration =
-                      500 +
-                      random.nextInt(800);
+                      450 +
+                      random.nextInt(
+                          800
+                      );
 
                   joystick(
                       dx,
@@ -992,20 +1069,24 @@ jobs:
                   );
 
                   /*
-                   * เดินเสร็จแล้วโจมตี
+                   * เดินเสร็จ
+                   * ลองตี
                    */
 
                   later(
-                      this::attack,
+                      this::attackSequence,
                       duration + 350
                   );
               }
 
+
               /*
-               * โจมตี
+               * ==================================================
+               * ATTACK
+               * ==================================================
                */
 
-              private void attack() {
+              private void attackSequence() {
 
                   if (!running) {
                       return;
@@ -1016,6 +1097,7 @@ jobs:
                   attackStep();
               }
 
+
               private void attackStep() {
 
                   if (!running) {
@@ -1024,13 +1106,39 @@ jobs:
 
                   attackCount++;
 
+                  /*
+                   * ปุ่มดาบ
+                   *
+                   * จุดสำคัญของ V9.5
+                   */
+
                   service.tap(
                       W * ATTACK_X,
                       H * ATTACK_Y
                   );
 
                   /*
-                   * ตีต่อเนื่อง
+                   * กดซ้ำอีกครั้งหลัง 120ms
+                   */
+
+                  later(
+                      () -> {
+
+                          if (!running) {
+                              return;
+                          }
+
+                          service.tap(
+                              W * ATTACK_X,
+                              H * ATTACK_Y
+                          );
+
+                      },
+                      120
+                  );
+
+                  /*
+                   * ตี 6 รอบ
                    */
 
                   if (
@@ -1039,7 +1147,7 @@ jobs:
 
                       later(
                           this::attackStep,
-                          450
+                          500
                       );
 
                       return;
@@ -1052,16 +1160,19 @@ jobs:
                    */
 
                   later(
-                      this::loot,
-                      500
+                      this::lootStart,
+                      700
                   );
               }
 
+
               /*
-               * เก็บของ
+               * ==================================================
+               * LOOT
+               * ==================================================
                */
 
-              private void loot() {
+              private void lootStart() {
 
                   if (!running) {
                       return;
@@ -1072,6 +1183,7 @@ jobs:
                   lootStep();
               }
 
+
               private void lootStep() {
 
                   if (!running) {
@@ -1080,12 +1192,21 @@ jobs:
 
                   lootCount++;
 
+                  /*
+                   * กดปุ่มเก็บของ
+                   */
+
                   service.tap(
                       W * LOOT_X,
                       H * LOOT_Y
                   );
 
+                  /*
+                   * ขยับเล็กน้อย
+                   */
+
                   float dx = 0f;
+
                   float dy = 0f;
 
                   switch (
@@ -1093,26 +1214,34 @@ jobs:
                   ) {
 
                       case 0:
+
                           dx = 1f;
+
                           break;
 
                       case 1:
+
                           dy = 1f;
+
                           break;
 
                       case 2:
+
                           dx = -1f;
+
                           break;
 
                       default:
+
                           dy = -1f;
+
                           break;
                   }
 
                   joystick(
                       dx,
                       dy,
-                      140
+                      130
                   );
 
                   if (
@@ -1129,55 +1258,43 @@ jobs:
                       lootCount = 0;
 
                       /*
-                       * กลับไปหา Monster
+                       * หา Monster ตัวต่อไป
                        */
 
                       later(
-                          this::refreshLock,
-                          500
+                          this::nextTarget,
+                          600
                       );
                   }
               }
 
+
               /*
-               * เปิด Auto Lock ใหม่
+               * ==================================================
+               * NEXT TARGET
+               * ==================================================
                */
 
-              private void refreshLock() {
+              private void nextTarget() {
 
                   if (!running) {
                       return;
                   }
 
-                  service.tap(
-                      W * MENU_X,
-                      H * MENU_Y
-                  );
+                  /*
+                   * เดินสุ่มต่อทันที
+                   *
+                   * ไม่หยุด
+                   */
 
-                  later(
-                      () -> {
-
-                          if (!running) {
-                              return;
-                          }
-
-                          service.tap(
-                              W * AUTO_X,
-                              H * AUTO_Y
-                          );
-
-                          later(
-                              this::randomWalk,
-                              500
-                          );
-
-                      },
-                      300
-                  );
+                  randomSearch();
               }
 
+
               /*
-               * Joystick
+               * ==================================================
+               * JOYSTICK
+               * ==================================================
                */
 
               private void joystick(
@@ -1218,6 +1335,10 @@ jobs:
                       duration
                   );
 
+                  /*
+                   * ปล่อย joystick
+                   */
+
                   later(
                       () -> {
 
@@ -1231,12 +1352,15 @@ jobs:
                           );
 
                       },
-                      duration + 50
+                      duration + 70
                   );
               }
 
+
               /*
-               * Timer
+               * ==================================================
+               * TIMER
+               * ==================================================
                */
 
               private void later(
@@ -1247,6 +1371,7 @@ jobs:
                   if (
                       runnable == null
                   ) {
+
                       return;
                   }
 
@@ -1258,28 +1383,24 @@ jobs:
           }
           EOF
 
-      - name: Validate generated files
+      - name: Validate project
         shell: bash
         run: |
-
           set -e
 
-          echo "===== FILES ====="
+          echo "================================"
+          echo "DUSTIN BOT V9.5"
+          echo "================================"
 
           find app/src/main -type f | sort
 
-          echo "===== JAVA FILES ====="
-
+          echo ""
+          echo "Java files:"
           find app/src/main/java -name "*.java" -print
-
-          echo "===== XML ====="
-
-          cat app/src/main/res/xml/accessibility_service_config.xml
 
       - name: Build APK
         shell: bash
         run: |
-
           set -e
 
           gradle \
@@ -1290,18 +1411,17 @@ jobs:
       - name: Prepare APK
         shell: bash
         run: |
-
           set -e
 
           mkdir -p output
 
           cp \
             app/build/outputs/apk/debug/app-debug.apk \
-            output/DustinBotV9.4-FULL-AUTO.apk
+            output/DustinBotV9.5-FULL-AUTO.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DUSTIN-BOT-V9.4-FULL-AUTO
-          path: output/DustinBotV9.4-FULL-AUTO.apk
+          name: DUSTIN-BOT-V9.5-FULL-AUTO
+          path: output/DustinBotV9.5-FULL-AUTO.apk
           if-no-files-found: error
