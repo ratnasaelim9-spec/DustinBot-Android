@@ -1,6 +1,9 @@
 name: Build DustinBot RuneClassic OCR V1
+run-name: Build DustinBot OCR V1 (${{ github.sha }})
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
