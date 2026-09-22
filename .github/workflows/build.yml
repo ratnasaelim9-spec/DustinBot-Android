@@ -24,9 +24,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Accept Android SDK Licenses
+      - name: Accept Android SDK Licenses & Install Components
         run: |
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
 
       - name: Create Android project
         shell: bash
@@ -37,6 +38,8 @@ jobs:
           mkdir -p app/src/main/java/com/dustinbot/v1
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/xml
+          
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
           
           cat > settings.gradle <<'EOF'
           pluginManagement {
@@ -72,12 +75,12 @@ jobs:
           
           android {
             namespace "com.dustinbot.v1"
-            compileSdk 35
+            compileSdk 34
             
             defaultConfig {
               applicationId "com.dustinbot.v1"
               minSdk 26
-              targetSdk 35
+              targetSdk 34
               versionCode 1
               versionName "1.0"
             }
@@ -372,12 +375,13 @@ jobs:
           
           cat > app/src/main/java/com/dustinbot/v1/CaptureService.java <<'EOF'
           package com.dustinbot.v1;
-          
+
           import android.app.Notification;
           import android.app.NotificationChannel;
           import android.app.NotificationManager;
           import android.app.Service;
           import android.content.Intent;
+          import android.content.pm.ServiceInfo;
           import android.graphics.Rect;
           import android.hardware.display.DisplayManager;
           import android.hardware.display.VirtualDisplay;
@@ -385,139 +389,100 @@ jobs:
           import android.media.ImageReader;
           import android.media.projection.MediaProjection;
           import android.media.projection.MediaProjectionManager;
+          import android.os.Build;
           import android.os.Handler;
           import android.os.IBinder;
           import android.os.Looper;
           import android.util.DisplayMetrics;
-          
+
           import com.google.mlkit.vision.common.InputImage;
           import com.google.mlkit.vision.text.Text;
           import com.google.mlkit.vision.text.TextRecognition;
           import com.google.mlkit.vision.text.TextRecognizer;
           import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
-          
+
           import java.util.Collections;
           import java.util.Set;
-          
+
           public class CaptureService extends Service {
-          
+
             static final String EXTRA_RESULT = "result";
             static final String EXTRA_DATA = "data";
-          
-            static volatile Set<String> targets =
-              Collections.emptySet();
-          
+
+            static volatile Set<String> targets = Collections.emptySet();
+
             private MediaProjection projection;
             private VirtualDisplay virtualDisplay;
             private ImageReader reader;
             private Handler handler;
             private TextRecognizer recognizer;
             private long lastTap = 0;
-          
+
             @Override
-            public int onStartCommand(
-              Intent intent,
-              int flags,
-              int startId
-            ) {
+            public int onStartCommand(Intent intent, int flags, int startId) {
               createChannel();
-          
+
               Notification notification =
-                new Notification.Builder(
-                  this,
-                  "dustinbot_capture"
-                )
-                .setContentTitle("DustinBot OCR")
-                .setContentText(
-                  "กำลังตรวจจับ Monster บนหน้าจอ"
-                )
-                .setSmallIcon(
-                  android.R.drawable.ic_menu_view
-                )
-                .build();
-          
-              startForeground(1101, notification);
-          
-              if (intent != null &&
-                intent.hasExtra(EXTRA_RESULT)) {
-          
-                int resultCode =
-                  intent.getIntExtra(EXTRA_RESULT, 0);
-          
-                Intent data =
-                  intent.getParcelableExtra(EXTRA_DATA);
-          
-                startCapture(
-                  resultCode,
-                  data
-                );
+                new Notification.Builder(this, "dustinbot_capture")
+                  .setContentTitle("DustinBot OCR")
+                  .setContentText("กำลังตรวจจับ Monster บนหน้าจอ")
+                  .setSmallIcon(android.R.drawable.ic_menu_view)
+                  .build();
+
+              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(1101, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
+              } else {
+                startForeground(1101, notification);
               }
-          
+
+              if (intent != null && intent.hasExtra(EXTRA_RESULT)) {
+                int resultCode = intent.getIntExtra(EXTRA_RESULT, 0);
+                Intent data = intent.getParcelableExtra(EXTRA_DATA);
+                startCapture(resultCode, data);
+              }
+
               return START_STICKY;
             }
-          
-            private void startCapture(
-              int resultCode,
-              Intent data
-            ) {
+
+            private void startCapture(int resultCode, Intent data) {
               if (projection != null) {
                 return;
               }
-          
-              DisplayMetrics dm =
-                getResources().getDisplayMetrics();
-          
+
+              DisplayMetrics dm = getResources().getDisplayMetrics();
               int width = dm.widthPixels;
               int height = dm.heightPixels;
               int density = dm.densityDpi;
-          
+
               MediaProjectionManager manager =
-                (MediaProjectionManager)
-                getSystemService(
-                  MEDIA_PROJECTION_SERVICE
-                );
-          
-              projection =
-                manager.getMediaProjection(
-                  resultCode,
-                  data
-                );
-          
-              reader =
-                ImageReader.newInstance(
-                  width,
-                  height,
-                  android.graphics.PixelFormat.RGBA_8888,
-                  2
-                );
-          
-              handler =
-                new Handler(
-                  Looper.getMainLooper()
-                );
-          
-              recognizer =
-                TextRecognition.getClient(
-                  TextRecognizerOptions.DEFAULT_OPTIONS
-                );
-          
-              virtualDisplay =
-                projection.createVirtualDisplay(
-                  "DustinBotOCR",
-                  width,
-                  height,
-                  density,
-                  DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-                  reader.getSurface(),
-                  null,
-                  handler
-                );
-          
+                (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+
+              projection = manager.getMediaProjection(resultCode, data);
+
+              reader = ImageReader.newInstance(
+                width,
+                height,
+                android.graphics.PixelFormat.RGBA_8888,
+                2
+              );
+
+              handler = new Handler(Looper.getMainLooper());
+              recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+
+              virtualDisplay = projection.createVirtualDisplay(
+                "DustinBotOCR",
+                width,
+                height,
+                density,
+                DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                reader.getSurface(),
+                null,
+                handler
+              );
+
               reader.setOnImageAvailableListener(
                 imageReader -> {
-                  Image image =
-                    imageReader.acquireLatestImage();
-          
+                  Image image = imageReader.acquireLatestImage();
                   if (image != null) {
                     processImage(image);
                   }
@@ -525,153 +490,75 @@ jobs:
                 handler
               );
             }
-          
+
             private void processImage(Image image) {
-          
-              InputImage input =
-                InputImage.fromMediaImage(
-                  image,
-                  0
-                );
-          
-              recognizer
-                .process(input)
-                .addOnSuccessListener(
-                  result -> {
-          
-                    long now =
-                      System.currentTimeMillis();
-          
-                    if (now - lastTap < 900) {
-                      return;
-                    }
-          
-                    for (
-                      Text.TextBlock block :
-                      result.getTextBlocks()
-                    ) {
-          
-                      for (
-                        Text.Line line :
-                        block.getLines()
-                      ) {
-          
-                        String raw =
-                          line.getText();
-          
-                        String detected =
-                          MonsterDatabase.norm(
-                            raw
-                          );
-          
-                        for (
-                          String target :
-                          targets
-                        ) {
-          
-                          String wanted =
-                            MonsterDatabase.norm(
-                              target
-                            );
-          
-                          if (wanted.length() < 3) {
+              InputImage input = InputImage.fromMediaImage(image, 0);
+
+              recognizer.process(input)
+                .addOnSuccessListener(result -> {
+                  long now = System.currentTimeMillis();
+                  if (now - lastTap < 900) {
+                    return;
+                  }
+
+                  for (Text.TextBlock block : result.getTextBlocks()) {
+                    for (Text.Line line : block.getLines()) {
+                      String raw = line.getText();
+                      String detected = MonsterDatabase.norm(raw);
+
+                      for (String target : targets) {
+                        String wanted = MonsterDatabase.norm(target);
+                        if (wanted.length() < 3) {
+                          continue;
+                        }
+
+                        if (detected.equals(wanted) || detected.contains(wanted) || wanted.contains(detected)) {
+                          Rect box = line.getBoundingBox();
+                          if (box == null) {
                             continue;
                           }
-          
-                          if (
-                            detected.equals(wanted)
-                            ||
-                            detected.contains(wanted)
-                            ||
-                            wanted.contains(detected)
-                          ) {
-          
-                            Rect box =
-                              line.getBoundingBox();
-          
-                            if (box == null) {
-                              continue;
-                            }
-          
-                            float x =
-                              box.centerX();
-          
-                            float y =
-                              box.centerY();
-          
-                            if (
-                              BotAccessibilityService.tap(
-                                x,
-                                y
-                              )
-                            ) {
-          
-                              lastTap = now;
-          
-                              MainActivity.postStatus(
-                                "พบ "
-                                + raw
-                                + " → แแตะ "
-                                + (int)x
-                                + ","
-                                + (int)y
-                              );
-          
-                              return;
-                            }
+
+                          float x = box.centerX();
+                          float y = box.centerY();
+
+                          if (BotAccessibilityService.tap(x, y)) {
+                            lastTap = now;
+                            MainActivity.postStatus("พบ " + raw + " → แตะ " + (int)x + "," + (int)y);
+                            return;
                           }
                         }
                       }
                     }
                   }
-                )
-                .addOnCompleteListener(
-                  task -> image.close()
-                );
+                })
+                .addOnCompleteListener(task -> image.close());
             }
-          
+
             private void createChannel() {
-          
-              NotificationManager manager =
-                getSystemService(
-                  NotificationManager.class
+              NotificationManager manager = getSystemService(NotificationManager.class);
+              if (manager != null) {
+                manager.createNotificationChannel(
+                  new NotificationChannel(
+                    "dustinbot_capture",
+                    "DustinBot Capture",
+                    NotificationManager.IMPORTANCE_LOW
+                  )
                 );
-          
-              manager.createNotificationChannel(
-                new NotificationChannel(
-                  "dustinbot_capture",
-                  "DustinBot Capture",
-                  NotificationManager.IMPORTANCE_LOW
-                )
-              );
+              }
             }
-          
+
             @Override
             public void onDestroy() {
-          
               try {
-                if (reader != null) {
-                  reader.close();
-                }
-          
-                if (virtualDisplay != null) {
-                  virtualDisplay.release();
-                }
-          
-                if (projection != null) {
-                  projection.stop();
-                }
-          
-                if (recognizer != null) {
-                  recognizer.close();
-                }
-          
+                if (reader != null) reader.close();
+                if (virtualDisplay != null) virtualDisplay.release();
+                if (projection != null) projection.stop();
+                if (recognizer != null) recognizer.close();
               } catch (Exception ignored) {
               }
-          
               super.onDestroy();
             }
-          
+
             @Override
             public IBinder onBind(Intent intent) {
               return null;
@@ -707,244 +594,106 @@ jobs:
             EditText search;
             TextView status;
           
-            ArrayList<MonsterDatabase.M> selected =
-              new ArrayList<>();
+            ArrayList<MonsterDatabase.M> selected = new ArrayList<>();
           
             int dp(int value) {
-              return (int)(
-                value *
-                getResources()
-                .getDisplayMetrics()
-                .density
-                + 0.5f
-              );
+              return (int)(value * getResources().getDisplayMetrics().density + 0.5f);
             }
           
-            TextView text(
-              String value,
-              int size
-            ) {
-              TextView view =
-                new TextView(this);
-          
+            TextView text(String value, int size) {
+              TextView view = new TextView(this);
               view.setText(value);
               view.setTextColor(Color.WHITE);
               view.setTextSize(size);
-          
-              view.setPadding(
-                dp(8),
-                dp(8),
-                dp(8),
-                dp(8)
-              );
-          
+              view.setPadding(dp(8), dp(8), dp(8), dp(8));
               return view;
             }
           
             @Override
             public void onCreate(Bundle state) {
-          
               super.onCreate(state);
-          
               instance = this;
-          
-              database =
-                new MonsterDatabase();
-          
+              database = new MonsterDatabase();
               buildUI();
             }
           
             private void buildUI() {
+              LinearLayout root = new LinearLayout(this);
+              root.setOrientation(LinearLayout.VERTICAL);
+              root.setPadding(dp(14), dp(10), dp(14), dp(20));
+              root.setBackgroundColor(Color.rgb(7, 17, 31));
           
-              LinearLayout root =
-                new LinearLayout(this);
-          
-              root.setOrientation(
-                LinearLayout.VERTICAL
-              );
-          
-              root.setPadding(
-                dp(14),
-                dp(10),
-                dp(14),
-                dp(20)
-              );
-          
-              root.setBackgroundColor(
-                Color.rgb(7, 17, 31)
-              );
-          
-              TextView title =
-                text(
-                  "DustinBot OCR V1",
-                  26
-                );
-          
-              title.setTextColor(
-                Color.rgb(80, 170, 255)
-              );
-          
+              TextView title = text("DustinBot OCR V1", 26);
+              title.setTextColor(Color.rgb(80, 170, 255));
               root.addView(title);
           
-              root.addView(
-                text(
-                  "Rune Classic • อ่านชื่อ Monster จากหน้าจอจริง",
-                  14
-                )
-              );
+              root.addView(text("Rune Classic • อ่านชื่อ Monster จากหน้าจอจริง", 14));
           
-              status =
-                text(
-                  "สถานะ: READY",
-                  15
-                );
-          
+              status = text("สถานะ: READY", 15);
               root.addView(status);
           
-              Button accessibility =
-                new Button(this);
-          
-              accessibility.setText(
-                "1. เปิด Accessibility"
+              Button accessibility = new Button(this);
+              accessibility.setText("1. เปิด Accessibility");
+              accessibility.setOnClickListener(v ->
+                startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
               );
-          
-              accessibility.setOnClickListener(
-                v ->
-                startActivity(
-                  new Intent(
-                    Settings.ACTION_ACCESSIBILITY_SETTINGS
-                  )
-                )
-              );
-          
               root.addView(accessibility);
           
-              Button capture =
-                new Button(this);
-          
-              capture.setText(
-                "2. เริ่มจับหน้าจอ + ตรวจ Monster"
-              );
-          
-              capture.setOnClickListener(
-                v -> requestCapture()
-              );
-          
+              Button capture = new Button(this);
+              capture.setText("2. เริ่มจับหน้าจอ + ตรวจ Monster");
+              capture.setOnClickListener(v -> requestCapture());
               root.addView(capture);
           
-              search =
-                new EditText(this);
-          
-              search.setHint(
-                "พิมพ์ชื่อ เช่น Poring"
-              );
-          
+              search = new EditText(this);
+              search.setHint("พิมพ์ชื่อ เช่น Poring");
               search.setTextColor(Color.WHITE);
               search.setHintTextColor(Color.GRAY);
-          
               root.addView(search);
           
-              Button find =
-                new Button(this);
-          
-              find.setText(
-                "ค้นหา Monster"
-              );
-          
-              find.setOnClickListener(
-                v -> renderMonsters()
-              );
-          
+              Button find = new Button(this);
+              find.setText("ค้นหา Monster");
+              find.setOnClickListener(v -> renderMonsters());
               root.addView(find);
           
-              monsterList =
-                new LinearLayout(this);
-          
-              monsterList.setOrientation(
-                LinearLayout.VERTICAL
-              );
-          
+              monsterList = new LinearLayout(this);
+              monsterList.setOrientation(LinearLayout.VERTICAL);
               root.addView(monsterList);
           
-              Button stop =
-                new Button(this);
-          
-              stop.setText(
-                "หยุดบอท"
+              Button stop = new Button(this);
+              stop.setText("หยุดบอท");
+              stop.setOnClickListener(v ->
+                stopService(new Intent(this, CaptureService.class))
               );
-          
-              stop.setOnClickListener(
-                v ->
-                stopService(
-                  new Intent(
-                    this,
-                    CaptureService.class
-                  )
-                )
-              );
-          
               root.addView(stop);
           
-              ScrollView scroll =
-                new ScrollView(this);
-          
+              ScrollView scroll = new ScrollView(this);
               scroll.addView(root);
-          
               setContentView(scroll);
           
               renderMonsters();
             }
           
             private void renderMonsters() {
-          
               monsterList.removeAllViews();
-          
-              String query =
-                search.getText().toString();
-          
+              String query = search.getText().toString();
               int count = 0;
           
-              for (
-                MonsterDatabase.M monster :
-                database.search(query)
-              ) {
-          
-                CheckBox box =
-                  new CheckBox(this);
-          
-                box.setText(
-                  monster.name
-                  + " ["
-                  + monster.id
-                  + "]"
-                );
-          
+              for (MonsterDatabase.M monster : database.search(query)) {
+                CheckBox box = new CheckBox(this);
+                box.setText(monster.name + " [" + monster.id + "]");
                 box.setTextColor(Color.WHITE);
-          
-                box.setChecked(
-                  selected.contains(monster)
-                );
-          
-                box.setOnCheckedChangeListener(
-                  (button, checked) -> {
-          
-                    if (
-                      checked &&
-                      !selected.contains(monster)
-                    ) {
-                      selected.add(monster);
-                    }
-          
-                    if (!checked) {
-                      selected.remove(monster);
-                    }
+                box.setChecked(selected.contains(monster));
+                box.setOnCheckedChangeListener((button, checked) -> {
+                  if (checked && !selected.contains(monster)) {
+                    selected.add(monster);
                   }
-                );
+                  if (!checked) {
+                    selected.remove(monster);
+                  }
+                });
           
                 monsterList.addView(box);
-          
                 count++;
-          
                 if (count >= 100) {
                   break;
                 }
@@ -952,100 +701,41 @@ jobs:
             }
           
             private void requestCapture() {
-          
               if (selected.isEmpty()) {
-          
-                status.setText(
-                  "สถานะ: เลือก Monster ก่อน เช่น Poring"
-                );
-          
+                status.setText("สถานะ: เลือก Monster ก่อน เช่น Poring");
                 return;
               }
           
-              ArrayList<String> names =
-                new ArrayList<>();
-          
-              for (
-                MonsterDatabase.M monster :
-                selected
-              ) {
-                names.add(
-                  monster.name
-                );
+              ArrayList<String> names = new ArrayList<>();
+              for (MonsterDatabase.M monster : selected) {
+                names.add(monster.name);
               }
           
-              CaptureService.targets =
-                new HashSet<>(names);
+              CaptureService.targets = new HashSet<>(names);
           
               MediaProjectionManager manager =
-                (MediaProjectionManager)
-                getSystemService(
-                  MEDIA_PROJECTION_SERVICE
-                );
+                (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
           
-              startActivityForResult(
-                manager.createScreenCaptureIntent(),
-                9001
-              );
+              startActivityForResult(manager.createScreenCaptureIntent(), 9001);
             }
           
             @Override
-            protected void onActivityResult(
-              int requestCode,
-              int resultCode,
-              Intent data
-            ) {
+            protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+              super.onActivityResult(requestCode, resultCode, data);
           
-              super.onActivityResult(
-                requestCode,
-                resultCode,
-                data
-              );
-          
-              if (
-                requestCode == 9001 &&
-                resultCode == RESULT_OK
-              ) {
-          
-                Intent intent =
-                  new Intent(
-                    this,
-                    CaptureService.class
-                  );
-          
-                intent.putExtra(
-                  CaptureService.EXTRA_RESULT,
-                  resultCode
-                );
-          
-                intent.putExtra(
-                  CaptureService.EXTRA_DATA,
-                  data
-                );
-          
-                startForegroundService(
-                  intent
-                );
-          
-                status.setText(
-                  "สถานะ: กำลังหา "
-                  + CaptureService.targets
-                );
+              if (requestCode == 9001 && resultCode == RESULT_OK) {
+                Intent intent = new Intent(this, CaptureService.class);
+                intent.putExtra(CaptureService.EXTRA_RESULT, resultCode);
+                intent.putExtra(CaptureService.EXTRA_DATA, data);
+                startForegroundService(intent);
+                status.setText("สถานะ: กำลังหา " + CaptureService.targets);
               }
             }
           
-            static void postStatus(
-              String message
-            ) {
-          
+            static void postStatus(String message) {
               if (instance != null) {
-          
-                instance.runOnUiThread(
-                  () ->
-                  instance.status.setText(
-                    "สถานะ: "
-                    + message
-                  )
+                instance.runOnUiThread(() ->
+                  instance.status.setText("สถานะ: " + message)
                 );
               }
             }
