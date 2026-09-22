@@ -24,6 +24,7 @@ jobs:
                     set -euo pipefail
                     
                     rm -rf app
+                    printf '%s\n' 'android.useAndroidX=true' 'android.enableJetifier=true' > gradle.properties
                     mkdir -p app/src/main/java/com/dustinbot/v1
                     mkdir -p app/src/main/res/values
                     mkdir -p app/src/main/res/xml
@@ -603,7 +604,6 @@ jobs:
                     );
                     
                     return;
-                    }
                     }
                     }
                     }
